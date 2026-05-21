@@ -86,7 +86,6 @@ public class DataInitializer implements CommandLineRunner {
         for (int sem = 0; sem < 4; sem++) {
             for (int c = 0; c < 5; c++) {
                 Enrollment e = new Enrollment(student, courses.get(sem).get(c), grades[c]);
-                e.setCreditPoints(courses.get(sem).get(c).getCredits() * grades[c].getGradePoints());
                 enrollmentRepository.save(e);
             }
         }

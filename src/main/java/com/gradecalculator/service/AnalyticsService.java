@@ -1,6 +1,6 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.DashboardResponse;
+import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
@@ -31,26 +31,25 @@ public class AnalyticsService {
      */
     public List<Map<String, Object>> getSGPATrends(Long studentId) {
         List<Map<String, Object>> trends = new ArrayList<>();
+        var allEnrollments = enrollmentRepository.findByStudentId(studentId);
         
-        gradeCalculationService.getGradeCalculationDao().findByStudentId(studentId).ifPresent(enrollments -> {
-            // Group by semester
-            Map<Long, List<Object>> bySemester = enrollments.stream()
-                .collect(Collectors.groupingBy(e -> e.getSemester().getId()));
-            
-            bySemester.forEach((semId, semEnrollments) -> {
-                int credits = 0, points = 0;
-                for (var e : semEnrollments) {
-                    if (e.getGrade() != LetterGrade.F) {
-                        credits += e.getCourse().getCredits();
-                        points += e.getCourse().getCredits() * e.getGrade().getGradePoints();
-                    }
+        // Group by semester
+        Map<Long, List<Enrollment>> bySemester = allEnrollments.stream()
+            .collect(Collectors.groupingBy(e -> e.getCourse().getSemester().getId()));
+        
+        bySemester.forEach((semId, enrollments) -> {
+            int credits = 0, points = 0;
+            for (Enrollment e : enrollments) {
+                if (e.getGrade() != null && e.getGrade() != LetterGrade.F) {
+                    credits += e.getCourse().getCredits();
+                    points += e.getCourse().getCredits() * e.getGrade().getGradePoints();
                 }
-                
-                Map<String, Object> trend = new HashMap<>();
-                trend.put("semester", "Sem " + semEnrollments.get(0).getSemester().getSemesterNumber());
-                trend.put("sgpa", credits > 0 ? Math.round((double) points / credits * 100) / 100 : 0);
-                trends.add(trend);
-            });
+            }
+            
+            Map<String, Object> trend = new HashMap<>();
+            trend.put("semester", "Sem " + enrollments.get(0).getCourse().getSemester().getSemesterNumber());
+            trend.put("sgpa", credits > 0 ? Math.round((double) points / credits * 100) / 100 : 0);
+            trends.add(trend);
         });
         
         return trends;
@@ -62,7 +61,7 @@ public class AnalyticsService {
     public List<Map<String, Object>> getRankings(int limit) {
         List<Map<String, Object>> rankings = new ArrayList<>();
         
-        studentRepository.findAll().forEach(student -> {
+        for (var student : studentRepository.findAll()) {
             double cgpa = gradeCalculationService.calculateOverallCGPA(student.getId()).getCgpa();
             
             Map<String, Object> rank = new HashMap<>();
@@ -71,7 +70,7 @@ public class AnalyticsService {
             rank.put("rollNumber", student.getStudentId());
             rank.put("cgpa", cgpa);
             rankings.add(rank);
-        });
+        }
         
         // Sort by CGPA descending
         rankings.sort((a, b) -> Double.compare((Double) b.get("cgpa"), (Double) a.get("cgpa")));
@@ -92,36 +91,36 @@ public class AnalyticsService {
     public Map<String, Object> getCourseAnalytics(Long courseId) {
         Map<String, Object> analytics = new HashMap<>();
         
-        enrollmentRepository.findByCourseId(courseId).ifPresent(enrollments -> {
-            // Calculate average
-            int totalCredits = 0;
-            int totalPoints = 0;
-            int passed = 0;
-            int failed = 0;
-            Map<String, Integer> gradeDist = new HashMap<>();
+        var enrollments = enrollmentRepository.findByCourseId(courseId);
+        
+        // Calculate average
+        int totalCredits = 0;
+        int totalPoints = 0;
+        int passed = 0;
+        int failed = 0;
+        Map<String, Integer> gradeDist = new HashMap<>();
 
-            for (var e : enrollments) {
-                LetterGrade grade = e.getGrade();
-                if (grade != null) {
-                    totalCredits += e.getCourse().getCredits();
-                    totalPoints += e.getCourse().getCredits() * grade.getGradePoints();
-                    
-                    if (grade != LetterGrade.F) {
-                        passed++;
-                        gradeDist.merge(grade.getGrade(), 1, Integer::sum);
-                    } else {
-                        failed++;
-                    }
+        for (var e : enrollments) {
+            LetterGrade grade = e.getGrade();
+            if (grade != null) {
+                totalCredits += e.getCourse().getCredits();
+                totalPoints += e.getCourse().getCredits() * grade.getGradePoints();
+                
+                if (grade != LetterGrade.F) {
+                    passed++;
+                } else {
+                    failed++;
                 }
+                gradeDist.merge(grade.getGrade(), 1, Integer::sum);
             }
+        }
 
-            analytics.put("totalStudents", enrollments.size());
-            analytics.put("passed", passed);
-            analytics.put("failed", failed);
-            analytics.put("averageCGPA", totalCredits > 0 ? 
-                Math.round((double) totalPoints / totalCredits * 100) / 100 : 0);
-            analytics.put("gradeDistribution", gradeDist);
-        });
+        analytics.put("totalStudents", enrollments.size());
+        analytics.put("passed", passed);
+        analytics.put("failed", failed);
+        analytics.put("averageGrade", totalCredits > 0 ? 
+            Math.round((double) totalPoints / totalCredits * 100) / 100 : 0);
+        analytics.put("gradeDistribution", gradeDist);
 
         return analytics;
     }
@@ -132,7 +131,7 @@ public class AnalyticsService {
     public Map<String, Object> getClassStatistics() {
         Map<String, Object> stats = new HashMap<>();
         
-        List<Map<String, Object>> rankings = getRankings(100);
+        var rankings = getRankings(100);
         
         if (!rankings.isEmpty()) {
             double avgCGPA = rankings.stream()
@@ -140,7 +139,7 @@ public class AnalyticsService {
                 .average()
                 .orElse(0);
             
-            int passCount = (int) rankings.stream()
+            long passCount = rankings.stream()
                 .filter(m -> (Double) m.get("cgpa") >= 5.0)
                 .count();
             

@@ -1,6 +1,5 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.DashboardResponse;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.Student;
 import com.gradecalculator.repository.EnrollmentRepository;
@@ -45,7 +44,7 @@ public class TranscriptPdfService {
         document.open();
 
         // Header
-        Font headerFont = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(139, 21, 56)); // Crimson
+        Font headerFont = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(139, 21, 56));
         Font subHeaderFont = new Font(Font.HELVETICA, 12, Font.BOLD, Color.GRAY);
 
         Paragraph title = new Paragraph("ACADEMIC TRANSCRIPT", headerFont);
@@ -58,8 +57,8 @@ public class TranscriptPdfService {
         PdfPTable infoTable = new PdfPTable(2);
         infoTable.setWidthPercentage(100);
         
-        addCell(infoTable, "Student Name:", student.getName());
-        addCell(infoTable, "Roll Number:", student.getStudentId());
+        addTableRow(infoTable, "Student Name:", student.getName());
+        addTableRow(infoTable, "Roll Number:", student.getStudentId());
         
         document.add(infoTable);
         document.add(new Paragraph(" "));
@@ -70,24 +69,20 @@ public class TranscriptPdfService {
         gradesTable.setWidths(new float[]{2f, 3f, 1f, 1f, 1f});
 
         // Headers
-        Font tableHeader = new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE);
-        PdfPCell headerBg = new PdfPCell(new Phrase("", tableHeader));
-        headerBg.setBackgroundColor(new Color(139, 21, 56));
-        
-        addHeaderCell(gradesTable, "Course Code");
-        addHeaderCell(gradesTable, "Course Name");
-        addHeaderCell(gradesTable, "Credits");
-        addHeaderCell(gradesTable, "Grade");
-        addHeaderCell(gradesTable, "Points");
+        addTableHeader(gradesTable, "Course Code");
+        addTableHeader(gradesTable, "Course Name");
+        addTableHeader(gradesTable, "Credits");
+        addTableHeader(gradesTable, "Grade");
+        addTableHeader(gradesTable, "Points");
 
         // Data
-        enrollments.forEach(e -> {
-            addCell(gradesTable, e.getCourse().getCourseCode());
-            addCell(gradesTable, e.getCourse().getCourseName());
-            addCell(gradesTable, String.valueOf(e.getCourse().getCredits()));
-            addCell(gradesTable, e.getGrade() != null ? e.getGrade().getGrade() : "-");
-            addCell(gradesTable, String.valueOf(e.getCreditPoints() != null ? e.getCreditPoints() : "-"));
-        });
+        for (Enrollment e : enrollments) {
+            gradesTable.addCell(e.getCourse().getCourseCode());
+            gradesTable.addCell(e.getCourse().getCourseName());
+            gradesTable.addCell(String.valueOf(e.getCourse().getCredits()));
+            gradesTable.addCell(e.getGrade() != null ? e.getGrade().getGrade() : "-");
+            gradesTable.addCell(String.valueOf(e.getCreditPoints()));
+        }
 
         document.add(gradesTable);
 
@@ -101,13 +96,14 @@ public class TranscriptPdfService {
         return baos.toByteArray();
     }
 
-    private void addCell(PdfPTable table, String text) {
-        PdfPCell cell = new PdfPCell(new Phrase(text));
-        cell.setPaddingBottom(5);
-        table.addCell(cell);
+    private void addTableRow(PdfPTable table, String label, String value) {
+        Font bold = new Font(Font.HELVETICA, 10, Font.BOLD);
+        Font normal = new Font(Font.HELVETICA, 10);
+        table.addCell(new PdfPCell(new Phrase(label, bold)));
+        table.addCell(new PdfPCell(new Phrase(value, normal)));
     }
 
-    private void addHeaderCell(PdfPTable table, String text) {
+    private void addTableHeader(PdfPTable table, String text) {
         Font font = new Font(Font.HELVETICA, 9, Font.BOLD, Color.WHITE);
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setBackgroundColor(new Color(139, 21, 56));

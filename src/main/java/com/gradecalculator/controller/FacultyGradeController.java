@@ -68,7 +68,11 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/semester/{semesterId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getEnrollmentsBySemester(@PathVariable Long semesterId) {
-        return ResponseEntity.ok(enrollmentRepository.findBySemesterId(semesterId));
+        // Get all enrollments and filter by semester
+        var enrollments = enrollmentRepository.findAll().stream()
+            .filter(e -> e.getCourse().getSemester().getId().equals(semesterId))
+            .toList();
+        return ResponseEntity.ok(enrollments);
     }
 
     /**
@@ -90,14 +94,6 @@ public class FacultyGradeController {
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
 
         enrollment.setGrade(request.getGrade());
-        
-        // Calculate credit points
-        if (request.getGrade() != null) {
-            enrollment.setCreditPoints(
-                enrollment.getCourse().getCredits() * request.getGrade().getGradePoints()
-            );
-        }
-
         Enrollment saved = enrollmentRepository.save(enrollment);
         
         Map<String, Object> response = new HashMap<>();
@@ -120,11 +116,6 @@ public class FacultyGradeController {
             
             if (enrollment != null) {
                 enrollment.setGrade(request.getGrade());
-                if (request.getGrade() != null) {
-                    enrollment.setCreditPoints(
-                        enrollment.getCourse().getCredits() * request.getGrade().getGradePoints()
-                    );
-                }
                 enrollmentRepository.save(enrollment);
                 
                 Map<String, Object> result = new HashMap<>();
