@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | GradePoint Performance Insights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-elevated: #1a1a24;
+            --accent-primary: #6366f1;
+            --accent-secondary: #22d3ee;
+            --accent-tertiary: #f472b6;
+            --accent-success: #34d399;
+            --accent-warning: #fbbf24;
+            --accent-danger: #f87171;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-subtle: #1e1e2e;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-secondary: linear-gradient(135deg, #22d3ee 0%, #6366f1 100%);
+            --gradient-mesh: radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                         radial-gradient(at 80% 0%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
+                         radial-gradient(at 0% 50%, rgba(34, 211, 238, 0.08) 0px, transparent 50%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: var(--gradient-mesh);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .logo h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        nav a {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+        }
+
+        nav a.active {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--text-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out 0.1s backwards;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: slideUp 0.5s ease-out backwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.purple { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+        .stat-icon.cyan { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+        .stat-icon.pink { background: rgba(244, 114, 182, 0.15); color: #f472b6; }
+        .stat-icon.green { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+
+        .stat-value {
+            font-family: 'Sora', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            margin-top: 0.5rem;
+        }
+
+        .stat-trend.up {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--accent-success);
+        }
+
+        .stat-trend.down {
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--accent-danger);
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .chart-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* GPA Bar Chart */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            width: 80px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 1s ease-out;
+            position: relative;
+        }
+
+        .bar-fill.gold {
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        }
+
+        .bar-fill.purple {
+            background: linear-gradient(90deg, #8b5cf6, #6366f1);
+        }
+
+        .bar-fill.cyan {
+            background: linear-gradient(90deg, #22d3ee, #06b6d4);
+        }
+
+        .bar-fill.pink {
+            background: linear-gradient(90deg, #f472b6, #ec4899);
+        }
+
+        .bar-value {
+            width: 40px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Progress Rings */
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .progress-ring-container {
+            text-align: center;
+        }
+
+        .progress-ring {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .progress-ring .bg {
+            stroke: var(--bg-elevated);
+        }
+
+        .progress-ring .progress {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 1.5s ease-out;
+        }
+
+        .progress-ring .value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Sora', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .progress-ring-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Grade Distribution */
+        .grade-dist {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .grade-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .grade-chip.o { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+        .grade-chip.aplus { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+        .grade-chip.a { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+        .grade-chip.bplus { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+        .grade-chip.b { background: rgba(244, 114, 182, 0.15); color: #f472b6; }
+        .grade-chip.c { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+
+        .grade-count {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes countUp {
+            from { 
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 3rem;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <div class="logo">
+                    <div class="logo-icon">📊</div>
+                    <h1>GradePoint Analytics</h1>
+                </div>
+                <nav>
+                    <a href="/">Home</a>
+                    <a href="/" class="active">Analytics</a>
+                    <a href="/">Results</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="hero">
+            <h2>Performance Insights</h2>
+            <p>Deep dive into your academic progress with detailed analytics and visual breakdowns</p>
+        </div>
+
+        <!-- Select Student -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <select id="student-select" style="
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 10px;
+                color: var(--text-primary);
+                min-width: 250px;
+                cursor: pointer;
+            ">
+                <option value="">Select a student...</option>
+            </select>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="stats-grid" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-icon purple">🎯</div>
+                <div class="stat-value" id="cgpa-display">0.00</div>
+                <div class="stat-label">Current CGPA</div>
+                <div class="stat-trend up">↑ Excellent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon cyan">📚</div>
+                <div class="stat-value" id="total-credits">0</div>
+                <div class="stat-label">Credits Earned</div>
+                <div class="stat-trend up">↑ On Track</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pink">📖</div>
+                <div class="stat-value" id="total-courses">0</div>
+                <div class="stat-label">Courses Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">🏆</div>
+                <div class="stat-value" id="semesters-count">0</div>
+                <div class="stat-label">Semesters Active</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-section" id="charts-section" style="display: none;">
+            <!-- GPA Trend -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">GPA Progression</div>
+                        <div class="chart-subtitle">Semester-wise performance</div>
+                    </div>
+                </div>
+                <div class="bar-chart" id="gpa-chart">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Grade Distribution -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Grade Distribution</div>
+                        <div class="chart-subtitle">Breakdown by letter grade</div>
+                    </div>
+                </div>
+                <div class="progress-grid" id="grade-dist">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid" id="quick-stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-icon purple">⭐</div>
+                <div class="stat-value" id="highest-gpa">0.00</div>
+                <div class="stat-label">Highest SGPA</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">✅</div>
+                <div class="stat-value" id="pass-rate">0%</div>
+                <div class="stat-label">Pass Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon cyan">🎓</div>
+                <div class="stat-value" id="outstanding">0</div>
+                <div class="stat-label">O Grades</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pink">💪</div>
+                <div class="stat-value" id="improvement">+0%</div>
+                <div class="stat-label">Trend</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>GradePoint Analytics • Academic Excellence Tracker</p>
+        </div>
+    </footer>
+
+    <script>
+        const GRADE_COLORS = {
+            'O': '#eab308',
+            'A+': '#818cf8',
+            'A': '#a78bfa',
+            'B+': '#22d3ee',
+            'B': '#f472b6',
+            'C': '#34d399'
+        };
+
+        let allStudents = [];
+        let dashboardData = null;
+
+        // Load students on page load
+        async function loadStudents() {
+            try {
+                const res = await fetch('/api/students');
+                allStudents = await res.json();
+                
+                const select = document.getElementById('student-select');
+                allStudents.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.id;
+                    option.textContent = `${student.name} (${student.studentId})`;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error loading students:', err);
+            }
+        }
+
+        // Load dashboard when student selected
+        document.getElementById('student-select').addEventListener('change', async (e) => {
+            const studentId = e.target.value;
+            if (!studentId) return;
+
+            try {
+                const res = await fetch(`/api/students/${studentId}/dashboard`);
+                dashboardData = await res.json();
+                
+                document.getElementById('stats-grid').style.display = 'grid';
+                document.getElementById('charts-section').style.display = 'grid';
+                document.getElementById('quick-stats').style.display = 'grid';
+
+                animateValue('cgpa-display', dashboardData.cgpa || 0);
+                document.getElementById('total-credits').textContent = dashboardData.totalCredits || 0;
+                document.getElementById('total-courses').textContent = dashboardData.totalCourses || 0;
+                document.getElementById('semesters-count').textContent = dashboardData.semestersCompleted || 0;
+
+                // Render GPA chart
+                renderGPAChart(dashboardData.sgpaBySemester);
+
+                // Render grade distribution
+                renderGradeDistribution(dashboardData);
+
+                // Quick stats
+                const sgpas = Object.values(dashboardData.sgpaBySemester || {});
+                const highest = Math.max(...sgpas, 0);
+                document.getElementById('highest-gpa').textContent = highest.toFixed(2);
+                document.getElementById('pass-rate').textContent = (dashboardData.passRate || 0) + '%';
+                document.getElementById('outstanding').textContent = dashboardData.outstandingCount || 0;
+                
+                // Calculate trend
+                if (sgpas.length >= 2) {
+                    const recent = sgpas.slice(-2);
+                    const trend = recent[1] - recent[0];
+                    document.getElementById('improvement').textContent = (trend >= 0 ? '+' : '') + trend.toFixed(2);
+                }
+            } catch (err) {
+                console.error('Error loading dashboard:', err);
+                alert('Error loading student data');
+            }
+        });
+
+        function animateValue(id, endValue) {
+            const elem = document.getElementById(id);
+            const duration = 1000;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = (endValue * eased).toFixed(2);
+                elem.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        function renderGPAChart(sgpaData) {
+            const container = document.getElementById('gpa-chart');
+            container.innerHTML = '';
+            
+            if (!sgpaData) return;
+
+            const colors = ['purple', 'cyan', 'pink', 'gold'];
+            const entries = Object.entries(sgpaData);
+            
+            entries.forEach(([sem, gpa], i) => {
+                const percentage = (gpa / 10) * 100;
+                const color = colors[i % colors.length];
+                
+                const item = document.createElement('div');
+                item.className = 'bar-item';
+                item.innerHTML = `
+                    <div class="bar-label">${sem}</div>
+                    <div class="bar-track">
+                        <div class="bar-fill ${color}" style="width: 0%; transition: width 1s ease-out ${i * 0.1}s">
+                        </div>
+                    </div>
+                    <div class="bar-value">${gpa.toFixed(2)}</div>
+                `;
+                container.appendChild(item);
+
+                // Animate after a short delay
+                setTimeout(() => {
+                    item.querySelector('.bar-fill').style.width = percentage + '%';
+                }, 100);
+            });
+        }
+
+        function renderGradeDistribution(data) {
+            const container = document.getElementById('grade-dist');
+            container.innerHTML = '';
+
+            const grades = data.gradeDistribution || {};
+            const total = Object.values(grades).reduce((a, b) => a + b, 0) || 1;
+            
+            const displayGrades = ['O', 'A+', 'A', 'B+', 'B', 'C'];
+            
+            displayGrades.forEach(grade => {
+                const count = grades[grade] || 0;
+                const percentage = (count / total) * 100;
+                const circumference = 283;
+                const offset = circumference - (percentage / 100) * circumference;
+                const color = GRADE_COLORS[grade];
+
+                const div = document.createElement('div');
+                div.className = 'progress-ring-container';
+                div.innerHTML = `
+                    <div class="progress-ring">
+                        <svg width="100" height="100">
+                            <circle class="bg" cx="50" cy="50" r="45"></circle>
+                            <circle class="progress" cx="50" cy="50" r="45" 
+                                style="stroke: ${color}; stroke-dashoffset: 283">
+                            </circle>
+                        </svg>
+                        <div class="value">${count}</div>
+                    </div>
+                    <div class="progress-ring-label">${grade}</div>
+                `;
+                container.appendChild(div);
+
+                // Animate
+                setTimeout(() => {
+                    div.querySelector('.progress').style.strokeDashoffset = offset;
+                }, 100);
+            });
+        }
+
+        // Initialize
+        loadStudents();
+    </script>
+</body>
+</html>
