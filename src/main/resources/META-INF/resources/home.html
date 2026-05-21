@@ -23,28 +23,48 @@
         .navbar {
             background: white;
             padding: 1rem 2rem;
-            border-bottom: 1px solid var(--mist);
+            border-bottom: 2px solid var(--mist);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--crimson);
         }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
         .nav-links a {
             color: var(--ink);
             text-decoration: none;
-            margin-left: 1.5rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
         .btn-login {
-            background: var(--crimson);
+            background: linear-gradient(135deg, var(--crimson) 0%, #a5294d 100%);
             color: white !important;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-block;
+            border: 2px solid var(--crimson);
+            box-shadow: 0 4px 12px rgba(139, 21, 56, 0.3);
+            transition: all 0.3s ease;
+            text-decoration: none !important;
         }
-        .nav-links a:hover {
+        .btn-login:hover {
+            background: linear-gradient(135deg, #a5294d 0%, #8b1538 100%);
+            box-shadow: 0 6px 16px rgba(139, 21, 56, 0.4);
+            transform: translateY(-2px);
+            color: white !important;
+        }
+        .nav-links a:not(.btn-login):hover {
             color: var(--crimson);
         }
         .container {
@@ -142,6 +162,8 @@
             <a href="/index.html">Dashboard</a>
             <a href="/analytics.html">Analytics</a>
             <a href="/transcript.html">Transcript</a>
+            <a href="/student-dashboard.html">My Dashboard</a>
+            <a href="/profile.html">Profile</a>
         </div>
     </nav>
     

@@ -19,7 +19,19 @@ public class HomeController {
 
     @GetMapping("/")
     @ResponseBody
-    public String index() throws IOException {
+    public String home() throws IOException {
+        return servePage("home.html");
+    }
+
+    @GetMapping("/home.html")
+    @ResponseBody
+    public String homeHtml() throws IOException {
+        return servePage("home.html");
+    }
+
+    @GetMapping("/index.html")
+    @ResponseBody
+    public String indexHtml() throws IOException {
         return servePage("index.html");
     }
 
@@ -33,6 +45,24 @@ public class HomeController {
     @ResponseBody
     public String transcript() throws IOException {
         return servePage("transcript.html");
+    }
+
+    @GetMapping("/faculty-grades")
+    @ResponseBody
+    public String facultyGrades() throws IOException {
+        return servePage("faculty-grades.html");
+    }
+
+    @GetMapping("/student-dashboard")
+    @ResponseBody
+    public String studentDashboard() throws IOException {
+        return servePage("student-dashboard.html");
+    }
+
+    @GetMapping("/profile")
+    @ResponseBody
+    public String profile() throws IOException {
+        return servePage("profile.html");
     }
 
     private String servePage(String page) throws IOException {
