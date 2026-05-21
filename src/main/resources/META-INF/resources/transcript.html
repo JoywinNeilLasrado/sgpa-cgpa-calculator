@@ -441,88 +441,9 @@
         </div>
     </footer>
 
-    <script>
-        var allStudents = [];
-
-        // Set dates
-        var today = new Date();
-        document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
-        document.getElementById('doc-id').textContent = 'GP-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-
-        // Load students
-        async function loadStudents() {
-            try {
-                var res = await fetch('/api/students');
-                allStudents = await res.json();
-                var select = document.getElementById('student-select');
-                allStudents.forEach(function(s) {
-                    var opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.textContent = s.name + ' (' + s.studentId + ')';
-                    select.appendChild(opt);
-                });
-            } catch (err) {
-                console.error('Error:', err);
-            }
-        }
-
-        // Load transcript
-        document.getElementById('student-select').addEventListener('change', async function(e) {
-            var studentId = e.target.value;
-            if (!studentId) return;
-
-            var student = allStudents.find(function(s) { return s.id == studentId; });
-            document.getElementById('student-name').textContent = student ? student.name : '-';
-            document.getElementById('student-roll').textContent = student ? student.studentId : '-';
-
-            try {
-                var res = await fetch('/api/students/' + studentId + '/dashboard');
-                var data = await res.json();
-
-                document.getElementById('transcript').style.display = 'block';
-                renderResults(data);
-
-                document.getElementById('final-cgpa').textContent = (data.cgpa || 0).toFixed(2);
-                document.getElementById('final-credits').textContent = data.totalCredits || 0;
-                document.getElementById('final-courses').textContent = data.totalCourses || 0;
-                document.getElementById('classification').textContent = getClassification(data.cgpa || 0);
-            } catch (err) {
-                console.error('Error:', err);
-            }
-        });
-
-        function renderResults(data) {
-            var container = document.getElementById('results-container');
-            container.innerHTML = '';
-
-            if (!data.semesterResults || data.semesterResults.length === 0) {
-                container.innerHTML = '<p style="text-align:center;color:var(--slate-light)">No results found</p>';
-                return;
-            }
-
-            data.semesterResults.forEach(function(semester) {
-                var rows = '';
-                semester.courses.forEach(function(c) {
-                    var gradeClass = c.grade.replace('+', '\\+');
-                    rows += '<tr><td class="code">' + c.courseCode + '</td><td>' + c.courseName + '</td><td class="credits">' + c.credits + '</td><td class="points">' + c.creditPoints + '</td><td><span class="grade-badge ' + gradeClass + '">' + c.grade + '</span></td></tr>';
-                });
-
-                container.innerHTML += '<div class="semester-group"><div class="semester-header"><div class="semester-title">Semester ' + semester.semesterNumber + '</div><div class="semester-gpa">SGPA: ' + semester.sgpa.toFixed(2) + '</div></div><table class="results-table"><thead><tr><th>Code</th><th>Course</th><th>Credits</th><th>Points</th><th>Grade</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-            });
-        }
-
-        function getClassification(cgpa) {
-            if (cgpa >= 9) return 'First Class';
-            if (cgpa >= 8) return 'First Class';
-            if (cgpa >= 7) return 'Second Class';
-            if (cgpa >= 6) return 'Second Class';
-            if (cgpa >= 5) return 'Third Class';
-            return 'Pass';
-        }
-
-        loadStudents();
-    </script>
+    <script src="/js/api.js"></script>
+    <script src="/js/calculator.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/transcript.js"></script>
 </body>
 </html>

@@ -431,3 +431,205 @@ h1, h2, h3, h4 {
 .animate-scale-in {
     animation: scaleIn 0.5s ease-out forwards;
 }
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    background: var(--slate);
+    box-shadow: var(--shadow-medium);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-error {
+    background: #dc2626;
+}
+
+.toast-success {
+    background: #059669;
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--mist);
+    border-top-color: var(--crimson);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .card {
+        padding: 1.25rem;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ===== PAGE SPECIFIC STYLES ===== */
+/* Dashboard */
+.dashboard-hero {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.dashboard-gpa {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--crimson);
+    line-height: 1;
+}
+
+.dashboard-label {
+    font-size: 0.875rem;
+    color: var(--slate-light);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-row {
+    margin-bottom: 1rem;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+/* Mini Table */
+.mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.mini-table th,
+.mini-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--mist);
+}
+
+.mini-table th {
+    font-weight: 600;
+    color: var(--slate-light);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.mini-table tr:hover td {
+    background: rgba(139, 21, 56, 0.03);
+}
+
+/* Grade Badge */
+.grade-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.grade-badge.O { background: #fef3c7; color: #b45309; }
+.grade-badge\.A\+ { background: #ede9fe; color: #6d28d9; }
+.grade-badge.A { background: #ddd6fe; color: #7c3aed; }
+.grade-badge\.B\+ { background: #cffafe; color: #0891b2; }
+.grade-badge.B { background: #fce7f3; color: #db2777; }
+.grade-badge.C { background: #d1fae5; color: #059669; }
+.grade-badge.P { background: #e5e7eb; color: #4b5563; }
+.grade-badge.F { background: #fee2e2; color: #dc2626; }
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    background: none;
+    border: 1px solid var(--mist);
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--parchment);
+}
+
+.action-btn.delete {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.action-btn.delete:hover {
+    background: #fee2e2;
+}
+
+/* Result Box */
+.result-box {
+    text-align: center;
+    padding: 2rem;
+    background: var(--parchment);
+    border-radius: 12px;
+    margin: 1.5rem 0;
+}
+
+.result-gpa {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--crimson);
+}
+
+.result-label {
+    font-size: 0.875rem;
+    color: var(--slate-light);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.5rem;
+}
+
+.result-divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--crimson), var(--gold));
+    margin: 1rem auto;
+}
