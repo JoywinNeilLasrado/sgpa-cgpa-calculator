@@ -1,24 +1,13 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.CgpaResponse;
-import com.gradecalculator.dto.DashboardResponse;
-import com.gradecalculator.dto.SemesterResultRowResponse;
-import com.gradecalculator.dto.SemesterSummaryResponse;
-import com.gradecalculator.dto.SgpaResponse;
-import com.gradecalculator.dto.StudentSummaryResponse;
-import com.gradecalculator.model.Course;
-import com.gradecalculator.model.Enrollment;
-import com.gradecalculator.model.LetterGrade;
-import com.gradecalculator.model.Semester;
-import com.gradecalculator.model.Student;
-import com.gradecalculator.repository.EnrollmentRepository;
-import com.gradecalculator.repository.SemesterRepository;
-import com.gradecalculator.repository.StudentRepository;
+import com.gradecalculator.dto.*;
+import com.gradecalculator.model.*;
+import com.gradecalculator.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -44,18 +33,93 @@ public class DashboardService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
+        // Get all enrollments for this student
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
+        
+        // Calculate CGPA
         CgpaResponse cgpa = gradeCalculationService.calculateOverallCGPA(studentId);
-        List<SemesterSummaryResponse> semesters = semesterRepository.findAll().stream()
-                .map(semester -> toSemesterSummary(studentId, semester))
-                .filter(summary -> summary != null)
-                .toList();
+        
+        // Build response
+        DashboardResponse response = new DashboardResponse();
+        response.setStudentId(student.getId());
+        response.setStudentName(student.getName());
+        response.setStudentRoll(student.getStudentId());
+        response.setCgpa(cgpa.getCgpa());
+        response.setTotalCredits(cgpa.getTotalEarnedCredits());
+        response.setTotalCourses((int) enrollments.stream().filter(e -> e.getGrade() != LetterGrade.F).count());
+        response.setSemestersCompleted(cgpa.getSemestersCompleted());
 
-        return new DashboardResponse(
-                new StudentSummaryResponse(student.getId(), student.getName(), student.getStudentId()),
-                cgpa.getCgpa(),
-                cgpa.getTotalEarnedCredits(),
-                semesters
-        );
+        // Calculate SGPA by semester
+        Map<String, Double> sgpaBySemester = new LinkedHashMap<>();
+        Map<String, Integer> gradeDistribution = new HashMap<>();
+        List<SemesterResultResponse> semesterResults = new ArrayList<>();
+
+        // Get all semesters and sort by number
+        List<Semester> semesters = semesterRepository.findAll();
+        semesters.sort(Comparator.comparing(Semester::getSemesterNumber));
+
+        int totalPassed = 0;
+        int totalWithGrades = 0;
+        int outstandingCount = 0;
+
+        for (Semester sem : semesters) {
+            List<Enrollment> semEnrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, sem.getId());
+            if (semEnrollments.isEmpty()) continue;
+
+            // Calculate SGPA for this semester
+            int semCredits = 0;
+            int semPoints = 0;
+            List<CourseResultResponse> courseResults = new ArrayList<>();
+
+            for (Enrollment e : semEnrollments) {
+                Course course = e.getCourse();
+                LetterGrade grade = e.getGrade();
+                
+                if (grade == null) continue;
+                totalWithGrades++;
+                
+                if (grade != LetterGrade.F) {
+                    totalPassed++;
+                    int cp = course.getCredits() * grade.getGradePoints();
+                    semCredits += course.getCredits();
+                    semPoints += cp;
+                    
+                    // Count grades
+                    gradeDistribution.merge(grade.getGrade(), 1, Integer::sum);
+                    
+                    // Count outstanding
+                    if (grade == LetterGrade.O) outstandingCount++;
+                    
+                    // Add course result
+                    courseResults.add(new CourseResultResponse(
+                            course.getCourseCode(),
+                            course.getCourseName(),
+                            course.getCredits(),
+                            grade.getGrade(),
+                            grade.getGradePoints(),
+                            cp
+                    ));
+                }
+            }
+
+            if (semCredits > 0) {
+                double semGpa = roundToTwo((double) semPoints / semCredits);
+                sgpaBySemester.put("Sem " + sem.getSemesterNumber(), semGpa);
+                
+                // Create semester result for transcript
+                SemesterResultResponse semResult = new SemesterResultResponse(sem.getSemesterNumber(), semGpa, semCredits, semPoints);
+                semResult.setCourses(courseResults);
+                semesterResults.add(semResult);
+            }
+        }
+
+        response.setSgpaBySemester(sgpaBySemester);
+        response.setGradeDistribution(gradeDistribution);
+        response.setPassRate(totalWithGrades > 0 ? (totalPassed * 100 / totalWithGrades) : 0);
+        response.setOutstandingCount(outstandingCount);
+        response.setSemesterResults(semesterResults);
+
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -65,38 +129,26 @@ public class DashboardService {
         semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
 
-        return enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId).stream()
-                .sorted(Comparator.comparing(enrollment -> enrollment.getCourse().getCourseCode()))
-                .map(this::toSemesterResultRow)
-                .toList();
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId);
+        
+        return enrollments.stream()
+                .sorted(Comparator.comparing(e -> e.getCourse().getCourseCode()))
+                .map(e -> {
+                    Course course = e.getCourse();
+                    LetterGrade grade = e.getGrade();
+                    return new SemesterResultRowResponse(
+                            course.getCourseCode(),
+                            course.getCourseName(),
+                            course.getCredits(),
+                            grade.getGrade(),
+                            grade.getGradePoints(),
+                            course.getCredits() * grade.getGradePoints()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
-    private SemesterSummaryResponse toSemesterSummary(Long studentId, Semester semester) {
-        List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semester.getId());
-        if (enrollments.isEmpty()) {
-            return null;
-        }
-
-        int totalCredits = enrollments.stream()
-                .map(Enrollment::getCourse)
-                .filter(course -> course != null && course.getCredits() != null)
-                .mapToInt(Course::getCredits)
-                .sum();
-
-        SgpaResponse sgpa = gradeCalculationService.calculateSGPA(studentId, semester.getId());
-        return new SemesterSummaryResponse(semester.getId(), semester.getSemesterNumber(), sgpa.getSgpa(), totalCredits);
-    }
-
-    private SemesterResultRowResponse toSemesterResultRow(Enrollment enrollment) {
-        Course course = enrollment.getCourse();
-        LetterGrade grade = enrollment.getGrade();
-        return new SemesterResultRowResponse(
-                course.getCourseCode(),
-                course.getCourseName(),
-                course.getCredits(),
-                grade.getGrade(),
-                grade.getGradePoints(),
-                enrollment.getCreditPoints()
-        );
+    private double roundToTwo(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }
