@@ -68,8 +68,8 @@ public class DataInitializer implements CommandLineRunner {
         createStudent("CS2024011", "Kevin Perry", "kevin", allCourses, LetterGrade.C, LetterGrade.C);
         createStudent("CS2024012", "Laura Palmer", "laura", allCourses, LetterGrade.C, LetterGrade.P);
 
-        createUserIfNotExists("admin", "admin", AppUser.Role.AppUser.Role.ADMIN);
-        createUserIfNotExists("faculty", "faculty", AppUser.Role.AppUser.Role.FACULTY);
+        createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
+        createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
     }
 
     private void createStudent(String roll, String name, String username, List<List<Course>> courses, LetterGrade best, LetterGrade avg) {
@@ -78,7 +78,7 @@ public class DataInitializer implements CommandLineRunner {
         AppUser u = new AppUser();
         u.setUsername(username);
         u.setPassword(PASS_HASH);
-        u.setRole(AppUser.Role.AppUser.Role.STUDENT);
+        u.setRole(AppUser.Role.STUDENT);
         try { userRepository.save(u); } catch (Exception e) {}
 
         // Enroll in first 4 semesters (20 courses)
