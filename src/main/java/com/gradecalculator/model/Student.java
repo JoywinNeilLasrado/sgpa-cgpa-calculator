@@ -1,6 +1,6 @@
 package com.gradecalculator.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,7 +25,7 @@ public class Student {
     private String studentId; // University roll number
 
     @OneToMany(mappedBy = "student")
-    @JsonManagedReference
+    @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
 
     // Constructors
