@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
     <style>
         :root {
             --ink: #0d1117;
@@ -626,17 +627,25 @@
     </style>
 </head>
 <body>
-    <header>
+    <!-- Navigation -->
+    <nav class="nav-header">
         <div class="container">
-            <div class="header-inner">
-                <div class="logo">
-                    <h1>GradePoint</h1>
-                    <span>Academic Excellence Tracker</span>
+            <div class="nav-inner">
+                <a href="/" class="nav-logo">
+                    <div class="nav-logo-icon">🎓</div>
+                    <div class="nav-logo-text">
+                        <h1>GradePoint</h1>
+                        <span>Academic Tracker</span>
+                    </div>
+                </a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link active">Calculator</a>
+                    <a href="/analytics" class="nav-link">Analytics</a>
+                    <a href="/transcript" class="nav-link">Transcript</a>
                 </div>
-                <div class="tagline">Precision in Every Calculation</div>
             </div>
         </div>
-    </header>
+    </nav>
 
     <main>
         <section class="hero">
