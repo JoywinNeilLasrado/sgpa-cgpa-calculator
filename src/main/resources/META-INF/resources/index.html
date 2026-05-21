@@ -499,6 +499,104 @@
             gap: 0.75rem;
             animation: fadeUp 0.4s ease-out;
         }
+
+        .message {
+            padding: 0.875rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 2px;
+            font-size: 0.9375rem;
+            display: none;
+        }
+
+        .message.success {
+            display: block;
+            color: #166534;
+            background: #dcfce7;
+            border: 1px solid #86efac;
+        }
+
+        .message.error {
+            display: block;
+            color: #991b1b;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn-secondary,
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary {
+            color: var(--ink);
+            background: var(--white);
+            border: 1px solid var(--mist);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--slate-light);
+        }
+
+        .btn-danger {
+            color: #991b1b;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .mini-table {
+            width: 100%;
+            min-width: 680px;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .mini-table th,
+        .mini-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--mist);
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        .mini-table th {
+            color: var(--slate-light);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.7rem;
+            background: var(--parchment);
+        }
     </style>
 </head>
 <body>
@@ -524,9 +622,71 @@
 
         <div class="container">
             <div class="tabs">
+                <button class="tab-btn" data-tab="dashboard">Dashboard</button>
                 <button class="tab-btn active" data-tab="sgpa">SGPA Calculator</button>
                 <button class="tab-btn" data-tab="cgpa">CGPA Calculator</button>
+                <button class="tab-btn" data-tab="manage">Manage Data</button>
                 <button class="tab-btn" data-tab="grades">Grade Scale</button>
+            </div>
+
+            <div id="dashboard-section" class="tab-content" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Student Dashboard</h3>
+                        <span class="card-meta">Academic Summary</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="dashboard-student">Select Student</label>
+                            <select class="form-select" id="dashboard-student">
+                                <option value="">Choose a student...</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="loadDashboard()">View Dashboard</button>
+                    </div>
+                </div>
+
+                <div id="dashboard-result" class="card" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title" id="dashboard-name">Student</h3>
+                        <span class="card-meta" id="dashboard-roll">Roll Number</span>
+                    </div>
+                    <div class="stats-grid" id="dashboard-stats"></div>
+                    <div class="section">
+                        <h3 class="section-title">Semester SGPA</h3>
+                        <div class="table-wrap">
+                            <table class="mini-table">
+                                <thead>
+                                    <tr>
+                                        <th>Semester</th>
+                                        <th>SGPA</th>
+                                        <th>Total Credits</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-semesters"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">Semester Result</h3>
+                        <div class="table-wrap">
+                            <table class="mini-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Credits</th>
+                                        <th>Grade</th>
+                                        <th>Grade Points</th>
+                                        <th>Credit Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-result-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="sgpa-section" class="tab-content">
@@ -609,6 +769,117 @@
                 </div>
             </div>
 
+            <div id="manage-section" class="tab-content" style="display: none;">
+                <div id="manage-message" class="message"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Students</h3>
+                        <span class="card-meta">Create, Edit, Delete</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="student-name">Name</label>
+                            <input class="form-input" id="student-name" placeholder="Student name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="student-roll">Roll Number</label>
+                            <input class="form-input" id="student-roll" placeholder="CS2024002">
+                        </div>
+                        <button class="btn-primary" onclick="createStudent()">Add Student</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="mini-table">
+                            <thead><tr><th>Name</th><th>Roll Number</th><th>Actions</th></tr></thead>
+                            <tbody id="students-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Semesters</h3>
+                        <span class="card-meta">Create, Edit, Delete</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="semester-number">Semester Number</label>
+                            <input class="form-input" id="semester-number" type="number" min="1" placeholder="4">
+                        </div>
+                        <button class="btn-primary" onclick="createSemester()">Add Semester</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="mini-table">
+                            <thead><tr><th>Semester</th><th>Actions</th></tr></thead>
+                            <tbody id="semesters-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Courses</h3>
+                        <span class="card-meta">Create, Edit, Delete</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="course-code">Course Code</label>
+                            <input class="form-input" id="course-code" placeholder="CS401">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="course-name">Course Name</label>
+                            <input class="form-input" id="course-name" placeholder="Computer Networks">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="course-credits">Credits</label>
+                            <input class="form-input" id="course-credits" type="number" min="1" placeholder="4">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="course-semester">Semester</label>
+                            <select class="form-select" id="course-semester"></select>
+                        </div>
+                        <button class="btn-primary" onclick="createCourse()">Add Course</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="mini-table">
+                            <thead><tr><th>Code</th><th>Name</th><th>Credits</th><th>Semester</th><th>Actions</th></tr></thead>
+                            <tbody id="courses-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Enrollments</h3>
+                        <span class="card-meta">Grades and Duplicate Prevention</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="enrollment-student">Student</label>
+                            <select class="form-select" id="enrollment-student"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="enrollment-course">Course</label>
+                            <select class="form-select" id="enrollment-course"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="enrollment-grade">Grade</label>
+                            <select class="form-select" id="enrollment-grade">
+                                <option>O</option><option>A+</option><option>A</option><option>B+</option>
+                                <option>B</option><option>C</option><option>P</option><option>F</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="createEnrollment()">Add Enrollment</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="mini-table">
+                            <thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Grade</th><th>Credit Points</th><th>Actions</th></tr></thead>
+                            <tbody id="enrollments-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div id="grades-section" class="tab-content" style="display: none;">
                 <div class="card" style="animation-delay: 0.3s">
                     <div class="card-header">
@@ -650,62 +921,139 @@
             });
         });
 
-        // Load initial data
+        let students = [];
+        let semesters = [];
+        let courses = [];
+        let enrollments = [];
+
+        async function api(url, options = {}) {
+            const res = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.message || 'Request failed');
+            }
+            if (res.status === 204) {
+                return null;
+            }
+            return res.json();
+        }
+
+        function showManageMessage(text, type = 'success') {
+            const box = document.getElementById('manage-message');
+            box.textContent = text;
+            box.className = `message ${type}`;
+        }
+
+        function fillSelect(id, items, label, placeholder) {
+            const select = document.getElementById(id);
+            if (!select) return;
+            select.innerHTML = `<option value="">${placeholder}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = label(item);
+                select.appendChild(opt);
+            });
+        }
+
+        function renderTables() {
+            document.getElementById('students-table').innerHTML = students.map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td>${s.studentId}</td>
+                    <td class="toolbar">
+                        <button class="btn-secondary" onclick="editStudent(${s.id})">Edit</button>
+                        <button class="btn-danger" onclick="deleteItem('/api/students/${s.id}', 'Student deleted')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('semesters-table').innerHTML = semesters.map(s => `
+                <tr>
+                    <td>Semester ${s.semesterNumber}</td>
+                    <td class="toolbar">
+                        <button class="btn-secondary" onclick="editSemester(${s.id})">Edit</button>
+                        <button class="btn-danger" onclick="deleteItem('/api/semesters/${s.id}', 'Semester deleted')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('courses-table').innerHTML = courses.map(c => `
+                <tr>
+                    <td>${c.courseCode}</td>
+                    <td>${c.courseName}</td>
+                    <td>${c.credits}</td>
+                    <td>Semester ${c.semester?.semesterNumber || ''}</td>
+                    <td class="toolbar">
+                        <button class="btn-secondary" onclick="editCourse(${c.id})">Edit</button>
+                        <button class="btn-danger" onclick="deleteItem('/api/courses/${c.id}', 'Course deleted')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('enrollments-table').innerHTML = enrollments.map(e => `
+                <tr>
+                    <td>${e.studentName} (${e.studentRollNumber})</td>
+                    <td>${e.courseCode} - ${e.courseName}</td>
+                    <td>Semester ${e.semesterNumber}</td>
+                    <td><span class="grade-badge grade-${e.grade.replace('+', '-plus')}">${e.grade}</span></td>
+                    <td>${e.creditPoints}</td>
+                    <td class="toolbar">
+                        <button class="btn-secondary" onclick="editEnrollment(${e.id})">Edit</button>
+                        <button class="btn-danger" onclick="deleteItem('/api/enrollments/${e.id}', 'Enrollment deleted')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         async function loadData() {
             try {
-                const [studentsRes, semestersRes] = await Promise.all([
-                    fetch('/api/students'),
-                    fetch('/api/semesters')
+                [students, semesters, courses, enrollments] = await Promise.all([
+                    api('/api/students'),
+                    api('/api/semesters'),
+                    api('/api/courses'),
+                    api('/api/enrollments')
                 ]);
 
-                const students = await studentsRes.json();
-                const semesters = await semestersRes.json();
+                semesters.sort((a, b) => a.semesterNumber - b.semesterNumber);
+                courses.sort((a, b) => a.courseCode.localeCompare(b.courseCode));
 
-                // Populate student dropdowns
-                const studentDropdowns = ['sgpa-student', 'cgpa-student'];
-                studentDropdowns.forEach(id => {
-                    const select = document.getElementById(id);
-                    students.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.id;
-                        opt.textContent = `${s.name} (${s.studentId})`;
-                        select.appendChild(opt);
-                    });
+                ['sgpa-student', 'cgpa-student', 'dashboard-student', 'enrollment-student'].forEach(id => {
+                    fillSelect(id, students, s => `${s.name} (${s.studentId})`, 'Choose a student...');
                 });
-
-                // Populate semester dropdowns
-                const semesterDropdowns = ['sgpa-semester', 'cgpa-semester'];
-                semesterDropdowns.forEach(id => {
-                    const select = document.getElementById(id);
-                    semesters.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.id;
-                        opt.textContent = `Semester ${s.semesterNumber}`;
-                        select.appendChild(opt);
-                    });
+                ['sgpa-semester', 'cgpa-semester', 'course-semester'].forEach(id => {
+                    fillSelect(id, semesters, s => `Semester ${s.semesterNumber}`, id === 'cgpa-semester' ? 'All Semesters' : 'Choose semester...');
                 });
+                fillSelect('enrollment-course', courses, c => `${c.courseCode} - ${c.courseName} (Sem ${c.semester?.semesterNumber || ''})`, 'Choose a course...');
 
-                // Populate grade table
-                const gradeScaleRes = await fetch('/api/grade-scale');
-                const gradeScale = await gradeScaleRes.json();
-                const tbody = document.getElementById('grade-table-body');
-                
-                const gradeOrder = ['O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
-                gradeOrder.forEach(grade => {
-                    const g = gradeScale.grades[grade];
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><span class="grade-badge grade-${grade.replace('+', '-plus')}">${grade}</span></td>
-                        <td>${g.performance}</td>
-                        <td>${g.marks}</td>
-                        <td><strong>${g.points}</strong></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
+                renderTables();
+                await loadGradeScale();
             } catch (error) {
                 console.error('Error loading data:', error);
+                showManageMessage(error.message, 'error');
             }
+        }
+
+        async function loadGradeScale() {
+            const tbody = document.getElementById('grade-table-body');
+            if (tbody.children.length) return;
+
+            const gradeScale = await api('/api/grade-scale');
+            const gradeOrder = ['O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
+            gradeOrder.forEach(grade => {
+                const g = gradeScale.grades[grade];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="grade-badge grade-${grade.replace('+', '-plus')}">${grade}</span></td>
+                    <td>${g.performance}</td>
+                    <td>${g.marks}</td>
+                    <td><strong>${g.points}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         // Calculators
@@ -722,8 +1070,7 @@
             document.getElementById('sgpa-value-display').textContent = '...';
 
             try {
-                const res = await fetch(`/api/sgpa/student/${studentId}/semester/${semesterId}`);
-                const data = await res.json();
+                const data = await api(`/api/sgpa/student/${studentId}/semester/${semesterId}`);
 
                 document.getElementById('sgpa-value-display').textContent = data.sgpa.toFixed(2);
                 document.getElementById('sgpa-stats').innerHTML = `
@@ -739,7 +1086,7 @@
 
                 document.getElementById('sgpa-result').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
-                alert('Error calculating SGPA');
+                alert(error.message);
             }
         }
 
@@ -760,8 +1107,7 @@
                     ? `/api/cgpa/student/${studentId}/semester/${semesterId}`
                     : `/api/cgpa/student/${studentId}`;
                 
-                const res = await fetch(url);
-                const data = await res.json();
+                const data = await api(url);
 
                 document.getElementById('cgpa-value-display').textContent = data.cgpa.toFixed(2);
                 document.getElementById('cgpa-stats').innerHTML = `
@@ -781,7 +1127,186 @@
 
                 document.getElementById('cgpa-result').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
-                alert('Error calculating CGPA');
+                alert(error.message);
+            }
+        }
+
+        async function loadDashboard() {
+            const studentId = document.getElementById('dashboard-student').value;
+            if (!studentId) {
+                alert('Please select a student');
+                return;
+            }
+
+            try {
+                const dashboard = await api(`/api/students/${studentId}/dashboard`);
+                document.getElementById('dashboard-result').style.display = 'block';
+                document.getElementById('dashboard-name').textContent = dashboard.student.name;
+                document.getElementById('dashboard-roll').textContent = dashboard.student.studentId;
+                document.getElementById('dashboard-stats').innerHTML = `
+                    <div class="stat-item"><div class="stat-value">${dashboard.overallCgpa.toFixed(2)}</div><div class="stat-label">Overall CGPA</div></div>
+                    <div class="stat-item"><div class="stat-value">${dashboard.totalCredits}</div><div class="stat-label">Total Credits</div></div>
+                    <div class="stat-item"><div class="stat-value">${dashboard.semesters.length}</div><div class="stat-label">Semesters</div></div>
+                `;
+                document.getElementById('dashboard-semesters').innerHTML = dashboard.semesters.map(s => `
+                    <tr>
+                        <td>Semester ${s.semesterNumber}</td>
+                        <td>${s.sgpa.toFixed(2)}</td>
+                        <td>${s.totalCredits}</td>
+                        <td><button class="btn-secondary" onclick="loadSemesterResult(${studentId}, ${s.semesterId})">View Result</button></td>
+                    </tr>
+                `).join('');
+                if (dashboard.semesters.length) {
+                    loadSemesterResult(studentId, dashboard.semesters[0].semesterId);
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function loadSemesterResult(studentId, semesterId) {
+            const rows = await api(`/api/results/student/${studentId}/semester/${semesterId}`);
+            document.getElementById('dashboard-result-table').innerHTML = rows.map(r => `
+                <tr>
+                    <td>${r.courseCode}</td>
+                    <td>${r.courseName}</td>
+                    <td>${r.credits}</td>
+                    <td><span class="grade-badge grade-${r.grade.replace('+', '-plus')}">${r.grade}</span></td>
+                    <td>${r.gradePoints}</td>
+                    <td>${r.creditPoints}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function createStudent() {
+            try {
+                await api('/api/students', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: document.getElementById('student-name').value,
+                        studentId: document.getElementById('student-roll').value
+                    })
+                });
+                document.getElementById('student-name').value = '';
+                document.getElementById('student-roll').value = '';
+                showManageMessage('Student added');
+                await loadData();
+            } catch (error) {
+                showManageMessage(error.message, 'error');
+            }
+        }
+
+        async function createSemester() {
+            try {
+                await api('/api/semesters', {
+                    method: 'POST',
+                    body: JSON.stringify({ semesterNumber: Number(document.getElementById('semester-number').value) })
+                });
+                document.getElementById('semester-number').value = '';
+                showManageMessage('Semester added');
+                await loadData();
+            } catch (error) {
+                showManageMessage(error.message, 'error');
+            }
+        }
+
+        async function createCourse() {
+            try {
+                await api('/api/courses', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        courseCode: document.getElementById('course-code').value,
+                        courseName: document.getElementById('course-name').value,
+                        credits: Number(document.getElementById('course-credits').value),
+                        semesterId: document.getElementById('course-semester').value
+                    })
+                });
+                ['course-code', 'course-name', 'course-credits'].forEach(id => document.getElementById(id).value = '');
+                showManageMessage('Course added');
+                await loadData();
+            } catch (error) {
+                showManageMessage(error.message, 'error');
+            }
+        }
+
+        async function createEnrollment() {
+            try {
+                await api('/api/enrollments', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        studentId: Number(document.getElementById('enrollment-student').value),
+                        courseId: Number(document.getElementById('enrollment-course').value),
+                        grade: document.getElementById('enrollment-grade').value
+                    })
+                });
+                showManageMessage('Enrollment added');
+                await loadData();
+            } catch (error) {
+                showManageMessage(error.message, 'error');
+            }
+        }
+
+        async function deleteItem(url, successMessage) {
+            if (!confirm('Delete this item? Related records may also be removed.')) return;
+            try {
+                await api(url, { method: 'DELETE' });
+                showManageMessage(successMessage);
+                await loadData();
+            } catch (error) {
+                showManageMessage(error.message, 'error');
+            }
+        }
+
+        async function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            const name = prompt('Student name', student.name);
+            if (name === null) return;
+            const roll = prompt('Roll number', student.studentId);
+            if (roll === null) return;
+            await updateItem(`/api/students/${id}`, { name, studentId: roll }, 'Student updated');
+        }
+
+        async function editSemester(id) {
+            const semester = semesters.find(s => s.id === id);
+            const semesterNumber = prompt('Semester number', semester.semesterNumber);
+            if (semesterNumber === null) return;
+            await updateItem(`/api/semesters/${id}`, { semesterNumber: Number(semesterNumber) }, 'Semester updated');
+        }
+
+        async function editCourse(id) {
+            const course = courses.find(c => c.id === id);
+            const courseCode = prompt('Course code', course.courseCode);
+            if (courseCode === null) return;
+            const courseName = prompt('Course name', course.courseName);
+            if (courseName === null) return;
+            const credits = prompt('Credits', course.credits);
+            if (credits === null) return;
+            await updateItem(`/api/courses/${id}`, {
+                courseCode,
+                courseName,
+                credits: Number(credits),
+                semesterId: course.semester.id
+            }, 'Course updated');
+        }
+
+        async function editEnrollment(id) {
+            const enrollment = enrollments.find(e => e.id === id);
+            const grade = prompt('Grade (O, A+, A, B+, B, C, P, F)', enrollment.grade);
+            if (grade === null) return;
+            await updateItem(`/api/enrollments/${id}`, {
+                studentId: enrollment.studentId,
+                courseId: enrollment.courseId,
+                grade
+            }, 'Enrollment updated');
+        }
+
+        async function updateItem(url, payload, successMessage) {
+            try {
+                await api(url, { method: 'PUT', body: JSON.stringify(payload) });
+                showManageMessage(successMessage);
+                await loadData();
+            } catch (error) {
+                showManageMessage(error.message, 'error');
             }
         }
 
