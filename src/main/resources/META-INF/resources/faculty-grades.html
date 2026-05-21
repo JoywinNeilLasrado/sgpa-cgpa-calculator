@@ -410,14 +410,22 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
-        <a href="/" class="nav-brand">GradePoint</a>
-        <div class="nav-links">
-            <a href="/home.html">Dashboard</a>
-            <a href="/analytics.html">Analytics</a>
-            <a href="/transcript.html">Transcript</a>
-            <a href="/profile.html">Profile</a>
-            <button class="btn-logout" onclick="logout()">Logout</button>
+    <nav class="nav-header">
+        <div class="container nav-inner">
+            <a href="/home.html" class="nav-logo">
+                <div class="nav-logo-icon">🎓</div>
+                <div class="nav-logo-text">
+                    <h1>GradePoint</h1>
+                    <span>Academic Excellence</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="/home.html" class="nav-link">Home</a>
+                <a href="/analytics.html" class="nav-link">Analytics</a>
+                <a href="/transcript.html" class="nav-link">Transcript</a>
+                <a href="/profile.html" class="nav-link">Profile</a>
+                <a href="#" class="nav-link" onclick="logout()">Logout</a>
+            </div>
         </div>
     </nav>
 
