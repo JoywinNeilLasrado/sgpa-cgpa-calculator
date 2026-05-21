@@ -56,8 +56,20 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/grades/**").permitAll()
+                .requestMatchers(
+                    "/api/students/**",
+                    "/api/semesters/**",
+                    "/api/courses/**",
+                    "/api/enrollments/**",
+                    "/api/results/**",
+                    "/api/sgpa/**",
+                    "/api/cgpa/**",
+                    "/api/grade-scale"
+                ).permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
