@@ -3,36 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results | GradePoint Transcript</title>
+    <title>Transcript | GradePoint</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Serif+4:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
     <style>
         :root {
-            --bg-primary: #fdfcfa;
-            --bg-secondary: #f7f5f2;
-            --text-primary: #1a1814;
-            --text-secondary: #5c574e;
-            --text-muted: #9c9589;
-            --accent-maroon: #8b2635;
-            --accent-gold: #b8942b;
-            --border: #e5e2da;
-            --border-dark: #cfcac2;
+            --ink: #0d1117;
+            --paper: #faf9f7;
+            --parchment: #f5f3ef;
+            --crimson: #8b1538;
+            --crimson-light: #a5294d;
+            --gold: #c9a227;
+            --gold-light: #e4bc3a;
+            --slate: #475569;
+            --slate-light: #64748b;
+            --mist: #e2e8f0;
+            --mist-dark: #cbd5e1;
+            --white: #ffffff;
+            --shadow-soft: 0 4px 24px rgba(13, 17, 23, 0.08);
         }
 
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Source Serif 4', Georgia, serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.7;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            line-height: 1.6;
             min-height: 100vh;
-            padding: 2rem;
         }
 
         body::before {
@@ -40,206 +46,144 @@
             position: fixed;
             inset: 0;
             background: 
-                radial-gradient(circle at 10% 10%, rgba(139, 38, 53, 0.03) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, rgba(184, 148, 43, 0.04) 0%, transparent 40%);
+                radial-gradient(ellipse at 20% 20%, rgba(139, 21, 56, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(201, 162, 39, 0.04) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
         }
 
-        /* Header */
-        .transcript-header {
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 2rem 0;
             text-align: center;
-            padding: 2rem 0 3rem;
-            border-bottom: 3px solid var(--accent-maroon);
+        }
+
+        .hero h2 {
+            font-size: 2rem;
+            color: var(--ink);
+        }
+
+        /* Document Header */
+        .doc-header {
+            text-align: center;
+            padding: 2rem 0 1.5rem;
+            border-bottom: 3px solid var(--crimson);
             margin-bottom: 2rem;
             position: relative;
         }
 
-        .transcript-header::after {
+        .doc-header::after {
             content: '';
             position: absolute;
             bottom: -3px;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px;
+            width: 50px;
             height: 3px;
-            background: var(--accent-gold);
+            background: var(--gold);
         }
 
-        .university-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.75rem;
+        .doc-badge {
+            font-size: 0.6875rem;
             font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: 0.08em;
+            color: var(--white);
+            background: var(--crimson);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2px;
             text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .doc-title {
+            font-size: 2rem;
+            color: var(--crimson);
             margin-bottom: 0.5rem;
         }
 
-        .document-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: var(--accent-maroon);
-            margin-bottom: 1.5rem;
-        }
-
-        .meta-info {
+        .doc-meta {
             display: flex;
             justify-content: center;
-            gap: 3rem;
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
+            gap: 2rem;
+            font-size: 0.8125rem;
+            color: var(--slate-light);
         }
 
-        .meta-item strong {
-            color: var(--text-primary);
-            font-weight: 500;
+        .doc-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
         /* Student Info */
-        .student-info {
+        .student-card {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            gap: 1.5rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--parchment);
+            border: 1px solid var(--mist);
+            border-radius: 10px;
             margin-bottom: 2rem;
-            padding: 1.5rem 2rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
         }
 
-        @media (max-width: 768px) {
-            .student-info {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 600px) {
+            .student-card { grid-template-columns: 1fr; }
         }
 
-        .info-group label {
+        .student-field label {
             display: block;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-muted);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--slate-light);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
             margin-bottom: 0.25rem;
         }
 
-        .info-group .value {
-            font-size: 1.0625rem;
+        .student-field .value {
+            font-size: 1rem;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--ink);
         }
 
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-bottom: 1.5rem;
+        /* Select */
+        .select-wrap {
+            max-width: 300px;
+            margin: 0 auto 2rem;
         }
 
-        .control-btn {
-            padding: 0.625rem 1.25rem;
-            font-family: 'Source Serif 4', serif;
-            font-size: 0.875rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-dark);
-            border-radius: 3px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .control-btn:hover {
-            border-color: var(--accent-maroon);
-            color: var(--accent-maroon);
-        }
-
-        .control-btn.primary {
-            background: var(--accent-maroon);
-            border-color: var(--accent-maroon);
-            color: white;
-        }
-
-        .control-btn.primary:hover {
-            background: #6d1f2a;
-        }
-
-        .student-select {
-            padding: 0.625rem 1.25rem;
-            font-family: 'Source Serif 4', serif;
-            font-size: 0.875rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-dark);
-            border-radius: 3px;
-            color: var(--text-primary);
-            min-width: 250px;
-        }
-
-        /* Results Table */
-        .results-table {
+        .form-select {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2rem;
-        }
-
-        .results-table th,
-        .results-table td {
             padding: 0.875rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9375rem;
+            color: var(--ink);
+            background: var(--white);
+            border: 1px solid var(--mist);
+            border-radius: 8px;
+            cursor: pointer;
         }
 
-        .results-table th {
-            font-size: 0.6875rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            background: var(--bg-secondary);
+        .form-select:focus {
+            outline: none;
+            border-color: var(--crimson);
         }
 
-        .results-table tr:last-child td {
-            border-bottom: 2px solid var(--border-dark);
-        }
-
-        .results-table .code {
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-            color: var(--accent-maroon);
-        }
-
-        .results-table .grade {
-            display: inline-block;
-            padding: 0.125rem 0.5rem;
-            background: var(--bg-secondary);
-            border-radius: 2px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            min-width: 2rem;
-            text-align: center;
-        }
-
-        .results-table .grade.O { background: #fef3c7; color: #b45309; }
-        .results-table .grade.A-plus { background: #ede9fe; color: #6d28d9; }
-        .results-table .grade.A { background: #ddd6fe; color: #7c3aed; }
-        .results-table .grade.B-plus { background: #cffafe; color: #0891b2; }
-        .results-table .grade.B { background: #fce7f3; color: #db2777; }
-        .results-table .grade.C { background: #d1fae5; color: #059669; }
-        .results-table .grade.P { background: #e5e7eb; color: #4b5563; }
-        .results-table .grade.F { background: #fee2e2; color: #dc2626; }
-
-        .results-table .credits {
-            text-align: center;
-            color: var(--text-secondary);
-        }
-
-        .results-table .points {
-            font-weight: 600;
-            text-align: center;
-        }
-
+        /* Results */
         .semester-group {
             margin-bottom: 2rem;
         }
@@ -248,236 +192,276 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background: var(--accent-maroon);
+            padding: 0.75rem 1.25rem;
+            background: var(--crimson);
             color: white;
-            border-radius: 3px 3px 0 0;
-            margin-bottom: -1px;
+            border-radius: 10px 10px 0 0;
         }
 
         .semester-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 1.125rem;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .semester-gpa {
-            font-weight: 500;
+            font-weight: 600;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border: 1px solid var(--mist);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--mist);
+        }
+
+        .results-table th {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--slate-light);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: var(--parchment);
+        }
+
+        .results-table .code {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--crimson);
+        }
+
+        .results-table .grade-badge {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .results-table .grade-badge.O { background: #fef3c7; color: #b45309; }
+        .results-table .grade-badge\.A\+ { background: #ede9fe; color: #6d28d9; }
+        .results-table .grade-badge.A { background: #ddd6fe; color: #7c3aed; }
+        .results-table .grade-badge\.B\+ { background: #cffafe; color: #0891b2; }
+        .results-table .grade-badge.B { background: #fce7f3; color: #db2777; }
+        .results-table .grade-badge.C { background: #d1fae5; color: #059669; }
+        .results-table .grade-badge.F { background: #fee2e2; color: #dc2626; }
+
+        .results-table .credits,
+        .results-table .points {
+            text-align: center;
         }
 
         /* Summary */
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--parchment);
+            border: 1px solid var(--mist);
+            border-radius: 10px;
             margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 2px solid var(--border-dark);
         }
 
-        @media (max-width: 768px) {
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        @media (max-width: 500px) {
+            .summary-grid { grid-template-columns: 1fr; }
         }
 
         .summary-item {
             text-align: center;
-            padding: 1rem;
         }
 
         .summary-label {
             font-size: 0.6875rem;
-            color: var(--text-muted);
+            color: var(--slate-light);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.25rem;
         }
 
         .summary-value {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 2rem;
-            font-weight: 600;
-            color: var(--accent-maroon);
+            font-weight: 700;
+            color: var(--crimson);
         }
 
-        .summary-value.large {
-            font-size: 2.5rem;
-        }
-
-        /* Footer */
-        .transcript-footer {
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-muted);
-            font-size: 0.8125rem;
-        }
-
-        .signature {
-            text-align: right;
-        }
-
-        .signature-line {
-            border-top: 1px solid var(--text-primary);
-            width: 200px;
-            margin-left: auto;
-            margin-top: 2rem;
-            padding-top: 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Print Styles */
-        @media print {
-            body {
-                padding: 0;
-                background: white;
-            }
-
-            .controls {
-                display: none;
-            }
-
-            .results-table {
-                page-break-inside: avoid;
-            }
-        }
-
-        /* Legend */
-        .legend {
+        /* Actions */
+        .actions {
             display: flex;
             gap: 1rem;
             justify-content: center;
             margin-bottom: 2rem;
-            flex-wrap: wrap;
         }
 
-        .legend-item {
-            display: flex;
+        .btn {
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+            padding: 0.75rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
         }
 
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
+        .btn-primary {
+            background: var(--crimson);
+            color: white;
         }
 
-        .legend-dot.high { background: #fef3c7; }
-        .legend-dot.good { background: #ede9fe; }
-        .legend-dot.average { background: #cffafe; }
-        .legend-dot.pass { background: #e5e7eb; }
+        .btn-secondary {
+            background: var(--white);
+            color: var(--ink);
+            border: 1px solid var(--mist);
+        }
+
+        /* Print */
+        @media print {
+            .nav-header, .select-wrap, .actions, .footer { display: none; }
+            body { background: white; }
+            .results-table { page-break-inside: avoid; }
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--mist);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <select class="student-select" id="student-select">
-            <option value="">Select a student...</option>
-        </select>
-        <button class="control-btn" onclick="window.print()">🖨️ Print / PDF</button>
-    </div>
-
-    <div id="transcript-content">
-        <div class="transcript-header">
-            <div class="university-name">Academic Records</div>
-            <div class="document-title">Official Grade Transcript</div>
-            <div class="meta-info">
-                <div class="meta-item">
-                    <strong>Date:</strong> <span id="current-date"></span>
-                </div>
-                <div class="meta-item">
-                    <strong>Document ID:</strong> <span id="doc-id">GP-TRN-001</span>
+    <!-- Navigation -->
+    <nav class="nav-header">
+        <div class="container">
+            <div class="nav-inner">
+                <a href="/" class="nav-logo">
+                    <div class="nav-logo-icon">🎓</div>
+                    <div class="nav-logo-text">
+                        <h1>GradePoint</h1>
+                        <span>Academic Tracker</span>
+                    </div>
+                </a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Calculator</a>
+                    <a href="/analytics" class="nav-link">Analytics</a>
+                    <a href="/transcript" class="nav-link active">Transcript</a>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <div class="student-info">
-            <div class="info-group">
-                <label>Student Name</label>
-                <div class="value" id="student-name">-</div>
+    <main class="container">
+        <div class="hero">
+            <h2>Transcript</h2>
+        </div>
+
+        <!-- Student Selection -->
+        <div class="select-wrap">
+            <select class="form-select" id="student-select">
+                <option value="">Select a student...</option>
+            </select>
+        </div>
+
+        <!-- Document -->
+        <div id="transcript" style="display: none;">
+            <div class="doc-header">
+                <div class="doc-badge">Official Record</div>
+                <div class="doc-title">Academic Transcript</div>
+                <div class="doc-meta">
+                    <span>Date: <span id="current-date"></span></span>
+                    <span>ID: <span id="doc-id"></span></span>
+                </div>
             </div>
-            <div class="info-group">
-                <label>Roll Number</label>
-                <div class="value" id="student-roll">-</div>
+
+            <div class="student-card">
+                <div class="student-field">
+                    <label>Student Name</label>
+                    <div class="value" id="student-name">-</div>
+                </div>
+                <div class="student-field">
+                    <label>Roll Number</label>
+                    <div class="value" id="student-roll">-</div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="results-container">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Cumulative GPA</div>
+                    <div class="summary-value" id="final-cgpa">0.00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Credits</div>
+                    <div class="summary-value" id="final-credits">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Courses Passed</div>
+                    <div class="summary-value" id="final-courses">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Classification</div>
+                    <div class="summary-value" id="classification">-</div>
+                </div>
             </div>
         </div>
 
-        <div class="legend">
-            <div class="legend-item"><div class="legend-dot high"></div> Outstanding (O)</div>
-            <div class="legend-item"><div class="legend-dot good"></div> Excellent (A+/A)</div>
-            <div class="legend-item"><div class="legend-dot average"></div> Good (B+/B)</div>
-            <div class="legend-item"><div class="legend-dot pass"></div> Average (C/P/F)</div>
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="window.print()">🖨️ Print / PDF</button>
         </div>
+    </main>
 
-        <div id="results-container">
-            <!-- Results populated by JS -->
-            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">
-                Select a student to view their transcript
-            </p>
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">GradePoint • Academic Excellence Tracker</p>
         </div>
-
-        <div class="summary-grid" id="summary-grid" style="display: none;">
-            <div class="summary-item">
-                <div class="summary-label">Cumulative GPA</div>
-                <div class="summary-value large" id="final-cgpa">0.00</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Total Credits</div>
-                <div class="summary-value" id="final-credits">0</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Courses Passed</div>
-                <div class="summary-value" id="final-courses">0</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Classification</div>
-                <div class="summary-value" style="font-size: 1.25rem;" id="classification">-</div>
-            </div>
-        </div>
-
-        <div class="transcript-footer" id="footer" style="display: none;">
-            <div>
-                Generated by GradePoint Calculator<br>
-                This is an unofficial transcript
-            </div>
-            <div class="signature">
-                <div>Authorized Signature</div>
-                <div class="signature-line">Controller of Examinations</div>
-            </div>
-        </div>
-    </div>
+    </footer>
 
     <script>
-        let allStudents = [];
+        var allStudents = [];
 
-        // Set current date
-        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+        // Set dates
+        var today = new Date();
+        document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric'
         });
-
-        // Generate doc ID
         document.getElementById('doc-id').textContent = 'GP-' + Math.random().toString(36).substr(2, 8).toUpperCase();
 
         // Load students
         async function loadStudents() {
             try {
-                const res = await fetch('/api/students');
+                var res = await fetch('/api/students');
                 allStudents = await res.json();
-                
-                const select = document.getElementById('student-select');
-                allStudents.forEach(student => {
-                    const option = document.createElement('option');
-                    option.value = student.id;
-                    option.textContent = `${student.name} (${student.studentId})`;
-                    select.appendChild(option);
+                var select = document.getElementById('student-select');
+                allStudents.forEach(function(s) {
+                    var opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.name + ' (' + s.studentId + ')';
+                    select.appendChild(opt);
                 });
             } catch (err) {
                 console.error('Error:', err);
@@ -485,26 +469,21 @@
         }
 
         // Load transcript
-        document.getElementById('student-select').addEventListener('change', async (e) => {
-            const studentId = e.target.value;
+        document.getElementById('student-select').addEventListener('change', async function(e) {
+            var studentId = e.target.value;
             if (!studentId) return;
 
-            // Update student info
-            const student = allStudents.find(s => s.id == studentId);
-            document.getElementById('student-name').textContent = student?.name || '-';
-            document.getElementById('student-roll').textContent = student?.studentId || '-';
+            var student = allStudents.find(function(s) { return s.id == studentId; });
+            document.getElementById('student-name').textContent = student ? student.name : '-';
+            document.getElementById('student-roll').textContent = student ? student.studentId : '-';
 
             try {
-                const res = await fetch(`/api/students/${studentId}/dashboard`);
-                const data = await res.json();
+                var res = await fetch('/api/students/' + studentId + '/dashboard');
+                var data = await res.json();
 
+                document.getElementById('transcript').style.display = 'block';
                 renderResults(data);
-                
-                // Show summary
-                document.getElementById('summary-grid').style.display = 'grid';
-                document.getElementById('footer').style.display = 'flex';
 
-                // Update summary values
                 document.getElementById('final-cgpa').textContent = (data.cgpa || 0).toFixed(2);
                 document.getElementById('final-credits').textContent = data.totalCredits || 0;
                 document.getElementById('final-courses').textContent = data.totalCourses || 0;
@@ -515,63 +494,34 @@
         });
 
         function renderResults(data) {
-            const container = document.getElementById('results-container');
+            var container = document.getElementById('results-container');
             container.innerHTML = '';
 
             if (!data.semesterResults || data.semesterResults.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">No results found</p>';
+                container.innerHTML = '<p style="text-align:center;color:var(--slate-light)">No results found</p>';
                 return;
             }
 
-            data.semesterResults.forEach(semester => {
-                const group = document.createElement('div');
-                group.className = 'semester-group';
+            data.semesterResults.forEach(function(semester) {
+                var rows = '';
+                semester.courses.forEach(function(c) {
+                    var gradeClass = c.grade.replace('+', '\\+');
+                    rows += '<tr><td class="code">' + c.courseCode + '</td><td>' + c.courseName + '</td><td class="credits">' + c.credits + '</td><td class="points">' + c.creditPoints + '</td><td><span class="grade-badge ' + gradeClass + '">' + c.grade + '</span></td></tr>';
+                });
 
-                let rows = semester.courses.map(c => `
-                    <tr>
-                        <td class="code">${c.courseCode}</td>
-                        <td>${c.courseName}</td>
-                        <td class="credits">${c.credits}</td>
-                        <td><span class="grade ${c.grade.replace('+', '-plus')}">${c.grade}</span></td>
-                        <td class="points">${c.creditPoints}</td>
-                    </tr>
-                `).join('');
-
-                group.innerHTML = `
-                    <div class="semester-header">
-                        <div class="semester-title">Semester ${semester.semesterNumber}</div>
-                        <div class="semester-gpa">SGPA: ${semester.sgpa.toFixed(2)}</div>
-                    </div>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>Course Code</th>
-                                <th>Course Name</th>
-                                <th style="text-align: center;">Credits</th>
-                                <th style="text-align: center;">Grade</th>
-                                <th style="text-align: center;">Points</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>
-                `;
-
-                container.appendChild(group);
+                container.innerHTML += '<div class="semester-group"><div class="semester-header"><div class="semester-title">Semester ' + semester.semesterNumber + '</div><div class="semester-gpa">SGPA: ' + semester.sgpa.toFixed(2) + '</div></div><table class="results-table"><thead><tr><th>Code</th><th>Course</th><th>Credits</th><th>Points</th><th>Grade</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
             });
         }
 
         function getClassification(cgpa) {
-            if (cgpa >= 9.0) return 'First Class';
-            if (cgpa >= 8.0) return 'First Class';
-            if (cgpa >= 7.0) return 'Second Class';
-            if (cgpa >= 6.0) return 'Second Class';
-            if (cgpa >= 5.0) return 'Third Class';
+            if (cgpa >= 9) return 'First Class';
+            if (cgpa >= 8) return 'First Class';
+            if (cgpa >= 7) return 'Second Class';
+            if (cgpa >= 6) return 'Second Class';
+            if (cgpa >= 5) return 'Third Class';
             return 'Pass';
         }
 
-        // Initialize
         loadStudents();
     </script>
 </body>
