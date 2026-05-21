@@ -31,6 +31,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public void run(String... args) throws Exception {
         // Create semesters
@@ -98,5 +101,28 @@ public class DataInitializer implements CommandLineRunner {
         Enrollment e12 = new Enrollment(student, ma301, LetterGrade.B_PLUS);
 
         enrollmentRepository.saveAll(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12));
+
+        // Create demo users for authentication (passwords are "password123")
+        try {
+            com.gradecalculator.model.User admin = new com.gradecalculator.model.User();
+            admin.setUsername("admin");
+            admin.setPassword("$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy"); // password123
+            admin.setRole(com.gradecalculator.model.User.Role.ADMIN);
+            userRepository.save(admin);
+
+            com.gradecalculator.model.User faculty = new com.gradecalculator.model.User();
+            faculty.setUsername("faculty");
+            faculty.setPassword("$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy");
+            faculty.setRole(com.gradecalculator.model.User.Role.FACULTY);
+            userRepository.save(faculty);
+
+            com.gradecalculator.model.User studentUser = new com.gradecalculator.model.User();
+            studentUser.setUsername("CS2024001");
+            studentUser.setPassword("$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy");
+            studentUser.setRole(com.gradecalculator.model.User.Role.STUDENT);
+            userRepository.save(studentUser);
+        } catch (Exception e) {
+            // Users可能已存在，跳过
+        }
     }
 }
