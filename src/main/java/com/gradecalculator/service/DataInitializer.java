@@ -19,7 +19,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private SemesterRepository semesterRepository;
     @Autowired private CourseRepository courseRepository;
     @Autowired private EnrollmentRepository enrollmentRepository;
-    @Autowired private AppAppUserRepository userRepository;
+    @Autowired private AppUserRepository userRepository;
 
     // BCrypt hash for "password123"
     private static final String PASS_HASH = "$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy";
@@ -68,17 +68,17 @@ public class DataInitializer implements CommandLineRunner {
         createStudent("CS2024011", "Kevin Perry", "kevin", allCourses, LetterGrade.C, LetterGrade.C);
         createStudent("CS2024012", "Laura Palmer", "laura", allCourses, LetterGrade.C, LetterGrade.P);
 
-        createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
-        createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
+        createUserIfNotExists("admin", "admin", AppUser.Role.Role.ADMIN);
+        createUserIfNotExists("faculty", "faculty", AppUser.Role.Role.FACULTY);
     }
 
     private void createStudent(String roll, String name, String username, List<List<Course>> courses, LetterGrade best, LetterGrade avg) {
         Student student = studentRepository.save(new Student(name, roll));
         
-        User u = new User();
+        AppUser u = new AppUser();
         u.setUsername(username);
         u.setPassword(PASS_HASH);
-        u.setRole(AppUser.Role.STUDENT);
+        u.setRole(AppUser.Role.Role.STUDENT);
         try { userRepository.save(u); } catch (Exception e) {}
 
         // Enroll in first 4 semesters (20 courses)
@@ -91,9 +91,9 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void createUserIfNotExists(String username, String pw, AppUser.Role role) {
+    private void createUserIfNotExists(String username, String pw, AppUser.Role.Role role) {
         if (!userRepository.existsByUsername(username)) {
-            User u = new User();
+            AppUser u = new AppUser();
             u.setUsername(username);
             u.setPassword(pw);
             u.setRole(role);
