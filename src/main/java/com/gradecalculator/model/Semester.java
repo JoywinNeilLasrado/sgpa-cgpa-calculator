@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class Semester {
     private Integer semesterNumber;
 
     @OneToMany(mappedBy = "semester")
+    @JsonIgnore
     private List<Course> courses = new ArrayList<>();
 
     // Constructors
