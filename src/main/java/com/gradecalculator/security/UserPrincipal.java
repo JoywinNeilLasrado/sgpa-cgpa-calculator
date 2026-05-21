@@ -19,7 +19,7 @@ public class UserPrincipal implements UserDetails {
     private final String role;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(User user) {
+    public UserPrincipal(AppUser user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();

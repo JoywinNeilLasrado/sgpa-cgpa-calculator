@@ -31,8 +31,8 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         String token = userService.authenticate(request.getUsername(), request.getPassword());
         
-        User user = userService.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        AppUser user = userService.findByUsername(request.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
         return ResponseEntity.ok(new LoginResponse(
                 user.getId(),
@@ -46,8 +46,8 @@ public class AuthController {
      * Register - POST /api/auth/register (Admin only initially)
      */
     @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request) {
-        User user = userService.register(request);
+    public ResponseEntity<AppUser> register(@Valid @RequestBody RegisterRequest request) {
+        AppUser user = userService.register(request);
         return ResponseEntity.ok(user);
     }
 
@@ -56,8 +56,8 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ResponseEntity<LoginResponse> getCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
-        User user = userService.findById(principal.getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        AppUser user = userService.findById(principal.getId())
+                .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
         return ResponseEntity.ok(new LoginResponse(
                 user.getId(),

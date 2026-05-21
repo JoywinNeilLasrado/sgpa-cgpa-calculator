@@ -2,6 +2,7 @@ package com.gradecalculator.service;
 
 import com.gradecalculator.dto.request.RegisterRequest;
 import com.gradecalculator.model.AppUser;
+import com.gradecalculator.model.AppUser.Role;
 import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.security.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * User service for authentication
+ * AppUser service for authentication
  */
 @Service
 public class UserService {
@@ -34,12 +35,12 @@ public class UserService {
     /**
      * Register a new user
      */
-    public User register(RegisterRequest request) {
+    public AppUser register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        User user = new User();
+        AppUser user = new AppUser();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
@@ -61,14 +62,14 @@ public class UserService {
     /**
      * Find user by username
      */
-    public Optional<User> findByUsername(String username) {
+    public Optional<AppUser> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     /**
      * Find user by ID
      */
-    public Optional<User> findById(Long id) {
+    public Optional<AppUser> findById(Long id) {
         return userRepository.findById(id);
     }
 
@@ -76,8 +77,8 @@ public class UserService {
      * Change user password
      */
     public void changePassword(Long userId, String oldPassword, String newPassword) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new IllegalArgumentException("Invalid old password");
