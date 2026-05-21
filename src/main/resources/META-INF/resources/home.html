@@ -152,6 +152,85 @@
             margin-bottom: 1rem;
         }
         .hide { display: none; }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--crimson) 0%, #a5294d 50%, var(--gold) 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            color: white;
+        }
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        .hero-tagline {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+        .hero-desc {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            opacity: 0.95;
+            margin-bottom: 2rem;
+        }
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .hero-features span {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .btn-primary {
+            background: white;
+            color: var(--crimson) !important;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* Calculator Section */
+        #calculator {
+            scroll-margin-top: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -167,8 +246,31 @@
         </div>
     </nav>
     
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <div class="hero-icon">🎓</div>
+            <h1>Welcome to GradePoint</h1>
+            <p class="hero-tagline">Academic Excellence Tracker</p>
+            <p class="hero-desc">
+                Calculate your <strong>SGPA</strong> (Semester Grade Point Average) and <strong>CGPA</strong> (Cumulative Grade Point Average) 
+                instantly. Track your academic performance, view analytics, and generate PDF transcripts - all in one place!
+            </p>
+            <div class="hero-features">
+                <span>📊 SGPA Calculation</span>
+                <span>📈 CGPA Tracking</span>
+                <span>📄 PDF Transcripts</span>
+                <span>📉 Analytics Charts</span>
+            </div>
+            <div class="hero-actions">
+                <a href="#calculator" class="btn-primary">Get Started</a>
+                <a href="/login.html" class="btn-outline">Login</a>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
-        <div class="card">
+        <div class="card" id="calculator">
             <h1>Calculate Your GPA</h1>
             <p class="subtitle">Enter your courses, credits, and grades to calculate SGPA or CGPA</p>
             
