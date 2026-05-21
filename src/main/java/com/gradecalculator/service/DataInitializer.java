@@ -1,128 +1,104 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.model.Course;
-import com.gradecalculator.model.LetterGrade;
-import com.gradecalculator.model.Semester;
-import com.gradecalculator.model.Student;
-import com.gradecalculator.model.Enrollment;
+import com.gradecalculator.model.*;
 import com.gradecalculator.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data initializer to populate the database with sample data for demonstration.
+ * Data initializer with multiple students across semesters
  */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired
-    private StudentRepository studentRepository;
+    @Autowired private StudentRepository studentRepository;
+    @Autowired private SemesterRepository semesterRepository;
+    @Autowired private CourseRepository courseRepository;
+    @Autowired private EnrollmentRepository enrollmentRepository;
+    @Autowired private UserRepository userRepository;
 
-    @Autowired
-    private SemesterRepository semesterRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    // BCrypt hash for "password123"
+    private static final String PASS_HASH = "$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy";
 
     @Override
     public void run(String... args) throws Exception {
-        // Create semesters
-        Semester sem1 = new Semester(1);
-        Semester sem2 = new Semester(2);
-        Semester sem3 = new Semester(3);
+        if (studentRepository.count() > 0) return;
+
+        List<Semester> semesters = new ArrayList<>();
+        for (int i = 1; i <= 6; i++) {
+            semesters.add(semesterRepository.save(new Semester(i)));
+        }
+
+        String[][] codeMatrix = {
+            {"CS101", "MA101", "PH101", "EN101", "CS102"},
+            {"CS201", "MA201", "PH201", "EN201", "CS202"},
+            {"CS301", "MA301", "CS302", "CS303", "MA302"},
+            {"CS401", "CS402", "CS403", "MA401", "CS404"},
+            {"CS501", "CS502", "CS503", "CS504", "CS505"},
+            {"CS601", "CS602", "CS603", "CS604", "CS606"}
+        };
+        String[] names = {"Programming", "Mathematics", "Physics", "English", "Electronics"};
+
+        List<List<Course>> allCourses = new ArrayList<>();
+        for (int s = 0; s < 6; s++) {
+            List<Course> semCourses = new ArrayList<>();
+            for (int c = 0; c < 5; c++) {
+                Course course = new Course(codeMatrix[s][c], names[c] + " " + (s + 1), 4);
+                course.setSemester(semesters.get(s));
+                semCourses.add(courseRepository.save(course));
+            }
+            allCourses.add(semCourses);
+        }
+
+        // 12 students with different grades
+        createStudent("CS2024001", "Alice Johnson", "alice", allCourses, LetterGrade.O, LetterGrade.A_PLUS);
+        createStudent("CS2024002", "Bob Smith", "bob", allCourses, LetterGrade.A_PLUS, LetterGrade.A);
+        createStudent("CS2024003", "Charlie Brown", "charlie", allCourses, LetterGrade.A_PLUS, LetterGrade.A);
+        createStudent("CS2024004", "Diana Prince", "diana", allCourses, LetterGrade.A, LetterGrade.B_PLUS);
+        createStudent("CS2024005", "Edward Norton", "edward", allCourses, LetterGrade.A, LetterGrade.B_PLUS);
+        createStudent("CS2024006", "Fiona Apple", "fiona", allCourses, LetterGrade.B_PLUS, LetterGrade.A);
+        createStudent("CS2024007", "George Miller", "george", allCourses, LetterGrade.B_PLUS, LetterGrade.B);
+        createStudent("CS2024008", "Hannah Lee", "hannah", allCourses, LetterGrade.B, LetterGrade.C);
+        createStudent("CS2024009", "Ian Curtis", "ian", allCourses, LetterGrade.B, LetterGrade.C);
+        createStudent("CS2024010", "Julia Roberts", "julia", allCourses, LetterGrade.C, LetterGrade.B_PLUS);
+        createStudent("CS2024011", "Kevin Perry", "kevin", allCourses, LetterGrade.C, LetterGrade.C);
+        createStudent("CS2024012", "Laura Palmer", "laura", allCourses, LetterGrade.C, LetterGrade.P);
+
+        createUserIfNotExists("admin", "admin", User.Role.ADMIN);
+        createUserIfNotExists("faculty", "faculty", User.Role.FACULTY);
+    }
+
+    private void createStudent(String roll, String name, String username, List<List<Course>> courses, LetterGrade best, LetterGrade avg) {
+        Student student = studentRepository.save(new Student(name, roll));
         
-        sem1 = semesterRepository.save(sem1);
-        sem2 = semesterRepository.save(sem2);
-        sem3 = semesterRepository.save(sem3);
+        User u = new User();
+        u.setUsername(username);
+        u.setPassword(PASS_HASH);
+        u.setRole(User.Role.STUDENT);
+        try { userRepository.save(u); } catch (Exception e) {}
 
-        // Create a sample student
-        Student student = new Student("John Doe", "CS2024001");
-        student = studentRepository.save(student);
+        // Enroll in first 4 semesters (20 courses)
+        LetterGrade[] grades = {best, best, avg, avg, avg};
+        for (int sem = 0; sem < 4; sem++) {
+            for (int c = 0; c < 5; c++) {
+                Enrollment e = new Enrollment(student, courses.get(sem).get(c), grades[c]);
+                e.setCreditPoints(courses.get(sem).get(c).getCredits() * grades[c].getGradePoints());
+                enrollmentRepository.save(e);
+            }
+        }
+    }
 
-        // Create courses for Semester 1
-        Course cs101 = new Course("CS101", "Introduction to Programming", 4);
-        cs101.setSemester(sem1);
-        Course ma101 = new Course("MA101", "Mathematics I", 4);
-        ma101.setSemester(sem1);
-        Course ph101 = new Course("PH101", "Physics I", 3);
-        ph101.setSemester(sem1);
-        Course en101 = new Course("EN101", "English I", 2);
-        en101.setSemester(sem1);
-
-        // Create courses for Semester 2
-        Course cs201 = new Course("CS201", "Data Structures", 4);
-        cs201.setSemester(sem2);
-        Course ma201 = new Course("MA201", "Mathematics II", 4);
-        ma201.setSemester(sem2);
-        Course ph201 = new Course("PH201", "Physics II", 3);
-        ph201.setSemester(sem2);
-        Course en201 = new Course("EN201", "Technical Communication", 2);
-        en201.setSemester(sem2);
-
-        // Create courses for Semester 3
-        Course cs301 = new Course("CS301", "Algorithms", 4);
-        cs301.setSemester(sem3);
-        Course cs302 = new Course("CS302", "Database Systems", 3);
-        cs302.setSemester(sem3);
-        Course cs303 = new Course("CS303", "Operating Systems", 3);
-        cs303.setSemester(sem3);
-        Course ma301 = new Course("MA301", "Discrete Mathematics", 3);
-        ma301.setSemester(sem3);
-
-        courseRepository.saveAll(Arrays.asList(cs101, ma101, ph101, en101, cs201, ma201, ph201, en201, cs301, cs302, cs303, ma301));
-
-        // Create enrollments (student's course registrations with grades)
-        // Semester 1 grades - good performance
-        Enrollment e1 = new Enrollment(student, cs101, LetterGrade.A);
-        Enrollment e2 = new Enrollment(student, ma101, LetterGrade.B_PLUS);
-        Enrollment e3 = new Enrollment(student, ph101, LetterGrade.A_PLUS);
-        Enrollment e4 = new Enrollment(student, en101, LetterGrade.B);
-
-        // Semester 2 grades - mixed performance
-        Enrollment e5 = new Enrollment(student, cs201, LetterGrade.B);
-        Enrollment e6 = new Enrollment(student, ma201, LetterGrade.C);
-        Enrollment e7 = new Enrollment(student, ph201, LetterGrade.B_PLUS);
-        Enrollment e8 = new Enrollment(student, en201, LetterGrade.A);
-
-        // Semester 3 grades
-        Enrollment e9 = new Enrollment(student, cs301, LetterGrade.A_PLUS);
-        Enrollment e10 = new Enrollment(student, cs302, LetterGrade.O);
-        Enrollment e11 = new Enrollment(student, cs303, LetterGrade.A);
-        Enrollment e12 = new Enrollment(student, ma301, LetterGrade.B_PLUS);
-
-        enrollmentRepository.saveAll(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12));
-
-        // Create demo users for authentication (passwords are "password123")
-        try {
-            com.gradecalculator.model.User admin = new com.gradecalculator.model.User();
-            admin.setUsername("admin");
-            admin.setPassword("$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy"); // password123
-            admin.setRole(com.gradecalculator.model.User.Role.ADMIN);
-            userRepository.save(admin);
-
-            com.gradecalculator.model.User faculty = new com.gradecalculator.model.User();
-            faculty.setUsername("faculty");
-            faculty.setPassword("$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy");
-            faculty.setRole(com.gradecalculator.model.User.Role.FACULTY);
-            userRepository.save(faculty);
-
-            com.gradecalculator.model.User studentUser = new com.gradecalculator.model.User();
-            studentUser.setUsername("CS2024001");
-            studentUser.setPassword("$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy");
-            studentUser.setRole(com.gradecalculator.model.User.Role.STUDENT);
-            userRepository.save(studentUser);
-        } catch (Exception e) {
-            // Users可能已存在，跳过
+    private void createUserIfNotExists(String username, String pw, User.Role role) {
+        if (!userRepository.existsByUsername(username)) {
+            User u = new User();
+            u.setUsername(username);
+            u.setPassword(pw);
+            u.setRole(role);
+            userRepository.save(u);
         }
     }
 }
