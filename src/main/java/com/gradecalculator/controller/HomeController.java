@@ -29,12 +29,6 @@ public class HomeController {
         return servePage("home.html");
     }
 
-    @GetMapping("/index.html")
-    @ResponseBody
-    public String indexHtml() throws IOException {
-        return servePage("index.html");
-    }
-
     @GetMapping("/analytics")
     @ResponseBody
     public String analytics() throws IOException {
