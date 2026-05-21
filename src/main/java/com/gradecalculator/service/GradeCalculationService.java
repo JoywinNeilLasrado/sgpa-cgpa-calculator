@@ -6,7 +6,6 @@ import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.model.Student;
-import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.SemesterRepository;
 import com.gradecalculator.repository.StudentRepository;
@@ -18,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Service for calculating SGPA and CGPA.
@@ -33,9 +31,6 @@ public class GradeCalculationService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
 
     @Autowired
     private SemesterRepository semesterRepository;
@@ -91,12 +86,6 @@ public class GradeCalculationService {
 
         // Get all enrollments up to the specified semester, excluding F grades
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
-
-        // Filter enrollments up to the specified semester and exclude F grades
-        Set<Long> validSemesterIds = semesterRepository.findAll().stream()
-                .filter(s -> s.getId() <= semesterId)
-                .map(s -> s.getId())
-                .collect(Collectors.toSet());
 
         int totalValidCreditPoints = 0;
         int totalValidCredits = 0;
