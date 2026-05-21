@@ -1,7 +1,7 @@
 package com.gradecalculator.security;
 
-import com.gradecalculator.model.User;
-import com.gradecalculator.repository.UserRepository;
+import com.gradecalculator.model.AppUser;
+import com.gradecalculator.repository.AppUserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final AppUserRepository userRepository;
 
-    public UserDetailsServiceImpl(UserRepository userRepository) {
+    public UserDetailsServiceImpl(AppUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

@@ -2,7 +2,7 @@ package com.gradecalculator.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import com.gradecalculator.model.User.Role;
+import com.gradecalculator.model.AppAppUser.Role;
 
 /**
  * Register request DTO

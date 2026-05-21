@@ -1,6 +1,6 @@
 package com.gradecalculator.security;
 
-import com.gradecalculator.model.User;
+import com.gradecalculator.model.AppUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

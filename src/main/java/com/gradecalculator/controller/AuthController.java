@@ -3,7 +3,7 @@ package com.gradecalculator.controller;
 import com.gradecalculator.dto.request.LoginRequest;
 import com.gradecalculator.dto.request.RegisterRequest;
 import com.gradecalculator.dto.response.LoginResponse;
-import com.gradecalculator.model.User;
+import com.gradecalculator.model.AppUser;
 import com.gradecalculator.security.UserPrincipal;
 import com.gradecalculator.service.UserService;
 import jakarta.validation.Valid;

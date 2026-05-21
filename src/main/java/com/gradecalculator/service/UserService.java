@@ -1,8 +1,8 @@
 package com.gradecalculator.service;
 
 import com.gradecalculator.dto.request.RegisterRequest;
-import com.gradecalculator.model.User;
-import com.gradecalculator.repository.UserRepository;
+import com.gradecalculator.model.AppUser;
+import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.security.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,12 +18,12 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final AppUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+    public UserService(AppUserRepository userRepository, PasswordEncoder passwordEncoder,
             AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
