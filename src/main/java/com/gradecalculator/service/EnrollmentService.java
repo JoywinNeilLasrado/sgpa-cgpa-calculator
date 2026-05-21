@@ -1,6 +1,7 @@
 package com.gradecalculator.service;
 
 import com.gradecalculator.dto.EnrollmentRequest;
+import com.gradecalculator.dto.EnrollmentResponse;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
@@ -11,9 +12,7 @@ import com.gradecalculator.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class EnrollmentService {
@@ -32,28 +31,28 @@ public class EnrollmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> findAll() {
+    public List<EnrollmentResponse> findAll() {
         return enrollmentRepository.findAll().stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> findByStudentId(Long studentId) {
+    public List<EnrollmentResponse> findByStudentId(Long studentId) {
         return enrollmentRepository.findByStudentId(studentId).stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> findByStudentIdAndSemesterId(Long studentId, Long semesterId) {
+    public List<EnrollmentResponse> findByStudentIdAndSemesterId(Long studentId, Long semesterId) {
         return enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId).stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
     @Transactional
-    public Map<String, Object> create(EnrollmentRequest request) {
+    public EnrollmentResponse create(EnrollmentRequest request) {
         Student student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
         Course course = courseRepository.findById(request.getCourseId())
@@ -67,7 +66,7 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public Map<String, Object> update(Long id, EnrollmentRequest request) {
+    public EnrollmentResponse update(Long id, EnrollmentRequest request) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         Student student = studentRepository.findById(request.getStudentId())
@@ -96,23 +95,23 @@ public class EnrollmentService {
         enrollmentRepository.delete(enrollment);
     }
 
-    public Map<String, Object> toEnrollmentResponse(Enrollment enrollment) {
-        Map<String, Object> response = new LinkedHashMap<>();
+    public EnrollmentResponse toEnrollmentResponse(Enrollment enrollment) {
         Course course = enrollment.getCourse();
         Student student = enrollment.getStudent();
-        response.put("id", enrollment.getId());
-        response.put("studentId", student.getId());
-        response.put("studentName", student.getName());
-        response.put("studentRollNumber", student.getStudentId());
-        response.put("courseId", course.getId());
-        response.put("courseCode", course.getCourseCode());
-        response.put("courseName", course.getCourseName());
-        response.put("credits", course.getCredits());
-        response.put("semesterId", course.getSemester().getId());
-        response.put("semesterNumber", course.getSemester().getSemesterNumber());
-        response.put("grade", enrollment.getGrade().getGrade());
-        response.put("gradePoints", enrollment.getGrade().getGradePoints());
-        response.put("creditPoints", enrollment.getCreditPoints());
-        return response;
+        return new EnrollmentResponse(
+                enrollment.getId(),
+                student.getId(),
+                student.getName(),
+                student.getStudentId(),
+                course.getId(),
+                course.getCourseCode(),
+                course.getCourseName(),
+                course.getCredits(),
+                course.getSemester().getId(),
+                course.getSemester().getSemesterNumber(),
+                enrollment.getGrade().getGrade(),
+                enrollment.getGrade().getGradePoints(),
+                enrollment.getCreditPoints()
+        );
     }
 }

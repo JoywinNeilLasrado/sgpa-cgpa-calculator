@@ -1,5 +1,6 @@
 package com.gradecalculator.controller;
 
+import com.gradecalculator.dto.CourseRequest;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.service.CourseService;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -45,23 +45,23 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<Course> createCourse(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Course> createCourse(@RequestBody CourseRequest request) {
         return ResponseEntity.ok(courseService.create(
-                valueAsString(request.get("courseCode")),
-                valueAsString(request.get("courseName")),
-                request.get("credits"),
-                request.get("semesterId")
+                request.getCourseCode(),
+                request.getCourseName(),
+                request.getCredits(),
+                request.getSemesterId()
         ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody CourseRequest request) {
         return ResponseEntity.ok(courseService.update(
                 id,
-                valueAsString(request.get("courseCode")),
-                valueAsString(request.get("courseName")),
-                request.get("credits"),
-                request.get("semesterId")
+                request.getCourseCode(),
+                request.getCourseName(),
+                request.getCredits(),
+                request.getSemesterId()
         ));
     }
 
@@ -71,7 +71,4 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    private String valueAsString(Object value) {
-        return value == null ? null : value.toString();
-    }
 }

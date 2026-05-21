@@ -1,12 +1,14 @@
 package com.gradecalculator.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,9 @@ import java.util.List;
  * Entity representing a student.
  */
 @Entity
-@Table(name = "students")
+@Table(name = "students", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_student_roll_number", columnNames = "student_id")
+})
 public class Student {
 
     @Id
@@ -22,6 +26,8 @@ public class Student {
     private Long id;
 
     private String name;
+
+    @Column(name = "student_id", nullable = false)
     private String studentId; // University roll number
 
     @OneToMany(mappedBy = "student")

@@ -47,4 +47,32 @@ public enum LetterGrade {
         }
         throw new IllegalArgumentException("Invalid grade: " + grade);
     }
+
+    public static LetterGrade fromMarks(int marks) {
+        if (marks < 0 || marks > 100) {
+            throw new IllegalArgumentException("Marks must be between 0 and 100");
+        }
+        if (marks >= 90) {
+            return O;
+        }
+        if (marks >= 80) {
+            return A_PLUS;
+        }
+        if (marks >= 70) {
+            return A;
+        }
+        if (marks >= 60) {
+            return B_PLUS;
+        }
+        if (marks >= 55) {
+            return B;
+        }
+        if (marks >= 50) {
+            return C;
+        }
+        if (marks >= 40) {
+            return P;
+        }
+        return F;
+    }
 }

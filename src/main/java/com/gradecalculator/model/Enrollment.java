@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -18,7 +19,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * including the grade received.
  */
 @Entity
-@Table(name = "enrollments")
+@Table(name = "enrollments", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_student_course_enrollment", columnNames = {"student_id", "course_id"})
+})
 public class Enrollment {
 
     @Id

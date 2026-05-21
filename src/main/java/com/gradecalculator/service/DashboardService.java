@@ -1,7 +1,11 @@
 package com.gradecalculator.service;
 
 import com.gradecalculator.dto.CgpaResponse;
+import com.gradecalculator.dto.DashboardResponse;
+import com.gradecalculator.dto.SemesterResultRowResponse;
+import com.gradecalculator.dto.SemesterSummaryResponse;
 import com.gradecalculator.dto.SgpaResponse;
+import com.gradecalculator.dto.StudentSummaryResponse;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
@@ -13,11 +17,8 @@ import com.gradecalculator.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class DashboardService {
@@ -39,44 +40,26 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getStudentDashboard(Long studentId) {
+    public DashboardResponse getStudentDashboard(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         CgpaResponse cgpa = gradeCalculationService.calculateOverallCGPA(studentId);
-        List<Map<String, Object>> semesters = new ArrayList<>();
+        List<SemesterSummaryResponse> semesters = semesterRepository.findAll().stream()
+                .map(semester -> toSemesterSummary(studentId, semester))
+                .filter(summary -> summary != null)
+                .toList();
 
-        for (Semester semester : semesterRepository.findAll()) {
-            List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semester.getId());
-            if (enrollments.isEmpty()) {
-                continue;
-            }
-
-            int totalCredits = enrollments.stream()
-                    .map(Enrollment::getCourse)
-                    .filter(course -> course != null && course.getCredits() != null)
-                    .mapToInt(Course::getCredits)
-                    .sum();
-
-            SgpaResponse sgpa = gradeCalculationService.calculateSGPA(studentId, semester.getId());
-            Map<String, Object> semesterSummary = new LinkedHashMap<>();
-            semesterSummary.put("semesterId", semester.getId());
-            semesterSummary.put("semesterNumber", semester.getSemesterNumber());
-            semesterSummary.put("sgpa", sgpa.getSgpa());
-            semesterSummary.put("totalCredits", totalCredits);
-            semesters.add(semesterSummary);
-        }
-
-        Map<String, Object> dashboard = new LinkedHashMap<>();
-        dashboard.put("student", student);
-        dashboard.put("overallCgpa", cgpa.getCgpa());
-        dashboard.put("totalCredits", cgpa.getTotalEarnedCredits());
-        dashboard.put("semesters", semesters);
-        return dashboard;
+        return new DashboardResponse(
+                new StudentSummaryResponse(student.getId(), student.getName(), student.getStudentId()),
+                cgpa.getCgpa(),
+                cgpa.getTotalEarnedCredits(),
+                semesters
+        );
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getSemesterResult(Long studentId, Long semesterId) {
+    public List<SemesterResultRowResponse> getSemesterResult(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
         semesterRepository.findById(semesterId)
@@ -88,16 +71,32 @@ public class DashboardService {
                 .toList();
     }
 
-    private Map<String, Object> toSemesterResultRow(Enrollment enrollment) {
+    private SemesterSummaryResponse toSemesterSummary(Long studentId, Semester semester) {
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semester.getId());
+        if (enrollments.isEmpty()) {
+            return null;
+        }
+
+        int totalCredits = enrollments.stream()
+                .map(Enrollment::getCourse)
+                .filter(course -> course != null && course.getCredits() != null)
+                .mapToInt(Course::getCredits)
+                .sum();
+
+        SgpaResponse sgpa = gradeCalculationService.calculateSGPA(studentId, semester.getId());
+        return new SemesterSummaryResponse(semester.getId(), semester.getSemesterNumber(), sgpa.getSgpa(), totalCredits);
+    }
+
+    private SemesterResultRowResponse toSemesterResultRow(Enrollment enrollment) {
         Course course = enrollment.getCourse();
         LetterGrade grade = enrollment.getGrade();
-        Map<String, Object> row = new LinkedHashMap<>();
-        row.put("courseCode", course.getCourseCode());
-        row.put("courseName", course.getCourseName());
-        row.put("credits", course.getCredits());
-        row.put("grade", grade.getGrade());
-        row.put("gradePoints", grade.getGradePoints());
-        row.put("creditPoints", enrollment.getCreditPoints());
-        return row;
+        return new SemesterResultRowResponse(
+                course.getCourseCode(),
+                course.getCourseName(),
+                course.getCredits(),
+                grade.getGrade(),
+                grade.getGradePoints(),
+                enrollment.getCreditPoints()
+        );
     }
 }

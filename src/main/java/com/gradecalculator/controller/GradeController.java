@@ -1,12 +1,17 @@
 package com.gradecalculator.controller;
 
 import com.gradecalculator.dto.CgpaResponse;
+import com.gradecalculator.dto.GradeFromMarksResponse;
+import com.gradecalculator.dto.GradeScaleEntryResponse;
+import com.gradecalculator.dto.GradeScaleResponse;
 import com.gradecalculator.dto.SgpaResponse;
+import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.service.GradeCalculationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,18 +51,27 @@ public class GradeController {
     }
 
     @GetMapping("/grade-scale")
-    public ResponseEntity<Map<String, Object>> getGradeScale() {
-        return ResponseEntity.ok(Map.of(
-                "grades", Map.of(
-                        "O", Map.of("performance", "Outstanding", "marks", "90-100", "points", 10),
-                        "A+", Map.of("performance", "Excellent", "marks", "80-89", "points", 9),
-                        "A", Map.of("performance", "Very Good", "marks", "70-79", "points", 8),
-                        "B+", Map.of("performance", "Good", "marks", "60-69", "points", 7),
-                        "B", Map.of("performance", "Above Average", "marks", "55-59", "points", 6),
-                        "C", Map.of("performance", "Average", "marks", "50-54", "points", 5),
-                        "P", Map.of("performance", "Pass", "marks", "40-49", "points", 4),
-                        "F", Map.of("performance", "Fail", "marks", "00-39", "points", 0)
-                )
+    public ResponseEntity<GradeScaleResponse> getGradeScale() {
+        return ResponseEntity.ok(new GradeScaleResponse(Map.of(
+                "O", new GradeScaleEntryResponse("Outstanding", "90-100", 10),
+                "A+", new GradeScaleEntryResponse("Excellent", "80-89", 9),
+                "A", new GradeScaleEntryResponse("Very Good", "70-79", 8),
+                "B+", new GradeScaleEntryResponse("Good", "60-69", 7),
+                "B", new GradeScaleEntryResponse("Above Average", "55-59", 6),
+                "C", new GradeScaleEntryResponse("Average", "50-54", 5),
+                "P", new GradeScaleEntryResponse("Pass", "40-49", 4),
+                "F", new GradeScaleEntryResponse("Fail", "00-39", 0)
+        )));
+    }
+
+    @GetMapping("/grades/from-marks")
+    public ResponseEntity<GradeFromMarksResponse> getGradeFromMarks(@RequestParam int marks) {
+        LetterGrade grade = LetterGrade.fromMarks(marks);
+        return ResponseEntity.ok(new GradeFromMarksResponse(
+                marks,
+                grade.getGrade(),
+                grade.getPerformanceLevel(),
+                grade.getGradePoints()
         ));
     }
 }
