@@ -1,25 +1,54 @@
-# SGPA & CGPA Calculator
+# GradePoint: Academic Grade Calculator
 
-A Spring Boot application to calculate Semester Grade Point Average (SGPA) and Cumulative Grade Point Average (CGPA) based on the 10-point grading scale.
+A professional Spring Boot application to calculate **SGPA** (Semester Grade Point Average) and **CGPA** (Cumulative Grade Point Average) following autonomous college grading regulations with a modern web interface.
 
-## Features
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.0-green)
+![License](https://img.shields.io/badge/License-MIT-orange)
 
+## ✨ Features
+
+### Core Functionality
 - **SGPA Calculator** - Calculate semester-wise GPA
 - **CGPA Calculator** - Calculate cumulative GPA across all semesters
-- **10-Point Grading Scale** - Full grading scale display
-- **REST API** - Backend endpoints for integration
-- **Professional UI** - Clean, academic-themed interface
+- **Dashboard** - View all student results at a glance
+- **Analytics** - Visual performance insights with charts
+- **Transcript** - Printable official academic transcript
 
-## Technology Stack
+### Technical
+- **REST API** - Full backend endpoints for integration
+- **10-Point Grading Scale** - Complete grading scale (O to F)
+- **Professional UI** - Academic-themed responsive interface
+- **Data Management** - CRUD for students, courses, enrollments
 
-- **Backend**: Spring Boot 3.2.0 (Java 21)
-- **Database**: H2 in-memory
-- **Build Tool**: Maven
+## 🚀 Quick Start
 
-## Grading Scale
+```bash
+# Clone and build
+git clone https://github.com/JoywinNeilLasrado/sgpa-cgpa-calculator.git
+cd sgpa-cgpa-calculator
 
-| Letter Grade | Performance | Marks | Points |
-|--------------|-------------|-------|--------|
+# Build
+mvn clean package
+
+# Run
+java -jar target/sgpa-cgpa-calculator-1.0.0.jar
+```
+
+Access at: **http://localhost:8080**
+
+## 🌐 Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Calculator | `/` | Main SGPA/CGPA calculator & data management |
+| Analytics | `/analytics` | Performance charts & statistics |
+| Transcript | `/transcript` | Printable academic transcript |
+
+## 📊 Grading Scale (10-Point)
+
+| Letter Grade | Performance | Marks Range | Grade Points |
+|--------------|-------------|--------------|---------------|
 | O | Outstanding | 90-100 | 10 |
 | A+ | Excellent | 80-89 | 9 |
 | A | Very Good | 70-79 | 8 |
@@ -29,58 +58,76 @@ A Spring Boot application to calculate Semester Grade Point Average (SGPA) and C
 | P | Pass | 40-49 | 4 |
 | F | Fail | 00-39 | 0 |
 
-## Formulas
+## 📐 Formulas
 
-### SGPA
+### SGPA (Semester Grade Point Average)
 ```
 SGPA = Σ(Course Credits × Grade Points) / Σ(Course Credits)
 ```
 
-### CGPA
+### CGPA (Cumulative Grade Point Average)
 ```
 CGPA = Σ(Credit Points excluding F grades) / Σ(Credits excluding F grades)
 ```
 
-## Building & Running
+## 🔌 API Endpoints
 
-```bash
-# Build the project
-mvn clean package
+### Students
+- `GET /api/students` - List all students
+- `POST /api/students` - Create student
+- `GET /api/students/{id}` - Get student by ID
+- `DELETE /api/students/{id}` - Delete student
 
-# Run the application  
-mvn spring-boot:run
-
-# Or run the JAR
-java -jar target/sgpa-cgpa-calculator-1.0.0.jar
-```
-
-The application runs on **port 8080**.
-
-## API Endpoints
-
-- `GET /api/students` - List students
+### Semesters
 - `GET /api/semesters` - List semesters
+- `POST /api/semesters` - Create semester
+
+### Courses
 - `GET /api/courses` - List courses
-- `GET /api/sgpa/student/{id}/semester/{id}` - Calculate SGPA
-- `GET /api/cgpa/student/{id}` - Calculate overall CGPA
-- `GET /api/cgpa/student/{id}/semester/{semId}` - Calculate CGPA up to semester
+- `POST /api/courses` - Create course
 
-## Web Interface
+### Enrollments
+- `GET /api/enrollments` - List enrollments
+- `POST /api/enrollments` - Create enrollment
 
-Access the UI at: `http://localhost:8080/`
+### Grade Calculations
+- `GET /api/sgpa/student/{id}/semester/{semId}` - SGPA for a semester
+- `GET /api/cgpa/student/{id}` - Overall CGPA
+- `GET /api/cgpa/student/{id}/semester/{semId}` - CGPA up to semester
+- `GET /api/students/{id}/dashboard` - Full dashboard with all stats
 
-## Project Structure
+### Grade Scale
+- `GET /api/grades/scale` - Get grading scale
+- `GET /api/grades/from-marks/{marks}` - Get grade from marks
+
+## 🛠 Technology Stack
+
+- **Backend**: Spring Boot 3.2.0 (Java 21)
+- **Database**: H2 in-memory
+- **Build Tool**: Maven
+- **Frontend**: Vanilla HTML/CSS/JS
+
+## 📁 Project Structure
 
 ```
 src/main/java/com/gradecalculator/
 ├── SgpaCgpaCalculatorApplication.java
 ├── controller/
+│   ├── CourseController.java
+│   ├── DashboardController.java
+│   ├── EnrollmentController.java
 │   ├── GradeController.java
-│   └── HomeController.java
+│   ├── HomeController.java
+│   ├── SemesterController.java
+│   └── StudentController.java
 ├── dto/
-│   ├── CgpaResponse.java
-│   ├── EnrollmentRequest.java
-│   └── SgpaResponse.java
+│   ├── CourseRequest.java
+│   ├── CourseResultResponse.java
+│   ├── DashboardResponse.java
+│   ├── SemesterResultResponse.java
+│   └── ...
+├── exception/
+│   └── GlobalExceptionHandler.java
 ├── model/
 │   ├── Course.java
 │   ├── Enrollment.java
@@ -93,10 +140,27 @@ src/main/java/com/gradecalculator/
 │   ├── SemesterRepository.java
 │   └── StudentRepository.java
 └── service/
-    ├── DataInitializer.java
-    └── GradeCalculationService.java
+│   ├── CourseService.java
+│   ├── DashboardService.java
+│   ├── DataInitializer.java
+│   ├── EnrollmentService.java
+│   ├── GradeCalculationService.java
+│   ├── SemesterService.java
+│   └── StudentService.java
 ```
 
-## License
+## 🎨 UI Features
 
-MIT
+- **Responsive Design** - Works on desktop and mobile
+- **Consistent Theme** - Professional crimson/gold palette
+- **Navigation Bar** - Easy switching between pages
+- **Animations** - Smooth transitions
+- **Print Support** - Transcript printable as PDF
+
+## 📝 License
+
+MIT License - Feel free to use and modify!
+
+---
+
+**Built with ❤️ for academic excellence**
