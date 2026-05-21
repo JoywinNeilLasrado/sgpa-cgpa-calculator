@@ -38,6 +38,12 @@
             text-decoration: none;
             margin-left: 1.5rem;
         }
+        .btn-login {
+            background: var(--crimson);
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
         .nav-links a:hover {
             color: var(--crimson);
         }
@@ -132,8 +138,10 @@
     <nav class="navbar">
         <div class="logo">GradePoint</div>
         <div class="nav-links">
-            <a href="/login.html">Login</a>
+            <a href="/login.html" class="btn-login" id="login-link">Login</a>
             <a href="/index.html">Dashboard</a>
+            <a href="/analytics.html">Analytics</a>
+            <a href="/transcript.html">Transcript</a>
         </div>
     </nav>
     
@@ -271,6 +279,25 @@
             resultValue.textContent = gpa;
             resultBox.classList.remove('hide');
         }
+        
+        // Check login status and update nav
+        function updateNav() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const loginLink = document.getElementById('login-link');
+            
+            if (token && user.username) {
+                loginLink.textContent = 'Logout (' + user.username + ')';
+                loginLink.href = '#';
+                loginLink.onclick = function() {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/home.html';
+                };
+            }
+        }
+        
+        updateNav();
         
         // Add initial courses
         addCourse();
