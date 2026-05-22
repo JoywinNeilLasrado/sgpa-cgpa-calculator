@@ -17,6 +17,9 @@ public class StudentService {
     private final UserService userService;
     private final com.gradecalculator.repository.AppUserRepository userRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${app.demo.password:password123}")
+    private String demoPassword;
+
     public StudentService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository,
                           UserService userService, com.gradecalculator.repository.AppUserRepository userRepository) {
         this.studentRepository = studentRepository;
@@ -58,7 +61,7 @@ public class StudentService {
         try {
             com.gradecalculator.dto.request.RegisterRequest regRequest = new com.gradecalculator.dto.request.RegisterRequest();
             regRequest.setUsername(username);
-            regRequest.setPassword("password123");
+            regRequest.setPassword(demoPassword);
             regRequest.setRole(com.gradecalculator.model.AppUser.Role.STUDENT);
             userService.register(regRequest);
         } catch (Exception e) {

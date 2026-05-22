@@ -41,11 +41,13 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Map<String, String> request) {
+        validateStudentRequest(request);
         return ResponseEntity.ok(studentService.create(request.get("name"), request.get("studentId"), request.get("branch")));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        validateStudentRequest(request);
         return ResponseEntity.ok(studentService.update(id, request.get("name"), request.get("studentId"), request.get("branch")));
     }
 
@@ -53,5 +55,24 @@ public class StudentController {
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void validateStudentRequest(Map<String, String> request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request body cannot be null");
+        }
+        String name = request.get("name");
+        String studentId = request.get("studentId");
+        String branch = request.get("branch");
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Student name cannot be empty");
+        }
+        if (studentId == null || studentId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Student ID cannot be empty");
+        }
+        if (branch == null || branch.trim().isEmpty()) {
+            throw new IllegalArgumentException("Branch cannot be empty");
+        }
     }
 }

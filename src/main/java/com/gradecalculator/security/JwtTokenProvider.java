@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Date;
 
 /**
@@ -16,14 +19,27 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:mySecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong}")
-    private String jwtSecret;
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${jwt.expiration:86400000}")  // 24 hours default
-    private long jwtExpiration;
+    private final SecretKey jwtSecretKey;
+    private final long jwtExpiration;
+
+    public JwtTokenProvider(
+            @Value("${jwt.secret:}") String jwtSecret,
+            @Value("${jwt.expiration:86400000}") long jwtExpiration) {
+        this.jwtExpiration = jwtExpiration;
+        if (jwtSecret == null || jwtSecret.trim().isEmpty() || "mySecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong".equals(jwtSecret)) {
+            logger.warn("⚠️ SECURITY WARNING: No secure JWT secret key configured under 'jwt.secret'! Generating a dynamic cryptographically secure random key for this runtime session.");
+            byte[] keyBytes = new byte[32];
+            new SecureRandom().nextBytes(keyBytes);
+            this.jwtSecretKey = Keys.hmacShaKeyFor(keyBytes);
+        } else {
+            this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        }
+    }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        return jwtSecretKey;
     }
 
     /**

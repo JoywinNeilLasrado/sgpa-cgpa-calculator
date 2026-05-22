@@ -24,8 +24,13 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private DepartmentRepository departmentRepository;
 
-    // BCrypt hash for "password123"
-    private static final String PASS_HASH = "$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy";
+    @org.springframework.beans.factory.annotation.Value("${app.demo.seed:true}")
+    private boolean demoSeed;
+
+    @org.springframework.beans.factory.annotation.Value("${app.demo.password:password123}")
+    private String demoPassword;
+
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DataInitializer.class);
 
     @Override
     public void run(String... args) throws Exception {
@@ -35,18 +40,27 @@ public class DataInitializer implements CommandLineRunner {
             departmentRepository.save(new Department("Electronics & Communication", "ECE"));
         }
 
+        if (!demoSeed) {
+            logger.info("ℹ️ Demo data seeding is disabled by config.");
+            return;
+        }
+
         if (studentRepository.count() > 0) return;
+
+        if ("password123".equals(demoPassword)) {
+            logger.warn("⚠️ SECURITY WARNING: Demo database is seeded with a weak default password 'password123'. Change 'app.demo.password' in application.properties for production.");
+        }
 
         AppUser adminUser = createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
         AppUser defaultFaculty = createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
-        AppUser profJones = createUserIfNotExists("prof.jones", "password123", AppUser.Role.FACULTY);
-        AppUser profSmith = createUserIfNotExists("prof.smith", "password123", AppUser.Role.FACULTY);
-        AppUser profDavis = createUserIfNotExists("prof.davis", "password123", AppUser.Role.FACULTY);
+        AppUser profJones = createUserIfNotExists("prof.jones", demoPassword, AppUser.Role.FACULTY);
+        AppUser profSmith = createUserIfNotExists("prof.smith", demoPassword, AppUser.Role.FACULTY);
+        AppUser profDavis = createUserIfNotExists("prof.davis", demoPassword, AppUser.Role.FACULTY);
         
         // Additional faculty members (generated like students)
         String[] extraFacultyUsernames = {"prof.williams", "prof.brown", "prof.taylor"};
         for (String fu : extraFacultyUsernames) {
-            createUserIfNotExists(fu, "password123", AppUser.Role.FACULTY);
+            createUserIfNotExists(fu, demoPassword, AppUser.Role.FACULTY);
         }
 
         List<Semester> semesters = new ArrayList<>();
@@ -90,7 +104,7 @@ public class DataInitializer implements CommandLineRunner {
             allCourses.add(semCourses);
         }
 
-        String studentPasswordHash = passwordEncoder.encode("password123");
+        String studentPasswordHash = passwordEncoder.encode(demoPassword);
 
         // 12 students divided into different branches with different grades
         createStudent("CS2024001", "Alice Johnson", "alice", "Computer Science", allCourses, LetterGrade.O, LetterGrade.A_PLUS, studentPasswordHash);

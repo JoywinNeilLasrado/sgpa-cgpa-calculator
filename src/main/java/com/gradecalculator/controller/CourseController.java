@@ -3,6 +3,7 @@ package com.gradecalculator.controller;
 import com.gradecalculator.dto.CourseRequest;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.service.CourseService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,7 +46,7 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<Course> createCourse(@RequestBody CourseRequest request) {
+    public ResponseEntity<Course> createCourse(@Valid @RequestBody CourseRequest request) {
         return ResponseEntity.ok(courseService.create(
                 request.getCourseCode(),
                 request.getCourseName(),
@@ -56,7 +57,7 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody CourseRequest request) {
+    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequest request) {
         return ResponseEntity.ok(courseService.update(
                 id,
                 request.getCourseCode(),

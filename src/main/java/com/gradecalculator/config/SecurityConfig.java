@@ -15,6 +15,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.filter.OncePerRequestFilter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Spring Security Configuration
@@ -26,6 +36,9 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${spring.h2.console.enabled:false}")
+    private boolean h2ConsoleEnabled;
 
     public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
@@ -50,33 +63,66 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+    // Custom filter to force loading of dynamic CSRF token to set the response cookie
+    public static class CsrfCookieFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+                throws ServletException, IOException {
+            CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+            if (csrfToken != null) {
+                csrfToken.getToken(); // Forces token generation and writing cookie
+            }
+            filterChain.doFilter(request, response);
+        }
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> {
+                // CSRF protection is not required for stateless JWT-authenticated APIs
+                // since the JWT token is sent via Authorization header (not cookies),
+                // making the application inherently immune to CSRF attacks.
+                // We keep CSRF infrastructure enabled for any future cookie/session endpoints.
+                csrf
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                    .ignoringRequestMatchers("/api/**");
+                if (h2ConsoleEnabled) {
+                    csrf.ignoringRequestMatchers("/h2-console/**");
+                }
+            })
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/admin.html", "/student.html", "/home.html", "/login.html", "/analytics.html", "/transcript.html", "/faculty-grades.html", "/profile.html", "/student-dashboard.html", "/favicon.ico").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/grades/**").permitAll()
-                .requestMatchers(
-                    "/api/students/**",
-                    "/api/semesters/**",
-                    "/api/courses/**",
-                    "/api/enrollments/**",
-                    "/api/results/**",
-                    "/api/sgpa/**",
-                    "/api/cgpa/**",
-                    "/api/grade-scale",
-                    "/api/faculty/**",
-                    "/api/departments/**"
-                ).permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().authenticated()
-            )
+            .authorizeHttpRequests(auth -> {
+                auth
+                    .requestMatchers("/", "/index.html", "/admin.html", "/student.html", "/home.html", "/login.html", "/analytics.html", "/transcript.html", "/faculty-grades.html", "/profile.html", "/student-dashboard.html", "/favicon.ico").permitAll()
+                    .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/grades/**").permitAll()
+                    .requestMatchers(
+                        "/api/students/**",
+                        "/api/semesters/**",
+                        "/api/courses/**",
+                        "/api/enrollments/**",
+                        "/api/results/**",
+                        "/api/sgpa/**",
+                        "/api/cgpa/**",
+                        "/api/grade-scale",
+                        "/api/faculty/**",
+                        "/api/departments/**"
+                    ).permitAll();
+                
+                if (h2ConsoleEnabled) {
+                    auth.requestMatchers("/h2-console/**").permitAll();
+                } else {
+                    auth.requestMatchers("/h2-console/**").denyAll();
+                }
+                
+                auth.anyRequest().authenticated();
+            })
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class)
             .headers(headers -> headers.frameOptions(f -> f.disable()));
 
         return http.build();

@@ -1,8 +1,14 @@
 package com.gradecalculator.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class PasswordChangeRequest {
     private Long userId; // student or faculty ID
     private String username;
+
+    @NotBlank(message = "New password cannot be empty")
+    @Size(min = 6, message = "New password must be at least 6 characters")
     private String newPassword;
 
     public Long getUserId() { return userId; }

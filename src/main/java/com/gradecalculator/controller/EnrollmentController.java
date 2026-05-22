@@ -3,6 +3,7 @@ package com.gradecalculator.controller;
 import com.gradecalculator.dto.EnrollmentRequest;
 import com.gradecalculator.dto.EnrollmentResponse;
 import com.gradecalculator.service.EnrollmentService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,14 +46,14 @@ public class EnrollmentController {
     }
 
     @PostMapping
-    public ResponseEntity<EnrollmentResponse> createEnrollment(@RequestBody EnrollmentRequest request) {
+    public ResponseEntity<EnrollmentResponse> createEnrollment(@Valid @RequestBody EnrollmentRequest request) {
         return ResponseEntity.ok(enrollmentService.create(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EnrollmentResponse> updateEnrollment(
             @PathVariable Long id,
-            @RequestBody EnrollmentRequest request) {
+            @Valid @RequestBody EnrollmentRequest request) {
         return ResponseEntity.ok(enrollmentService.update(id, request));
     }
 

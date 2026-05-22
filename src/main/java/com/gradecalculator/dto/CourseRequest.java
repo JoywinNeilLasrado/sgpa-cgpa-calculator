@@ -1,11 +1,29 @@
 package com.gradecalculator.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class CourseRequest {
 
+    @NotBlank(message = "Course code cannot be blank")
+    @Size(min = 2, max = 10, message = "Course code must be between 2 and 10 characters")
     private String courseCode;
+
+    @NotBlank(message = "Course name cannot be blank")
+    @Size(min = 3, max = 100, message = "Course name must be between 3 and 100 characters")
     private String courseName;
+
+    @NotNull(message = "Credits cannot be null")
+    @Min(value = 1, message = "Credits must be at least 1")
+    @Max(value = 6, message = "Credits must be at most 6")
     private Integer credits;
+
+    @NotNull(message = "Semester mapping is required")
     private Long semesterId;
+
     private Long facultyId;
 
     public String getCourseCode() {

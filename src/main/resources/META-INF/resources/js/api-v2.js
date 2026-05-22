@@ -6,6 +6,13 @@
 const API = (() => {
     const BASE_URL = '/api';
 
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }
+
     function getHeaders() {
         return {
             'Content-Type': 'application/json',
@@ -15,8 +22,19 @@ const API = (() => {
 
     async function request(endpoint, options = {}) {
         const url = `${BASE_URL}${endpoint}`;
+        const headers = getHeaders();
+        
+        // Attach CSRF token for mutating requests (POST, PUT, DELETE)
+        const method = (options.method || 'GET').toUpperCase();
+        if (method !== 'GET' && method !== 'HEAD') {
+            const csrfToken = getCookie('XSRF-TOKEN');
+            if (csrfToken) {
+                headers['X-XSRF-TOKEN'] = csrfToken;
+            }
+        }
+
         const config = {
-            headers: getHeaders(),
+            headers,
             ...options
         };
 
@@ -27,7 +45,18 @@ const API = (() => {
             window.location.href = '/';
             return;
         }
-        if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+        if (!res.ok) {
+            let errorMsg = `API Error: ${res.statusText}`;
+            try {
+                const errData = JSON.parse(await res.text());
+                if (errData && errData.message) {
+                    errorMsg = errData.message;
+                }
+            } catch (e) {
+                // If it's not JSON, fallback to standard error msg
+            }
+            throw new Error(errorMsg);
+        }
         const text = await res.text();
         return text ? JSON.parse(text) : {};
     }

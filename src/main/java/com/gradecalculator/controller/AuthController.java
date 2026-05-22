@@ -86,10 +86,10 @@ public class AuthController {
     /**
      * Change password - PUT /api/auth/change-password
      */
-    @PutMapping("/change-password")
+    @PostMapping("/password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request) {
         
         userService.changePassword(principal.getId(), request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok().build();
@@ -99,7 +99,11 @@ public class AuthController {
      * Inner class for change password request
      */
     public static class ChangePasswordRequest {
+        @jakarta.validation.constraints.NotBlank(message = "Old password cannot be empty")
         private String oldPassword;
+
+        @jakarta.validation.constraints.NotBlank(message = "New password cannot be empty")
+        @jakarta.validation.constraints.Size(min = 6, message = "New password must be at least 6 characters")
         private String newPassword;
 
         public String getOldPassword() { return oldPassword; }

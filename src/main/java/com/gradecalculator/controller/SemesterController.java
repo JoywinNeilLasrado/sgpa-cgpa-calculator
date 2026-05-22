@@ -41,11 +41,13 @@ public class SemesterController {
 
     @PostMapping
     public ResponseEntity<Semester> createSemester(@RequestBody Map<String, Integer> request) {
+        validateSemesterRequest(request);
         return ResponseEntity.ok(semesterService.create(request.get("semesterNumber")));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Semester> updateSemester(@PathVariable Long id, @RequestBody Map<String, Integer> request) {
+        validateSemesterRequest(request);
         return ResponseEntity.ok(semesterService.update(id, request.get("semesterNumber")));
     }
 
@@ -53,5 +55,18 @@ public class SemesterController {
     public ResponseEntity<Void> deleteSemester(@PathVariable Long id) {
         semesterService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void validateSemesterRequest(Map<String, Integer> request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request body cannot be null");
+        }
+        Integer semesterNumber = request.get("semesterNumber");
+        if (semesterNumber == null) {
+            throw new IllegalArgumentException("Semester number is required");
+        }
+        if (semesterNumber < 1 || semesterNumber > 10) {
+            throw new IllegalArgumentException("Semester number must be between 1 and 10");
+        }
     }
 }
