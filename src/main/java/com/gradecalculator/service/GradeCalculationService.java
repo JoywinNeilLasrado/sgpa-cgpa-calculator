@@ -48,7 +48,7 @@ public class GradeCalculationService {
         List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId);
 
         if (enrollments.isEmpty()) {
-            throw new IllegalArgumentException("No enrollments found for this student in the specified semester");
+            return new SgpaResponse(studentId, semesterId, 0.0, 0, 0);
         }
 
         int totalCreditPoints = 0;
@@ -66,7 +66,7 @@ public class GradeCalculationService {
         }
 
         if (totalCredits == 0) {
-            throw new IllegalStateException("No valid courses found for SGPA calculation");
+            return new SgpaResponse(studentId, semesterId, 0.0, 0, 0);
         }
 
         double sgpa = roundToTwoDecimals((double) totalCreditPoints / totalCredits);
@@ -126,7 +126,7 @@ public class GradeCalculationService {
         semestersCompleted = countedSemesters.size();
 
         if (totalValidCredits == 0) {
-            throw new IllegalStateException("No valid courses found for CGPA calculation (all grades may be F)");
+            return new CgpaResponse(studentId, 0.0, 0, 0, semestersCompleted);
         }
 
         double cgpa = roundToTwoDecimals((double) totalValidCreditPoints / totalValidCredits);
@@ -172,7 +172,7 @@ public class GradeCalculationService {
         }
 
         if (totalValidCredits == 0) {
-            throw new IllegalStateException("No valid courses found for CGPA calculation");
+            return new CgpaResponse(studentId, 0.0, 0, 0, semestersCompleted.size());
         }
 
         double cgpa = roundToTwoDecimals((double) totalValidCreditPoints / totalValidCredits);

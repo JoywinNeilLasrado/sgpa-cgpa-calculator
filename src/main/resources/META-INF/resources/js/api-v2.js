@@ -142,6 +142,15 @@ const API = (() => {
             body: JSON.stringify(requests)
         }),
 
+        // Department APIs
+        getDepartments: () => request('/departments', { method: 'GET' }),
+        createDepartment: (name, code) =>
+            request('/departments', {
+                method: 'POST',
+                body: JSON.stringify({ name, code })
+            }),
+        deleteDepartment: (id) => request(`/departments/${id}`, { method: 'DELETE' }),
+
         // Analytics
         getSGPATrends: (studentId) => 
             request(`/analytics/sgpa-trends/${studentId}`, { method: 'GET' }),

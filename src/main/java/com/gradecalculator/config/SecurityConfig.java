@@ -69,7 +69,8 @@ public class SecurityConfig {
                     "/api/sgpa/**",
                     "/api/cgpa/**",
                     "/api/grade-scale",
-                    "/api/faculty/**"
+                    "/api/faculty/**",
+                    "/api/departments/**"
                 ).permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()

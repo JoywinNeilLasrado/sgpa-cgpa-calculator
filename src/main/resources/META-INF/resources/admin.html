@@ -194,6 +194,9 @@
                     <button class="sidebar-item" onclick="switchTab('faculty', this)">
                         <span>👨‍🏫</span> Faculty Registry
                     </button>
+                    <button class="sidebar-item" onclick="switchTab('departments', this)">
+                        <span>🏢</span> Department Registry
+                    </button>
                 </div>
             </div>
 
@@ -492,7 +495,9 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Department</label>
-                                    <input class="form-input" id="faculty-department" placeholder="Computer Science">
+                                    <select class="form-select" id="faculty-department">
+                                        <!-- Dynamic departments -->
+                                    </select>
                                 </div>
                                 <div class="form-group" style="justify-content: flex-end;">
                                     <button class="btn btn-primary" onclick="addFaculty()" style="width: 100%;">Onboard Faculty</button>
@@ -528,6 +533,61 @@
                     </div>
                 </div>
 
+                <!-- DEPARTMENTS TAB -->
+                <div id="tab-departments" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Department Registry</h3>
+                                <p class="card-subtitle">Manage campus departments, academic branches, and tracking codes.</p>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--parchment); border: 1px solid var(--mist-dark); margin-bottom: 2rem; padding: 1.5rem;">
+                            <h4 style="font-family: 'DM Sans', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--crimson); margin-bottom: 1rem; font-weight: 700;">
+                                + Add New Department
+                            </h4>
+                            <div class="form-grid" style="margin-bottom: 0;">
+                                <div class="form-group">
+                                    <label class="form-label">Department Name</label>
+                                    <input class="form-input" id="department-name" placeholder="Computer Science">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Department Code</label>
+                                    <input class="form-input" id="department-code" placeholder="CS">
+                                </div>
+                                <div class="form-group" style="justify-content: flex-end;">
+                                    <button class="btn btn-primary" onclick="addDepartment()" style="width: 100%;">Create Department</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-flex">
+                            <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" class="search-input" id="search-departments" placeholder="Search departments by name or code..." oninput="filterTable('departments')">
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--slate-light);" id="count-departments-text">0 departments loaded</span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="table" id="departments-table">
+                                <thead>
+                                    <tr>
+                                        <th>Internal ID</th>
+                                        <th>Department Name</th>
+                                        <th>Code</th>
+                                        <th style="text-align: right;">Action Ledger</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="4" class="loading">Loading department registry...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -556,9 +616,8 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script src="/js/api-v2.js"></script>
+
     <script>
-        let cachedStudents = [];
-        // Password Modal Functions
         function openPasswordModal(username) {
             const modal = document.getElementById('passwordModal');
             modal.dataset.username = username;
@@ -587,8 +646,10 @@
             });
         }
 
+        let cachedStudents = [];
         let cachedCourses = [];
         let cachedEnrollments = [];
+        let cachedDepartments = [];
 
         // Check if token exists
         if (!localStorage.getItem('token')) {
@@ -632,6 +693,7 @@
         }
 
         async function loadAllData() {
+            await loadDepartments();
             await loadStudents();
             await loadSemesters();
             await loadCourses();
@@ -765,6 +827,39 @@
             }
         }
 
+        async function loadDepartments() {
+            try {
+                const departments = await API.getDepartments();
+                cachedDepartments = departments;
+
+                document.getElementById('count-departments-text').textContent = `${departments.length} departments loaded`;
+
+                const tbody = document.querySelector('#departments-table tbody');
+                tbody.innerHTML = departments.length ? departments.map(d => `
+                    <tr class="department-row-item" data-name="${d.name.toLowerCase()}" data-code="${d.code.toLowerCase()}">
+                        <td><strong>${d.id}</strong></td>
+                        <td>${d.name}</td>
+                        <td><span class="grade-badge A">${d.code}</span></td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-danger btn-sm" onclick="deleteDepartment(${d.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="4" class="empty-state">No departments registered.</td></tr>';
+
+                // Populate dynamic select dropdowns
+                const studentBranchSelect = document.getElementById('student-branch');
+                const facultyDeptSelect = document.getElementById('faculty-department');
+
+                const optionsHtml = departments.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+                studentBranchSelect.innerHTML = optionsHtml;
+                facultyDeptSelect.innerHTML = optionsHtml;
+
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to pull departments.', 'error');
+            }
+        }
+
         async function loadEnrollments() {
             try {
                 const enrollments = await API.getEnrollments();
@@ -815,6 +910,12 @@
                     const name = tr.getAttribute('data-name');
                     const username = tr.getAttribute('data-username');
                     tr.style.display = (name.includes(query) || username.includes(query)) ? '' : 'none';
+                });
+            } else if (type === 'departments') {
+                document.querySelectorAll('.department-row-item').forEach(tr => {
+                    const name = tr.getAttribute('data-name');
+                    const code = tr.getAttribute('data-code');
+                    tr.style.display = (name.includes(query) || code.includes(query)) ? '' : 'none';
                 });
             }
         }
@@ -867,6 +968,27 @@
             } catch (err) {
                 console.error(err);
                 showToast('Failed to onboard faculty staff.', 'error');
+            }
+        }
+
+        async function addDepartment() {
+            const name = document.getElementById('department-name').value.trim();
+            const code = document.getElementById('department-code').value.trim();
+
+            if (!name || !code) {
+                showToast('Complete all department fields.', 'error');
+                return;
+            }
+
+            try {
+                await API.createDepartment(name, code);
+                document.getElementById('department-name').value = '';
+                document.getElementById('department-code').value = '';
+                await loadDepartments();
+                showToast(`Department '${name}' created successfully!`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to create department. Duplicates?', 'error');
             }
         }
 
@@ -946,6 +1068,19 @@
                 } catch (err) {
                     console.error(err);
                     showToast('Failed to delete faculty member.', 'error');
+                }
+            }
+        }
+
+        async function deleteDepartment(id) {
+            if (confirm('Verify: Permanently delete this department?')) {
+                try {
+                    await API.deleteDepartment(id);
+                    await loadDepartments();
+                    showToast('Department successfully deleted.', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Failed to delete department.', 'error');
                 }
             }
         }
@@ -1043,7 +1178,9 @@
             if (newName === null) return;
             const newRoll = prompt('Modify student Roll ID:', oldRoll);
             if (newRoll === null) return;
-            const newBranch = prompt('Modify student Academic Branch (Computer Science / Information Technology / Electronics & Communication):', oldBranch || 'Computer Science');
+            const validBranches = cachedDepartments.map(d => d.name);
+            const branchOptionsStr = validBranches.join(' / ');
+            const newBranch = prompt(`Modify student Academic Branch (${branchOptionsStr}):`, oldBranch || 'Computer Science');
             if (newBranch === null) return;
 
             if (!newName.trim() || !newRoll.trim() || !newBranch.trim()) {
@@ -1051,10 +1188,9 @@
                 return;
             }
 
-            const validBranches = ['Computer Science', 'Information Technology', 'Electronics & Communication'];
             const trimmedBranch = newBranch.trim();
             if (!validBranches.includes(trimmedBranch)) {
-                showToast('Invalid branch. Must be "Computer Science", "Information Technology", or "Electronics & Communication".', 'error');
+                showToast(`Invalid branch. Must be one of: ${validBranches.join(', ')}`, 'error');
                 return;
             }
 

@@ -22,12 +22,19 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private EnrollmentRepository enrollmentRepository;
     @Autowired private AppUserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private DepartmentRepository departmentRepository;
 
     // BCrypt hash for "password123"
     private static final String PASS_HASH = "$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy";
 
     @Override
     public void run(String... args) throws Exception {
+        if (departmentRepository.count() == 0) {
+            departmentRepository.save(new Department("Computer Science", "CS"));
+            departmentRepository.save(new Department("Information Technology", "IT"));
+            departmentRepository.save(new Department("Electronics & Communication", "ECE"));
+        }
+
         if (studentRepository.count() > 0) return;
 
         AppUser adminUser = createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);

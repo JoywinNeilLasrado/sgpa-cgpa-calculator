@@ -482,8 +482,19 @@
                 const toppers = await API.getToppers(5);
                 renderToppersPodium(toppers);
 
-                // Reset branch selector
-                document.getElementById('branch-filter').value = 'All';
+                // Populate branch filter options dynamically from departments registry
+                try {
+                    const depts = await API.getDepartments();
+                    const branchFilter = document.getElementById('branch-filter');
+                    if (branchFilter) {
+                        branchFilter.innerHTML = '<option value="All">All Branches</option>' + 
+                            depts.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+                    }
+                } catch (e) {
+                    console.error("Failed to load departments for filtering", e);
+                }
+                const branchFilterElem = document.getElementById('branch-filter');
+                if (branchFilterElem) branchFilterElem.value = 'All';
 
                 // Load Complete Rankings table
                 const rankings = await API.getRankings(50);
