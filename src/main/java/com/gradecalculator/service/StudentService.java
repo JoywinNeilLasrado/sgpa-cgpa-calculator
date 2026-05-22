@@ -14,10 +14,15 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final UserService userService;
+    private final com.gradecalculator.repository.AppUserRepository userRepository;
 
-    public StudentService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository) {
+    public StudentService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository,
+                          UserService userService, com.gradecalculator.repository.AppUserRepository userRepository) {
         this.studentRepository = studentRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     public List<Student> findAll() {
@@ -38,7 +43,29 @@ public class StudentService {
                 .ifPresent(student -> {
                     throw new IllegalArgumentException("A student with this roll number already exists");
                 });
-        return studentRepository.save(new Student(name, rollNumber, branch));
+
+        // Generate username (lowercase first name, fallback to studentId if duplicate)
+        String username = name.split(" ")[0].toLowerCase();
+        if (userRepository.existsByUsername(username)) {
+            username = rollNumber.toLowerCase();
+        }
+
+        Student student = new Student(name, rollNumber, branch);
+        student.setUsername(username);
+        Student savedStudent = studentRepository.save(student);
+
+        // Register matching AppUser
+        try {
+            com.gradecalculator.dto.request.RegisterRequest regRequest = new com.gradecalculator.dto.request.RegisterRequest();
+            regRequest.setUsername(username);
+            regRequest.setPassword("password123");
+            regRequest.setRole(com.gradecalculator.model.AppUser.Role.STUDENT);
+            userService.register(regRequest);
+        } catch (Exception e) {
+            // Ignore or log if already exists
+        }
+
+        return savedStudent;
     }
 
     public Student update(Long id, String name, String rollNumber) {
@@ -65,6 +92,10 @@ public class StudentService {
     public void delete(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        if (student.getUsername() != null) {
+            userRepository.findByUsername(student.getUsername())
+                    .ifPresent(userRepository::delete);
+        }
         enrollmentRepository.deleteAll(enrollmentRepository.findByStudentId(id));
         studentRepository.delete(student);
     }

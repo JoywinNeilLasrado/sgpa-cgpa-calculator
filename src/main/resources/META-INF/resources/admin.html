@@ -191,6 +191,9 @@
                     <button class="sidebar-item" onclick="switchTab('grades', this)">
                         <span>📊</span> Overall Grade Files
                     </button>
+                    <button class="sidebar-item" onclick="switchTab('faculty', this)">
+                        <span>👨‍🏫</span> Faculty Registry
+                    </button>
                 </div>
             </div>
 
@@ -339,6 +342,12 @@
                                     <select class="form-select" id="course-semester">
                                         <!-- Loaded dynamically -->
                                     </select>
+                                    <div class="form-group">
+                                        <label class="form-label">Faculty Instructor</label>
+                                        <select class="form-select" id="course-faculty">
+                                            <!-- Loaded dynamically -->
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <button class="btn btn-primary" onclick="addCourse()" style="width: 100%;">Create Syllabus Course</button>
@@ -359,11 +368,12 @@
                                         <th>Course Name</th>
                                         <th>Academic Credits</th>
                                         <th>Semester Stage</th>
+                                        <th>Faculty Instructor</th>
                                         <th style="text-align: right;">Action Ledger</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td colspan="5" class="loading">Loading syllabus inventory...</td></tr>
+                                    <tr><td colspan="6" class="loading">Loading syllabus inventory...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -453,10 +463,93 @@
                     </div>
                 </div>
 
+                <!-- FACULTY TAB -->
+                <div id="tab-faculty" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Faculty Registry</h3>
+                                <p class="card-subtitle">Manage faculty personnel and academic credentials.</p>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--parchment); border: 1px solid var(--mist-dark); margin-bottom: 2rem; padding: 1.5rem;">
+                            <h4 style="font-family: 'DM Sans', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--crimson); margin-bottom: 1rem; font-weight: 700;">
+                                + Onboard Faculty Staff
+                            </h4>
+                            <div class="form-grid" style="margin-bottom: 0;">
+                                <div class="form-group">
+                                    <label class="form-label">Faculty Name</label>
+                                    <input class="form-input" id="faculty-name" placeholder="Dr. Smith">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Username</label>
+                                    <input class="form-input" id="faculty-username" placeholder="dsmith">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input class="form-input" id="faculty-email" placeholder="smith@university.edu">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Department</label>
+                                    <input class="form-input" id="faculty-department" placeholder="Computer Science">
+                                </div>
+                                <div class="form-group" style="justify-content: flex-end;">
+                                    <button class="btn btn-primary" onclick="addFaculty()" style="width: 100%;">Onboard Faculty</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-flex">
+                            <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" class="search-input" id="search-faculty" placeholder="Search by name or username..." oninput="filterTable('faculty')">
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--slate-light);" id="count-faculty-text">0 faculty members loaded</span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="table" id="faculty-table">
+                                <thead>
+                                    <tr>
+                                        <th>Internal ID</th>
+                                        <th>Name</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Department</th>
+                                        <th style="text-align: right;">Action Ledger</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="6" class="loading">Loading faculty registry...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
+    </div>
+
+    <!-- Password Reset Modal Overlay -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 class="card-title">Change Password</h3>
+                <button class="btn btn-secondary btn-sm" onclick="closePasswordModal()" style="padding: 0.25rem 0.5rem; border: none; background: none; font-size: 1.25rem; line-height: 1; color: var(--slate);">✕</button>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label" for="newPasswordInput">New Password</label>
+                <input type="password" class="form-input" id="newPasswordInput" placeholder="Enter new password">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPasswordChange()">Update Password</button>
+            </div>
+        </div>
     </div>
 
     <!-- Toast Notifications -->
@@ -465,6 +558,35 @@
     <script src="/js/api-v2.js"></script>
     <script>
         let cachedStudents = [];
+        // Password Modal Functions
+        function openPasswordModal(username) {
+            const modal = document.getElementById('passwordModal');
+            modal.dataset.username = username;
+            modal.classList.add('active');
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.remove('active');
+            document.getElementById('newPasswordInput').value = '';
+        }
+
+        function submitPasswordChange() {
+            const username = document.getElementById('passwordModal').dataset.username;
+            const newPass = document.getElementById('newPasswordInput').value.trim();
+            if (!newPass) {
+                showToast('Password cannot be empty', 'error');
+                return;
+            }
+            API.changeUserPassword(username, newPass).then(() => {
+                showToast('Password changed successfully');
+                closePasswordModal();
+            }).catch(err => {
+                console.error(err);
+                showToast('Failed to change password', 'error');
+            });
+        }
+
         let cachedCourses = [];
         let cachedEnrollments = [];
 
@@ -513,6 +635,7 @@
             await loadStudents();
             await loadSemesters();
             await loadCourses();
+            await loadFaculty();
             await loadEnrollments();
             
             // Sync summary counters
@@ -537,8 +660,9 @@
                         <td><span class="grade-badge ${s.branch === 'Computer Science' ? 'O' : s.branch === 'Information Technology' ? 'B-plus' : 'A-plus'}" style="border: none; padding: 0.15rem 0.5rem; font-size: 0.75rem;">${s.branch || 'Computer Science'}</span></td>
                         <td style="text-align: right;">
                             <div class="table-actions" style="justify-content: flex-end;">
-                                <button class="btn btn-secondary btn-sm" onclick="editStudent(${s.id}, '${s.name}', '${s.studentId}', '${s.branch}')">Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id})">Delete</button>
+                                 <button class="btn btn-secondary btn-sm" onclick="editStudent(${s.id}, '${s.name}', '${s.studentId}', '${s.branch}')">Edit</button>
+                                 <button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id})">Delete</button>
+                                 <button class="btn btn-warning btn-sm" onclick="openPasswordModal('${s.username}')">Change Password</button>
                             </div>
                         </td>
                     </tr>
@@ -595,11 +719,12 @@
                         <td>${c.name}</td>
                         <td>${c.credits} Credits</td>
                         <td><span class="grade-badge O">Sem ${c.semester?.semesterNumber || '-'}</span></td>
+                        <td>${c.faculty?.name || '-'}</td>
                         <td style="text-align: right;">
                             <button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.id})">Delete</button>
                         </td>
                     </tr>
-                `).join('') : '<tr><td colspan="5" class="empty-state">Curriculum inventory is empty.</td></tr>';
+                `).join('') : '<tr><td colspan="6" class="empty-state">Curriculum inventory is empty.</td></tr>';
 
                 // Populate enroll course dropdown
                 const select = document.getElementById('enrollment-course');
@@ -609,6 +734,34 @@
             } catch (err) {
                 console.error(err);
                 showToast('Failed to pull curriculum list.', 'error');
+            }
+        }
+
+        async function loadFaculty() {
+            try {
+                const faculty = await API.getFacultyMembers();
+                // Populate faculty dropdown for course assignment
+                const select = document.getElementById('course-faculty');
+                select.innerHTML = '<option value="">Select faculty...</option>' + faculty.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+                // Populate faculty table
+                const tbody = document.querySelector('#faculty-table tbody');
+                tbody.innerHTML = faculty.length ? faculty.map(f => `
+                    <tr class="faculty-row-item" data-name="${f.name.toLowerCase()}" data-username="${f.username?.toLowerCase() || ''}">
+                        <td><strong>${f.id}</strong></td>
+                        <td>${f.name}</td>
+                        <td>${f.username}</td>
+                        <td>${f.email || '-'}</td>
+                        <td>${f.department || '-'}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-danger btn-sm" onclick="deleteFaculty(${f.id})">Delete</button>
+                         <button class="btn btn-warning btn-sm" onclick="openPasswordModal('${f.username}')">Change Password</button>
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="6" class="empty-state">No faculty accounts registered.</td></tr>';
+                document.getElementById('count-faculty-text').textContent = `${faculty.length} faculty members loaded`;
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load faculty list.', 'error');
             }
         }
 
@@ -657,6 +810,12 @@
                     const code = tr.getAttribute('data-code');
                     tr.style.display = (student.includes(query) || code.includes(query)) ? '' : 'none';
                 });
+            } else if (type === 'faculty') {
+                document.querySelectorAll('.faculty-row-item').forEach(tr => {
+                    const name = tr.getAttribute('data-name');
+                    const username = tr.getAttribute('data-username');
+                    tr.style.display = (name.includes(query) || username.includes(query)) ? '' : 'none';
+                });
             }
         }
 
@@ -679,6 +838,39 @@
             }
         }
 
+        async function addFaculty() {
+            const name = document.getElementById('faculty-name').value.trim();
+            const username = document.getElementById('faculty-username').value.trim();
+            const email = document.getElementById('faculty-email').value.trim();
+            const department = document.getElementById('faculty-department').value.trim();
+
+            if (!name || !username || !email || !department) {
+                showToast('Complete all faculty fields.', 'error');
+                return;
+            }
+
+            try {
+                const password = prompt('Enter a password for the new faculty member:', 'password123');
+                if (password === null) return;
+                if (!password.trim()) {
+                    showToast('Password cannot be empty.', 'error');
+                    return;
+                }
+
+                await API.createFaculty(name, username, password.trim(), email, department);
+                document.getElementById('faculty-name').value = '';
+                document.getElementById('faculty-username').value = '';
+                document.getElementById('faculty-email').value = '';
+                document.getElementById('faculty-department').value = '';
+                await loadFaculty();
+                showToast(`Faculty staff '${name}' onboarded successfully!`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to onboard faculty staff.', 'error');
+            }
+        }
+
+
         async function addSemester() {
             const num = document.getElementById('semester-number').value.trim();
             if (!num) { showToast('Provide a semester number cycle.', 'error'); return; }
@@ -699,11 +891,12 @@
             const name = document.getElementById('course-name').value.trim();
             const credits = document.getElementById('course-credits').value.trim();
             const semesterId = document.getElementById('course-semester').value;
+            const facultyId = document.getElementById('course-faculty').value;
 
-            if (!code || !name || !credits || !semesterId) { showToast('Complete all course fields.', 'error'); return; }
+            if (!code || !name || !credits || !semesterId || !facultyId) { showToast('Complete all course fields.', 'error'); return; }
 
             try {
-                await API.createCourse(code, name, parseInt(credits), semesterId);
+                await API.createCourse(code, name, parseInt(credits), semesterId, facultyId);
                 document.getElementById('course-code').value = '';
                 document.getElementById('course-name').value = '';
                 document.getElementById('course-credits').value = '';
@@ -743,6 +936,20 @@
                 }
             }
         }
+
+        async function deleteFaculty(id) {
+            if (confirm('Verify: Permanently purge faculty member account?')) {
+                try {
+                    await API.deleteFaculty(id);
+                    await loadFaculty();
+                    showToast('Faculty member successfully purged.', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Failed to delete faculty member.', 'error');
+                }
+            }
+        }
+
 
         async function deleteSemester(id) {
             if (confirm('Verify: Purge semester cycle and connected syllabus records?')) {

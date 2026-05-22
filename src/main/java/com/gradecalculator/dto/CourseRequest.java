@@ -6,6 +6,7 @@ public class CourseRequest {
     private String courseName;
     private Integer credits;
     private Long semesterId;
+    private Long facultyId;
 
     public String getCourseCode() {
         return courseCode;
@@ -37,5 +38,13 @@ public class CourseRequest {
 
     public void setSemesterId(Long semesterId) {
         this.semesterId = semesterId;
+    }
+
+    public Long getFacultyId() {
+        return facultyId;
+    }
+
+    public void setFacultyId(Long facultyId) {
+        this.facultyId = facultyId;
     }
 }

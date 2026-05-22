@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final com.gradecalculator.repository.StudentRepository studentRepository;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, com.gradecalculator.repository.StudentRepository studentRepository) {
         this.userService = userService;
+        this.studentRepository = studentRepository;
     }
 
     /**
@@ -34,8 +36,15 @@ public class AuthController {
         AppUser user = userService.findByUsername(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
+        Long userId = user.getId();
+        if (user.getRole() == AppUser.Role.STUDENT) {
+            userId = studentRepository.findByUsername(user.getUsername())
+                    .map(com.gradecalculator.model.Student::getId)
+                    .orElse(user.getId());
+        }
+
         return ResponseEntity.ok(new LoginResponse(
-                user.getId(),
+                userId,
                 user.getUsername(),
                 user.getRole().name(),
                 token
@@ -59,8 +68,15 @@ public class AuthController {
         AppUser user = userService.findById(principal.getId())
                 .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
+        Long userId = user.getId();
+        if (user.getRole() == AppUser.Role.STUDENT) {
+            userId = studentRepository.findByUsername(user.getUsername())
+                    .map(com.gradecalculator.model.Student::getId)
+                    .orElse(user.getId());
+        }
+
         return ResponseEntity.ok(new LoginResponse(
-                user.getId(),
+                userId,
                 user.getUsername(),
                 user.getRole().name(),
                 null  // Don't return token for /me

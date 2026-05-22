@@ -30,6 +30,18 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (studentRepository.count() > 0) return;
 
+        AppUser adminUser = createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
+        AppUser defaultFaculty = createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
+        AppUser profJones = createUserIfNotExists("prof.jones", "password123", AppUser.Role.FACULTY);
+        AppUser profSmith = createUserIfNotExists("prof.smith", "password123", AppUser.Role.FACULTY);
+        AppUser profDavis = createUserIfNotExists("prof.davis", "password123", AppUser.Role.FACULTY);
+        
+        // Additional faculty members (generated like students)
+        String[] extraFacultyUsernames = {"prof.williams", "prof.brown", "prof.taylor"};
+        for (String fu : extraFacultyUsernames) {
+            createUserIfNotExists(fu, "password123", AppUser.Role.FACULTY);
+        }
+
         List<Semester> semesters = new ArrayList<>();
         for (int i = 1; i <= 6; i++) {
             semesters.add(semesterRepository.save(new Semester(i)));
@@ -51,6 +63,21 @@ public class DataInitializer implements CommandLineRunner {
             for (int c = 0; c < 5; c++) {
                 Course course = new Course(codeMatrix[s][c], names[c] + " " + (s + 1), 4);
                 course.setSemester(semesters.get(s));
+
+                // Assign faculty
+                String code = codeMatrix[s][c];
+                if (s < 3) {
+                    if (code.startsWith("CS")) {
+                        course.setFaculty(profJones);
+                    } else if (code.startsWith("MA") || code.startsWith("PH") || code.startsWith("EN")) {
+                        course.setFaculty(profSmith);
+                    } else {
+                        course.setFaculty(defaultFaculty);
+                    }
+                } else {
+                    course.setFaculty(profDavis);
+                }
+
                 semCourses.add(courseRepository.save(course));
             }
             allCourses.add(semCourses);
@@ -71,16 +98,16 @@ public class DataInitializer implements CommandLineRunner {
         createStudent("CS2024010", "Julia Roberts", "julia", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.B_PLUS, studentPasswordHash);
         createStudent("CS2024011", "Kevin Perry", "kevin", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.C, studentPasswordHash);
         createStudent("CS2024012", "Laura Palmer", "laura", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.P, studentPasswordHash);
-
-        createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
-        createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
     }
 
     private void createStudent(String roll, String name, String username, String branch, List<List<Course>> courses, LetterGrade best, LetterGrade avg, String passwordHash) {
-        Student student = studentRepository.save(new Student(name, roll, branch));
+        Student student = new Student(name, roll, branch);
+        student.setUsername(username);
+        student = studentRepository.save(student);
         
         AppUser u = new AppUser();
         u.setUsername(username);
+        u.setName(username); // default name same as username
         u.setPassword(passwordHash);
         u.setRole(AppUser.Role.STUDENT);
         try { userRepository.save(u); } catch (Exception e) {}
@@ -95,13 +122,14 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void createUserIfNotExists(String username, String pw, AppUser.Role role) {
-        if (!userRepository.existsByUsername(username)) {
+    private AppUser createUserIfNotExists(String username, String pw, AppUser.Role role) {
+        return userRepository.findByUsername(username).orElseGet(() -> {
             AppUser u = new AppUser();
             u.setUsername(username);
+            u.setName(username); // use username as default name
             u.setPassword(passwordEncoder.encode(pw));
             u.setRole(role);
-            userRepository.save(u);
-        }
+            return userRepository.save(u);
+        });
     }
 }

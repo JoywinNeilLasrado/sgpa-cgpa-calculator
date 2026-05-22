@@ -2,9 +2,11 @@ package com.gradecalculator.service;
 
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Semester;
+import com.gradecalculator.model.AppUser;
 import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.SemesterRepository;
+import com.gradecalculator.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,14 +19,17 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final SemesterRepository semesterRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final AppUserRepository userRepository;
 
     public CourseService(
             CourseRepository courseRepository,
             SemesterRepository semesterRepository,
-            EnrollmentRepository enrollmentRepository) {
+            EnrollmentRepository enrollmentRepository,
+            AppUserRepository userRepository) {
         this.courseRepository = courseRepository;
         this.semesterRepository = semesterRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Course> findAll() {
@@ -39,7 +44,7 @@ public class CourseService {
         return courseRepository.findById(id);
     }
 
-    public Course create(String courseCode, String courseName, Object creditsValue, Object semesterIdValue) {
+    public Course create(String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue) {
         Long semesterId = parseLong(semesterIdValue, "Semester is required");
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
@@ -50,12 +55,23 @@ public class CourseService {
                     throw new IllegalArgumentException("A course with this code already exists in the semester");
                 });
 
+        AppUser faculty = null;
+        if (facultyIdValue != null && !facultyIdValue.toString().trim().isEmpty() && !facultyIdValue.toString().equalsIgnoreCase("none") && !facultyIdValue.toString().equals("0")) {
+            Long facultyId = parseLong(facultyIdValue, "Invalid faculty ID");
+            faculty = userRepository.findById(facultyId)
+                    .orElseThrow(() -> new IllegalArgumentException("Faculty user not found"));
+            if (faculty.getRole() != AppUser.Role.FACULTY) {
+                throw new IllegalArgumentException("Assigned user must be a faculty member");
+            }
+        }
+
         Course course = new Course(courseCode, courseName, credits);
         course.setSemester(semester);
+        course.setFaculty(faculty);
         return courseRepository.save(course);
     }
 
-    public Course update(Long id, String courseCode, String courseName, Object creditsValue, Object semesterIdValue) {
+    public Course update(Long id, String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         Long semesterId = parseLong(semesterIdValue, "Semester is required");
@@ -69,10 +85,21 @@ public class CourseService {
                     throw new IllegalArgumentException("A course with this code already exists in the semester");
                 });
 
+        AppUser faculty = null;
+        if (facultyIdValue != null && !facultyIdValue.toString().trim().isEmpty() && !facultyIdValue.toString().equalsIgnoreCase("none") && !facultyIdValue.toString().equals("0")) {
+            Long facultyId = parseLong(facultyIdValue, "Invalid faculty ID");
+            faculty = userRepository.findById(facultyId)
+                    .orElseThrow(() -> new IllegalArgumentException("Faculty user not found"));
+            if (faculty.getRole() != AppUser.Role.FACULTY) {
+                throw new IllegalArgumentException("Assigned user must be a faculty member");
+            }
+        }
+
         course.setCourseCode(courseCode);
         course.setCourseName(courseName);
         course.setCredits(parsePositiveInt(creditsValue, "Credits must be greater than zero"));
         course.setSemester(semester);
+        course.setFaculty(faculty);
         return courseRepository.save(course);
     }
 

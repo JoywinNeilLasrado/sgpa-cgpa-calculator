@@ -33,6 +33,9 @@ public class Student {
     @Column(name = "branch")
     private String branch = "Computer Science";
 
+    @Column(name = "username", unique = true)
+    private String username;
+
     @OneToMany(mappedBy = "student")
     @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
@@ -83,6 +86,14 @@ public class Student {
 
     public void setBranch(String branch) {
         this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public List<Enrollment> getEnrollments() {

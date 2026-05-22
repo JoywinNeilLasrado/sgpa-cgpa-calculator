@@ -36,6 +36,10 @@ public class Course {
     @JoinColumn(name = "semester_id")
     private Semester semester;
 
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    private AppUser faculty;
+
     // Constructors
     public Course() {}
 
@@ -84,5 +88,21 @@ public class Course {
 
     public void setSemester(Semester semester) {
         this.semester = semester;
+    }
+
+    public AppUser getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(AppUser faculty) {
+        this.faculty = faculty;
+    }
+
+    public String getCode() {
+        return courseCode;
+    }
+
+    public String getName() {
+        return courseName;
     }
 }

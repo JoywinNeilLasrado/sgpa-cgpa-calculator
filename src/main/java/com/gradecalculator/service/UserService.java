@@ -44,6 +44,7 @@ public class UserService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
+        user.setName(request.getUsername()); // Fix: Name cannot be null in DB
 
         return userRepository.save(user);
     }
@@ -84,6 +85,22 @@ public class UserService {
             throw new IllegalArgumentException("Invalid old password");
         }
 
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // Admin can set password directly without old password verification
+    public void adminChangePassword(Long userId, String newPassword) {
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // Admin can set password directly without old password verification using username
+    public void adminChangePasswordByUsername(String username, String newPassword) {
+        AppUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }

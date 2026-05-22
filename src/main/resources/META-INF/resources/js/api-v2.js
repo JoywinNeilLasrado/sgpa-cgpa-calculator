@@ -46,6 +46,11 @@ const API = (() => {
             body: JSON.stringify({ oldPassword, newPassword })
         }),
 
+        changeUserPassword: (username, newPassword) => request('/admin/users/password', {
+            method: 'PUT',
+            body: JSON.stringify({ username, newPassword })
+        }),
+
         // Students
         getStudents: () => request('/students', { method: 'GET' }),
         getStudent: (id) => request(`/students/${id}`, { method: 'GET' }),
@@ -77,13 +82,13 @@ const API = (() => {
         getCourses: () => request('/courses', { method: 'GET' }),
         getCoursesBySemester: (semesterId) => request(`/courses/semester/${semesterId}`, { method: 'GET' }),
         getCourse: (id) => request(`/courses/${id}`, { method: 'GET' }),
-        createCourse: (courseCode, courseName, credits, semesterId) => request('/courses', {
+        createCourse: (courseCode, courseName, credits, semesterId, facultyId) => request('/courses', {
             method: 'POST',
-            body: JSON.stringify({ courseCode, courseName, credits, semesterId })
+            body: JSON.stringify({ courseCode, courseName, credits, semesterId, facultyId })
         }),
-        updateCourse: (id, courseCode, courseName, credits, semesterId) => request(`/courses/${id}`, {
+        updateCourse: (id, courseCode, courseName, credits, semesterId, facultyId) => request(`/courses/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({ courseCode, courseName, credits, semesterId })
+            body: JSON.stringify({ courseCode, courseName, credits, semesterId, facultyId })
         }),
         deleteCourse: (id) => request(`/courses/${id}`, { method: 'DELETE' }),
 
@@ -113,6 +118,14 @@ const API = (() => {
         getGradeFromMarks: (marks) => request(`/grades/from-marks?marks=${marks}`, { method: 'GET' }),
 
         // Faculty APIs
+        getFacultyMembers: () => request('/faculty/members', { method: 'GET' }),
+        createFaculty: (name, username, password, email, department) =>
+            request('/faculty/register', {
+                method: 'POST',
+                body: JSON.stringify({ name, username, password, email, department })
+            }),
+        deleteFaculty: (id) => request(`/faculty/members/${id}`, { method: 'DELETE' }),
+
         getFacultyEnrollmentsByCourse: (courseId) => 
             request(`/faculty/enrollments/course/${courseId}`, { method: 'GET' }),
         getFacultyEnrollmentsBySemester: (semesterId) => 
