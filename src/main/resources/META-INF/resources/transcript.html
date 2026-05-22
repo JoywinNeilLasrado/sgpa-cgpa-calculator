@@ -3,449 +3,784 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcript | GradePoint</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <title>Official Academic Transcript | GradePoint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/theme.css">
     <style>
-        :root {
-            --ink: #0d1117;
-            --paper: #faf9f7;
-            --parchment: #f5f3ef;
-            --crimson: #8b1538;
-            --crimson-light: #a5294d;
-            --gold: #c9a227;
-            --gold-light: #e4bc3a;
-            --slate: #475569;
-            --slate-light: #64748b;
-            --mist: #e2e8f0;
-            --mist-dark: #cbd5e1;
-            --white: #ffffff;
-            --shadow-soft: 0 4px 24px rgba(13, 17, 23, 0.08);
+        /* Custom Academic Luxury Transcript Styles */
+        .transcript-wrapper {
+            max-width: 900px;
+            margin: 2.5rem auto 5rem;
+            padding: 0 1rem;
         }
 
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--paper);
-            color: var(--ink);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: 
-                radial-gradient(ellipse at 20% 20%, rgba(139, 21, 56, 0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(201, 162, 39, 0.04) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        h1, h2, h3, h4 {
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Hero */
-        .hero {
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        .hero h2 {
-            font-size: 2rem;
-            color: var(--ink);
-        }
-
-        /* Document Header */
-        .doc-header {
-            text-align: center;
-            padding: 2rem 0 1.5rem;
-            border-bottom: 3px solid var(--crimson);
+        /* Selector UI Card */
+        .select-card {
+            background: var(--white);
+            border: 1px solid var(--mist);
+            border-radius: var(--radius-md);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-soft);
             margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .doc-header::after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: var(--gold);
-        }
-
-        .doc-badge {
-            font-size: 0.6875rem;
-            font-weight: 600;
-            color: var(--white);
-            background: var(--crimson);
-            padding: 0.25rem 0.75rem;
-            border-radius: 2px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            display: inline-block;
-            margin-bottom: 0.75rem;
-        }
-
-        .doc-title {
-            font-size: 2rem;
-            color: var(--crimson);
-            margin-bottom: 0.5rem;
-        }
-
-        .doc-meta {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            font-size: 0.8125rem;
-            color: var(--slate-light);
-        }
-
-        .doc-meta span {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
-        }
-
-        /* Student Info */
-        .student-card {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            justify-content: space-between;
             gap: 1.5rem;
-            padding: 1.25rem 1.5rem;
-            background: var(--parchment);
-            border: 1px solid var(--mist);
-            border-radius: 10px;
-            margin-bottom: 2rem;
+            transition: all 0.3s ease;
         }
 
-        @media (max-width: 600px) {
-            .student-card { grid-template-columns: 1fr; }
+        .select-card:hover {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-medium);
         }
 
-        .student-field label {
-            display: block;
-            font-size: 0.6875rem;
-            font-weight: 600;
-            color: var(--slate-light);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+        .select-info h3 {
+            font-size: 1.25rem;
+            color: var(--crimson);
             margin-bottom: 0.25rem;
         }
 
-        .student-field .value {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--ink);
+        .select-info p {
+            font-size: 0.85rem;
+            color: var(--slate-light);
         }
 
-        /* Select */
         .select-wrap {
-            max-width: 300px;
-            margin: 0 auto 2rem;
+            position: relative;
+            min-width: 320px;
         }
 
         .form-select {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.8rem 1.25rem;
             font-family: 'DM Sans', sans-serif;
-            font-size: 0.9375rem;
+            font-size: 0.9rem;
+            font-weight: 500;
             color: var(--ink);
-            background: var(--white);
-            border: 1px solid var(--mist);
-            border-radius: 8px;
+            background: var(--paper);
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-sm);
             cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238b1538' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.25rem center;
+            background-size: 12px;
         }
 
         .form-select:focus {
             outline: none;
             border-color: var(--crimson);
+            box-shadow: 0 0 0 3px var(--crimson-glow);
         }
 
-        /* Results */
-        .semester-group {
-            margin-bottom: 2rem;
-        }
-
-        .semester-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1.25rem;
-            background: var(--crimson);
-            color: white;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .semester-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-
-        .semester-gpa {
-            font-weight: 600;
-        }
-
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--white);
-            border: 1px solid var(--mist);
-            border-top: none;
-            border-radius: 0 0 10px 10px;
+        /* Certificate Styling */
+        .transcript-paper {
+            background: #faf8f5;
+            color: #1a1a1a;
+            border: 12px double var(--gold);
+            padding: 3.5rem;
+            box-shadow: var(--shadow-premium);
+            border-radius: 4px;
+            position: relative;
             overflow: hidden;
-            margin-bottom: 1.5rem;
+            font-family: 'Cormorant Garamond', serif;
         }
 
-        .results-table th,
-        .results-table td {
-            padding: 0.875rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--mist);
+        /* Ambient Watermark */
+        .transcript-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            width: 450px;
+            height: 450px;
+            pointer-events: none;
+            opacity: 0.02;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b1538'%3E%3Cpath d='M12 2L1 9l11 7 9-5.73V17h2V9L12 2zm0 18c-3.86 0-7-3.14-7-7 0-.38.04-.74.11-1.1L12 16.5l6.89-4.6c.07.36.11.72.11 1.1 0 3.86-3.14 7-7 7z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
         }
 
-        .results-table th {
-            font-size: 0.6875rem;
+        .transcript-inner {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Corner flourishes */
+        .corner-flourish {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border: 2px solid var(--gold-dark);
+            pointer-events: none;
+        }
+        .flourish-tl { top: -2.25rem; left: -2.25rem; border-right: none; border-bottom: none; }
+        .flourish-tr { top: -2.25rem; right: -2.25rem; border-left: none; border-bottom: none; }
+        .flourish-bl { bottom: -2.25rem; left: -2.25rem; border-right: none; border-top: none; }
+        .flourish-br { bottom: -2.25rem; right: -2.25rem; border-left: none; border-top: none; }
+
+        /* Institutional Head */
+        .institution-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--crimson);
+            padding-bottom: 1.5rem;
+        }
+
+        .institution-logo {
+            font-size: 2.75rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 2px 4px rgba(139, 21, 56, 0.15));
+            display: inline-block;
+        }
+
+        .institution-name {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--crimson);
+            text-transform: uppercase;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .institution-sub {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
             font-weight: 600;
+            color: var(--gold-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin-top: 0.25rem;
+        }
+
+        .document-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 1.25rem 0 0.5rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .document-meta-row {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            color: var(--slate);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .document-meta-row span strong {
+            color: var(--ink);
+        }
+
+        /* Registry Details Grid */
+        .registry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            border-top: 1px solid var(--mist-dark);
+            border-bottom: 1px solid var(--mist-dark);
+            padding: 1.25rem 0;
+        }
+
+        .registry-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .registry-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
             color: var(--slate-light);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            background: var(--parchment);
+            letter-spacing: 0.1em;
         }
 
-        .results-table .code {
-            font-family: monospace;
+        .registry-value {
+            font-size: 1.2rem;
             font-weight: 600;
+            color: var(--ink);
+        }
+
+        /* Semester Groups */
+        .semester-block {
+            margin-bottom: 2.25rem;
+            page-break-inside: avoid;
+        }
+
+        .semester-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid var(--gold-dark);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .semester-block-title {
+            font-size: 1.35rem;
+            font-weight: 700;
             color: var(--crimson);
         }
 
-        .results-table .grade-badge {
+        .semester-block-gpa {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--ink);
+            background: var(--parchment);
+            padding: 0.2rem 0.75rem;
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-sm);
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .ledger-table th {
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--mist-dark);
+        }
+
+        .ledger-table td {
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            color: #2d3748;
+        }
+
+        .ledger-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ledger-table .code {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--crimson);
+        }
+
+        .ledger-table .course-name {
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        .ledger-table .centered {
+            text-align: center;
+        }
+
+        /* Grade Pill Styling */
+        .grade-badge-custom {
             display: inline-block;
+            font-weight: 700;
+            font-size: 0.75rem;
             padding: 0.125rem 0.5rem;
             border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            min-width: 28px;
+            min-width: 32px;
             text-align: center;
         }
 
-        .results-table .grade-badge.O { background: #fef3c7; color: #b45309; }
-        .results-table .grade-badge\.A\+ { background: #ede9fe; color: #6d28d9; }
-        .results-table .grade-badge.A { background: #ddd6fe; color: #7c3aed; }
-        .results-table .grade-badge\.B\+ { background: #cffafe; color: #0891b2; }
-        .results-table .grade-badge.B { background: #fce7f3; color: #db2777; }
-        .results-table .grade-badge.C { background: #d1fae5; color: #059669; }
-        .results-table .grade-badge.F { background: #fee2e2; color: #dc2626; }
+        .grade-badge-custom.O { background: #fef3c7; color: #b45309; border: 1px solid rgba(180, 83, 9, 0.2); }
+        .grade-badge-custom.A-plus { background: #ede9fe; color: #6d28d9; border: 1px solid rgba(109, 40, 217, 0.2); }
+        .grade-badge-custom.A { background: #ddd6fe; color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.2); }
+        .grade-badge-custom.B-plus { background: #cffafe; color: #0891b2; border: 1px solid rgba(8, 145, 178, 0.2); }
+        .grade-badge-custom.B { background: #fce7f3; color: #db2777; border: 1px solid rgba(219, 39, 119, 0.2); }
+        .grade-badge-custom.C { background: #d1fae5; color: #059669; border: 1px solid rgba(5, 150, 105, 0.2); }
+        .grade-badge-custom.P { background: #f3f4f6; color: #4b5563; border: 1px solid rgba(75, 85, 99, 0.2); }
+        .grade-badge-custom.F { background: #fee2e2; color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
 
-        .results-table .credits,
-        .results-table .points {
-            text-align: center;
-        }
-
-        /* Summary */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+        /* Summary Standout Grid */
+        .attestation-summary {
+            background: var(--white);
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-sm);
             padding: 1.5rem;
-            background: var(--parchment);
-            border: 1px solid var(--mist);
-            border-radius: 10px;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 500px) {
-            .summary-grid { grid-template-columns: 1fr; }
-        }
-
-        .summary-item {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 3rem 0 2.5rem;
             text-align: center;
+            box-shadow: inset 0 0 10px rgba(201, 162, 39, 0.05);
+            page-break-inside: avoid;
         }
 
-        .summary-label {
-            font-size: 0.6875rem;
+        .summary-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-block:not(:last-child) {
+            border-right: 1px solid var(--mist);
+        }
+
+        .summary-block-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
             color: var(--slate-light);
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin-bottom: 0.25rem;
         }
 
-        .summary-value {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem;
+        .summary-block-value {
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--crimson);
+            line-height: 1.1;
         }
 
-        /* Actions */
-        .actions {
+        .summary-block-sub {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.7rem;
+            color: var(--slate);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        /* Signatures Section */
+        .attestation-signatures {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1.5fr;
+            gap: 2rem;
+            margin-top: 4rem;
+            align-items: flex-end;
+            page-break-inside: avoid;
+        }
+
+        .sig-block {
             display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-
-        .btn {
-            display: inline-flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.25s ease;
-        }
-
-        .btn-primary {
-            background: var(--crimson);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--ink);
-            border: 1px solid var(--mist);
-        }
-
-        /* Print */
-        @media print {
-            .nav-header, .select-wrap, .actions, .footer { display: none; }
-            body { background: white; }
-            .results-table { page-break-inside: avoid; }
-        }
-
-        /* Footer */
-        .footer {
-            padding: 2rem 0;
-            margin-top: 3rem;
-            border-top: 1px solid var(--mist);
             text-align: center;
+        }
+
+        .sig-line {
+            width: 100%;
+            border-top: 1px solid var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .sig-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sig-institution {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.6rem;
+            color: var(--slate-light);
+        }
+
+        /* Wax Seal Style Badge */
+        .wax-seal-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .wax-seal {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a5294d 0%, #8b1538 100%);
+            border: 3px double var(--gold);
+            box-shadow: 0 4px 10px rgba(139, 21, 56, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--gold-light);
+            text-align: center;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            user-select: none;
+            padding: 0.5rem;
+        }
+
+        .wax-seal span {
+            font-size: 0.55rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .wax-seal-crest {
+            font-size: 1.25rem;
+            margin-bottom: -0.1rem;
+        }
+
+        /* Actions Layout */
+        .print-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        /* Empty State */
+        .empty-transcript {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--white);
+            border: 1px dashed var(--mist-dark);
+            border-radius: var(--radius-md);
+        }
+
+        .empty-transcript-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            filter: grayscale(0.5);
+        }
+
+        .empty-transcript-text {
+            font-size: 1.15rem;
+            color: var(--slate);
+        }
+
+        /* Print Media Styles */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body::before {
+                display: none !important;
+            }
+
+            .nav-header,
+            .select-card,
+            #term-selector-card,
+            .print-actions,
+            .toast-container,
+            footer {
+                display: none !important;
+            }
+
+            .transcript-wrapper {
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .transcript-paper {
+                box-shadow: none !important;
+                border: 8px double #c9a227 !important;
+                padding: 1.5rem 2rem !important;
+                background: #ffffff !important;
+                border-radius: 0 !important;
+                overflow: visible !important;
+                min-height: auto !important;
+            }
+
+            /* Compress margins/paddings on print to guarantee single A4 page fit */
+            .institution-header {
+                margin-bottom: 1rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+
+            .institution-name {
+                font-size: 1.85rem !important;
+            }
+
+            .document-title {
+                font-size: 1.35rem !important;
+                margin: 0.75rem 0 0.25rem !important;
+            }
+
+            .registry-grid {
+                gap: 1rem !important;
+                margin-bottom: 1rem !important;
+                padding: 0.75rem 0 !important;
+            }
+
+            .registry-value {
+                font-size: 1.05rem !important;
+            }
+
+            .semester-block {
+                margin-bottom: 1.25rem !important;
+            }
+
+            .semester-block-header {
+                margin-bottom: 0.35rem !important;
+                padding-bottom: 0.25rem !important;
+            }
+
+            .semester-block-title {
+                font-size: 1.15rem !important;
+            }
+
+            .ledger-table th {
+                padding: 0.4rem 0.5rem !important;
+                font-size: 0.65rem !important;
+            }
+
+            .ledger-table td {
+                padding: 0.4rem 0.5rem !important;
+                font-size: 0.8rem !important;
+            }
+
+            .grade-badge-custom {
+                border: 1px solid #718096 !important;
+                color: #000000 !important;
+                background: transparent !important;
+                padding: 0.1rem 0.35rem !important;
+                font-size: 0.7rem !important;
+            }
+
+            .attestation-summary {
+                border: 1.5px solid #c9a227 !important;
+                background: #ffffff !important;
+                box-shadow: none !important;
+                padding: 0.85rem !important;
+                margin: 1.25rem 0 1rem !important;
+                gap: 0.5rem !important;
+            }
+
+            .summary-block-value {
+                font-size: 1.35rem !important;
+                color: #8b1538 !important;
+            }
+
+            .summary-block-label {
+                font-size: 0.55rem !important;
+            }
+
+            .summary-block-sub {
+                font-size: 0.6rem !important;
+            }
+
+            .attestation-signatures {
+                margin-top: 2rem !important;
+                gap: 1rem !important;
+            }
+
+            .sig-title {
+                font-size: 0.65rem !important;
+            }
+
+            .sig-institution {
+                font-size: 0.55rem !important;
+            }
+
+            .wax-seal {
+                width: 75px !important;
+                height: 75px !important;
+                background: #8b1538 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .wax-seal span {
+                font-size: 0.45rem !important;
+            }
+
+            .wax-seal-crest {
+                font-size: 1rem !important;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+
+    <!-- Dynamic Header Navigation -->
     <nav class="nav-header">
-        <div class="container">
-            <div class="nav-inner">
-                <a href="/home.html" class="nav-logo">
-                    <div class="nav-logo-icon">🎓</div>
-                    <div class="nav-logo-text">
-                        <h1>GradePoint</h1>
-                        <span>Academic Tracker</span>
-                    </div>
-                </a>
-                <div class="nav-links">
-                    <a href="/" class="nav-link">Calculator</a>
-                    <a href="/analytics" class="nav-link">Analytics</a>
-                    <a href="/transcript" class="nav-link active">Transcript</a>
-                    <a href="/student-dashboard" class="nav-link">Dashboard</a>
-                    <a href="/profile" class="nav-link">Profile</a>
+        <div class="container nav-inner">
+            <a href="#" id="brand-link" class="nav-logo">
+                <div class="nav-logo-icon">🎓</div>
+                <div class="nav-logo-text">
+                    <h1>GradePoint</h1>
+                    <span>Academic Excellence</span>
                 </div>
+            </a>
+            <div class="nav-links" id="nav-links-container">
+                <!-- Dynamically injected based on user role -->
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <div class="hero">
-            <h2>Transcript</h2>
-        </div>
-
-        <!-- Student Selection -->
-        <div class="select-wrap">
-            <select class="form-select" id="student-select">
-                <option value="">Select a student...</option>
-            </select>
-        </div>
-
-        <!-- Document -->
-        <div id="transcript" style="display: none;">
-            <div class="doc-header">
-                <div class="doc-badge">Official Record</div>
-                <div class="doc-title">Academic Transcript</div>
-                <div class="doc-meta">
-                    <span>Date: <span id="current-date"></span></span>
-                    <span>ID: <span id="doc-id"></span></span>
-                </div>
+    <!-- Main Content Container -->
+    <div class="container transcript-wrapper">
+        
+        <!-- Selection Gate Card (Hidden for students) -->
+        <div class="select-card animate-fade-up" id="student-selector-card" style="display: none;">
+            <div class="select-info">
+                <h3>Select Student Profile</h3>
+                <p>Lookup and generate an official printable transcript from the registry ledger.</p>
             </div>
-
-            <div class="student-card">
-                <div class="student-field">
-                    <label>Student Name</label>
-                    <div class="value" id="student-name">-</div>
-                </div>
-                <div class="student-field">
-                    <label>Roll Number</label>
-                    <div class="value" id="student-roll">-</div>
-                </div>
-            </div>
-
-            <!-- Results -->
-            <div id="results-container">
-                <!-- Populated by JS -->
-            </div>
-
-            <!-- Summary -->
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="summary-label">Cumulative GPA</div>
-                    <div class="summary-value" id="final-cgpa">0.00</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Total Credits</div>
-                    <div class="summary-value" id="final-credits">0</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Courses Passed</div>
-                    <div class="summary-value" id="final-courses">0</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Classification</div>
-                    <div class="summary-value" id="classification">-</div>
-                </div>
+            <div class="select-wrap">
+                <select class="form-select" id="student-select">
+                    <option value="">Select a student...</option>
+                </select>
             </div>
         </div>
 
-        <!-- Actions -->
-        <div class="actions">
-            <button class="btn btn-primary" onclick="window.print()">🖨️ Print / PDF</button>
+        <!-- Semester/Marks Card Selection Gate Card -->
+        <div class="select-card animate-fade-up" id="term-selector-card" style="display: none; margin-bottom: 2rem;">
+            <div class="select-info">
+                <h3>Select Academic Term / Marks Card</h3>
+                <p>Choose between the official cumulative transcript and term-specific grade sheets.</p>
+            </div>
+            <div class="select-wrap">
+                <select class="form-select" id="term-select">
+                    <option value="all">Official Cumulative Transcript (All Semesters)</option>
+                </select>
+            </div>
         </div>
-    </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p class="footer-text">GradePoint • Academic Excellence Tracker</p>
+        <!-- Initial Placeholder State -->
+        <div id="transcript-placeholder" class="empty-transcript animate-fade-up">
+            <div class="empty-transcript-icon">📜</div>
+            <p class="empty-transcript-text" id="placeholder-text">Please select a student from the registry to view their official transcript.</p>
         </div>
-    </footer>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/calculator.js"></script>
-    <script src="/js/ui.js"></script>
+        <!-- Main Transcript Document -->
+        <div id="transcript-card" style="display: none;" class="transcript-paper animate-fade-up">
+            <!-- Background Watermark -->
+            <div class="transcript-watermark"></div>
+            
+            <div class="transcript-inner">
+                <!-- Corner flourishes -->
+                <div class="corner-flourish flourish-tl"></div>
+                <div class="corner-flourish flourish-tr"></div>
+                <div class="corner-flourish flourish-bl"></div>
+                <div class="corner-flourish flourish-br"></div>
+ 
+                <!-- Institution Header -->
+                <div class="institution-header">
+                    <div class="institution-logo">🎓</div>
+                    <h2 class="institution-name">GradePoint Academy</h2>
+                    <div class="institution-sub">Office of the Academic Registrar</div>
+                    
+                    <h3 class="document-title" id="document-title">Official Transcript of Academic Record</h3>
+                    <div class="document-meta-row">
+                        <span>Date of Issue: <strong id="current-date">-</strong></span>
+                        <span>Verification ID: <strong id="doc-id">-</strong></span>
+                    </div>
+                </div>
+
+                <!-- Registry Details -->
+                <div class="registry-grid">
+                    <div class="registry-item">
+                        <span class="registry-label">Student Full Name</span>
+                        <span class="registry-value" id="student-name">-</span>
+                    </div>
+                    <div class="registry-item">
+                        <span class="registry-label">Institutional Roll Number</span>
+                        <span class="registry-value" id="student-roll">-</span>
+                    </div>
+                </div>
+
+                <!-- Course Results Ledger -->
+                <div id="results-container">
+                    <!-- Dynamic Ledger Semesters Injected Here -->
+                </div>
+
+                <!-- Attestation Summary Box -->
+                <div class="attestation-summary" id="attestation-summary-box">
+                    <div class="summary-block" id="block-gpa">
+                        <span class="summary-block-label" id="cgpa-label">Cumulative GPA</span>
+                        <span class="summary-block-value" id="final-cgpa">0.00</span>
+                        <span class="summary-block-sub">10.00 Scale</span>
+                    </div>
+                    <div class="summary-block" id="block-cgpa-extra" style="display: none;">
+                        <span class="summary-block-label" id="cgpa-extra-label">Cumulative CGPA</span>
+                        <span class="summary-block-value" id="final-cgpa-extra">0.00</span>
+                        <span class="summary-block-sub">Up to Semester</span>
+                    </div>
+                    <div class="summary-block" id="block-credits">
+                        <span class="summary-block-label" id="credits-label">Total Credits</span>
+                        <span class="summary-block-value" id="final-credits">0</span>
+                        <span class="summary-block-sub">Earned Units</span>
+                    </div>
+                    <div class="summary-block" id="block-courses">
+                        <span class="summary-block-label" id="courses-label">Completed Courses</span>
+                        <span class="summary-block-value" id="final-courses">0</span>
+                        <span class="summary-block-sub">Registered</span>
+                    </div>
+                    <div class="summary-block" id="block-standing">
+                        <span class="summary-block-label" id="standing-label">Standing</span>
+                        <span class="summary-block-value" style="font-size: 1.15rem; font-weight: 700; color: var(--gold-dark);" id="classification">-</span>
+                        <span class="summary-block-sub" id="standing-sub">Official Degree Range</span>
+                    </div>
+                </div>
+
+                <!-- Signatures & Authentic Wax Seal -->
+                <div class="attestation-signatures">
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <span class="sig-title">Registrar of the Academy</span>
+                        <span class="sig-institution">GradePoint Registrar Office</span>
+                    </div>
+                    
+                    <div class="wax-seal-container">
+                        <div class="wax-seal">
+                            <span class="wax-seal-crest">🎓</span>
+                            <span>OFFICIAL</span>
+                            <span style="font-size: 0.45rem; color: var(--white); margin-top: 0.1rem;">REGISTRY SEAL</span>
+                        </div>
+                    </div>
+
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <span class="sig-title">Attesting Chancellor</span>
+                        <span class="sig-institution">GradePoint Academic Board</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Printing Action Bar -->
+        <div class="print-actions animate-fade-up" id="actions-bar" style="display: none;">
+            <button class="btn btn-secondary" onclick="window.history.back()">
+                ⬅️ Return to Portal
+            </button>
+            <button class="btn btn-primary" onclick="window.print()">
+                🖨️ Print Transcript / Save PDF
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api-v2.js"></script>
     <script src="/js/transcript.js"></script>
 </body>
 </html>

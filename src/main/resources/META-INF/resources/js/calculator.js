@@ -86,10 +86,11 @@ const Calculator = (function() {
     function getClassification(cgpa) {
         if (cgpa >= 9.0) return 'First Class with Distinction';
         if (cgpa >= 8.0) return 'First Class';
-        if (cgpa >= 7.0) return 'Second Class (Upper)';
-        if (cgpa >= 6.0) return 'Second Class (Lower)';
+        if (cgpa >= 7.0) return 'Second Class (Upper Division)';
+        if (cgpa >= 6.0) return 'Second Class (Lower Division)';
         if (cgpa >= 5.0) return 'Third Class';
-        return 'Pass';
+        if (cgpa >= 4.0) return 'Pass';
+        return 'Academic Warning';
     }
 
     // Public API

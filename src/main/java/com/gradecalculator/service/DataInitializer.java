@@ -4,6 +4,7 @@ import com.gradecalculator.model.*;
 import com.gradecalculator.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private CourseRepository courseRepository;
     @Autowired private EnrollmentRepository enrollmentRepository;
     @Autowired private AppUserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     // BCrypt hash for "password123"
     private static final String PASS_HASH = "$2a$10$N9qo8uLOknjlSew6UoOqZuJaeNpKR3TmK7JvGqgCWzWldJ5m7w1xGy";
@@ -54,30 +56,32 @@ public class DataInitializer implements CommandLineRunner {
             allCourses.add(semCourses);
         }
 
+        String studentPasswordHash = passwordEncoder.encode("password123");
+
         // 12 students with different grades
-        createStudent("CS2024001", "Alice Johnson", "alice", allCourses, LetterGrade.O, LetterGrade.A_PLUS);
-        createStudent("CS2024002", "Bob Smith", "bob", allCourses, LetterGrade.A_PLUS, LetterGrade.A);
-        createStudent("CS2024003", "Charlie Brown", "charlie", allCourses, LetterGrade.A_PLUS, LetterGrade.A);
-        createStudent("CS2024004", "Diana Prince", "diana", allCourses, LetterGrade.A, LetterGrade.B_PLUS);
-        createStudent("CS2024005", "Edward Norton", "edward", allCourses, LetterGrade.A, LetterGrade.B_PLUS);
-        createStudent("CS2024006", "Fiona Apple", "fiona", allCourses, LetterGrade.B_PLUS, LetterGrade.A);
-        createStudent("CS2024007", "George Miller", "george", allCourses, LetterGrade.B_PLUS, LetterGrade.B);
-        createStudent("CS2024008", "Hannah Lee", "hannah", allCourses, LetterGrade.B, LetterGrade.C);
-        createStudent("CS2024009", "Ian Curtis", "ian", allCourses, LetterGrade.B, LetterGrade.C);
-        createStudent("CS2024010", "Julia Roberts", "julia", allCourses, LetterGrade.C, LetterGrade.B_PLUS);
-        createStudent("CS2024011", "Kevin Perry", "kevin", allCourses, LetterGrade.C, LetterGrade.C);
-        createStudent("CS2024012", "Laura Palmer", "laura", allCourses, LetterGrade.C, LetterGrade.P);
+        createStudent("CS2024001", "Alice Johnson", "alice", allCourses, LetterGrade.O, LetterGrade.A_PLUS, studentPasswordHash);
+        createStudent("CS2024002", "Bob Smith", "bob", allCourses, LetterGrade.A_PLUS, LetterGrade.A, studentPasswordHash);
+        createStudent("CS2024003", "Charlie Brown", "charlie", allCourses, LetterGrade.A_PLUS, LetterGrade.A, studentPasswordHash);
+        createStudent("CS2024004", "Diana Prince", "diana", allCourses, LetterGrade.A, LetterGrade.B_PLUS, studentPasswordHash);
+        createStudent("CS2024005", "Edward Norton", "edward", allCourses, LetterGrade.A, LetterGrade.B_PLUS, studentPasswordHash);
+        createStudent("CS2024006", "Fiona Apple", "fiona", allCourses, LetterGrade.B_PLUS, LetterGrade.A, studentPasswordHash);
+        createStudent("CS2024007", "George Miller", "george", allCourses, LetterGrade.B_PLUS, LetterGrade.B, studentPasswordHash);
+        createStudent("CS2024008", "Hannah Lee", "hannah", allCourses, LetterGrade.B, LetterGrade.C, studentPasswordHash);
+        createStudent("CS2024009", "Ian Curtis", "ian", allCourses, LetterGrade.B, LetterGrade.C, studentPasswordHash);
+        createStudent("CS2024010", "Julia Roberts", "julia", allCourses, LetterGrade.C, LetterGrade.B_PLUS, studentPasswordHash);
+        createStudent("CS2024011", "Kevin Perry", "kevin", allCourses, LetterGrade.C, LetterGrade.C, studentPasswordHash);
+        createStudent("CS2024012", "Laura Palmer", "laura", allCourses, LetterGrade.C, LetterGrade.P, studentPasswordHash);
 
         createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
         createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
     }
 
-    private void createStudent(String roll, String name, String username, List<List<Course>> courses, LetterGrade best, LetterGrade avg) {
+    private void createStudent(String roll, String name, String username, List<List<Course>> courses, LetterGrade best, LetterGrade avg, String passwordHash) {
         Student student = studentRepository.save(new Student(name, roll));
         
         AppUser u = new AppUser();
         u.setUsername(username);
-        u.setPassword(PASS_HASH);
+        u.setPassword(passwordHash);
         u.setRole(AppUser.Role.STUDENT);
         try { userRepository.save(u); } catch (Exception e) {}
 
@@ -95,7 +99,7 @@ public class DataInitializer implements CommandLineRunner {
         if (!userRepository.existsByUsername(username)) {
             AppUser u = new AppUser();
             u.setUsername(username);
-            u.setPassword(pw);
+            u.setPassword(passwordEncoder.encode(pw));
             u.setRole(role);
             userRepository.save(u);
         }

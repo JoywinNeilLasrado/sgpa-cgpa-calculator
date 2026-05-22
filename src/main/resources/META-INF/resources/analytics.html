@@ -3,417 +3,697 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics | GradePoint</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <title>Academic Analytics | GradePoint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/theme.css">
     <style>
-        :root {
-            --ink: #0d1117;
-            --paper: #faf9f7;
-            --parchment: #f5f3ef;
-            --crimson: #8b1538;
-            --gold: #c9a227;
-            --slate: #475569;
-            --slate-light: #64748b;
-            --mist: #e2e8f0;
-            --white: #ffffff;
-            --shadow-soft: 0 4px 24px rgba(13, 17, 23, 0.08);
-            --shadow-medium: 0 8px 40px rgba(13, 17, 23, 0.12);
+        .analytics-hero {
+            background: linear-gradient(135deg, var(--ink) 0%, #171f2a 100%);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--paper);
-            color: var(--ink);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        body::before {
+        .analytics-hero::before {
             content: '';
-            position: fixed;
-            inset: 0;
-            background: 
-                radial-gradient(ellipse at 20% 20%, rgba(139, 21, 56, 0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(201, 162, 39, 0.04) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
+            position: absolute;
+            right: -5%;
+            top: -20%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
         }
 
-        h1, h2, h3, h4 {
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Hero */
-        .hero {
-            padding: 3rem 0;
-            text-align: center;
-        }
-
-        .hero h2 {
-            font-size: 2.5rem;
-            color: var(--ink);
+        .analytics-hero h2 {
+            font-size: 2.8rem;
+            color: var(--white);
             margin-bottom: 0.5rem;
         }
 
-        .hero p {
-            color: var(--slate);
-            font-size: 1.1rem;
+        .analytics-hero p {
+            font-size: 1rem;
+            color: var(--slate-light);
+            letter-spacing: 0.05em;
         }
 
-        /* Stats Grid */
-        .stats-grid {
+        .podium-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
-            margin: 2rem 0;
+            margin-bottom: 2.5rem;
+            align-items: flex-end;
         }
 
-        .stat-card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 1.5rem;
+        @media (max-width: 640px) {
+            .podium-container {
+                grid-template-columns: 1fr;
+                align-items: stretch;
+            }
+        }
+
+        .podium-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius-md);
+            padding: 2rem 1.5rem;
             text-align: center;
-            border: 1px solid var(--mist);
             box-shadow: var(--shadow-soft);
-            transition: all 0.3s ease;
-            animation: fadeUp 0.5s ease-out backwards;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .stat-card:nth-child(1) { animation-delay: 0.1s; }
-        .stat-card:nth-child(2) { animation-delay: 0.2s; }
-        .stat-card:nth-child(3) { animation-delay: 0.3s; }
-        .stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
-            border-color: var(--crimson);
+        .podium-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-premium);
         }
 
-        .stat-icon {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 1rem;
-            background: var(--parchment);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .stat-value {
+        .podium-rank {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem;
+            font-size: 3.5rem;
             font-weight: 700;
-            color: var(--crimson);
             line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .podium-card.first {
+            border: 2px solid var(--gold);
+            background: linear-gradient(180deg, var(--white) 0%, rgba(201, 162, 39, 0.03) 100%);
+            padding: 3rem 1.5rem;
+            z-index: 2;
+        }
+
+        .podium-card.first .podium-rank {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(201, 162, 39, 0.2);
+        }
+
+        .podium-card.second {
+            z-index: 1;
+        }
+
+        .podium-card.second .podium-rank {
+            color: var(--slate-light);
+        }
+
+        .podium-card.third {
+            z-index: 0;
+        }
+
+        .podium-card.third .podium-rank {
+            color: #b45309;
+        }
+
+        .podium-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--ink);
             margin-bottom: 0.25rem;
         }
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--slate-light);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .stat-badge {
-            display: inline-block;
-            margin-top: 0.5rem;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.6875rem;
-            font-weight: 600;
-            border-radius: 20px;
-            background: rgba(52, 211, 153, 0.15);
-            color: #059669;
-        }
-
-        .stat-badge.down {
-            background: rgba(248, 113, 113, 0.15);
-            color: #dc2626;
-        }
-
-        /* Charts Section */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        @media (max-width: 900px) {
-            .charts-grid { grid-template-columns: 1fr; }
-        }
-
-        .chart-card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid var(--mist);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .chart-header {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--mist);
-        }
-
-        .chart-title {
-            font-size: 1.25rem;
-            color: var(--ink);
-        }
-
-        .chart-subtitle {
-            font-size: 0.8125rem;
-            color: var(--slate-light);
-        }
-
-        /* Bar Chart */
-        .bar-list { display: flex; flex-direction: column; gap: 1rem; }
-
-        .bar-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .bar-label {
-            width: 80px;
-            font-size: 0.875rem;
-            color: var(--slate);
-            font-weight: 500;
-        }
-
-        .bar-track {
-            flex: 1;
-            height: 28px;
-            background: var(--parchment);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .bar-fill {
-            height: 100%;
-            border-radius: 6px;
-            background: linear-gradient(90deg, var(--crimson), var(--gold));
-            transition: width 1s ease-out;
-        }
-
-        .bar-value {
-            width: 45px;
-            text-align: right;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        /* Grade Distribution */
-        .grade-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .grade-item {
-            text-align: center;
-            padding: 1rem;
-            background: var(--parchment);
-            border-radius: 8px;
-        }
-
-        .grade-letter {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.75rem;
+        .podium-score {
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--crimson);
         }
 
-        .grade-count {
-            font-size: 0.875rem;
+        .podium-roll {
+            font-size: 0.75rem;
+            color: var(--slate-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .grade-distribution-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grade-distribution-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .grade-count-card {
+            background: var(--parchment);
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .grade-count-card:hover {
+            border-color: var(--crimson);
+            background: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .grade-count-letter {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .grade-count-val {
+            font-size: 1rem;
+            font-weight: 700;
             color: var(--slate);
         }
 
-        /* Footer */
-        .footer {
-            padding: 2rem 0;
-            margin-top: 3rem;
-            border-top: 1px solid var(--mist);
-            text-align: center;
+        .analytics-layout {
+            display: grid;
+            grid-template-columns: 1.4fr 0.85fr;
+            gap: 2.5rem;
         }
 
-        .footer-text {
-            font-size: 0.8125rem;
-            color: var(--slate-light);
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Select */
-        .select-wrap {
-            max-width: 300px;
-            margin: 0 auto 2rem;
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.9375rem;
-            color: var(--ink);
-            background: var(--white);
-            border: 1px solid var(--mist);
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--crimson);
+        @media (max-width: 1024px) {
+            .analytics-layout {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+
+    <!-- Header Navigation -->
     <nav class="nav-header">
-        <div class="container">
-            <div class="nav-inner">
-                <a href="/home.html" class="nav-logo">
-                    <div class="nav-logo-icon">🎓</div>
-                    <div class="nav-logo-text">
-                        <h1>GradePoint</h1>
-                        <span>Academic Tracker</span>
-                    </div>
-                </a>
-                <div class="nav-links">
-                    <a href="/" class="nav-link">Calculator</a>
-                    <a href="/analytics" class="nav-link active">Analytics</a>
-                    <a href="/transcript" class="nav-link">Transcript</a>
-                    <a href="/faculty-grades" class="nav-link">Grade Entry</a>
-                    <a href="/student-dashboard" class="nav-link">Dashboard</a>
-                    <a href="/profile" class="nav-link">Profile</a>
+        <div class="container nav-inner">
+            <a href="#" id="brand-link" class="nav-logo">
+                <div class="nav-logo-icon">🎓</div>
+                <div class="nav-logo-text">
+                    <h1>GradePoint</h1>
+                    <span>Academic Excellence</span>
                 </div>
+            </a>
+            <div class="nav-links" id="nav-links-container">
+                <!-- Dynamically injected based on user role -->
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <div class="hero">
-            <h2>Performance Analytics</h2>
-            <p>Visual insights into your academic journey</p>
+    <!-- Main Container -->
+    <div class="container" style="margin-top: 2.5rem; margin-bottom: 5rem;">
+        
+        <!-- Welcome Hero -->
+        <div class="analytics-hero">
+            <h2 id="hero-welcome">System & Academic Analytics</h2>
+            <p>Institutional summaries, toppers leaderboard distributions, and historical progression indexes.</p>
         </div>
 
-        <!-- Select Student -->
-        <div class="select-wrap">
-            <select class="form-select" id="student-select">
-                <option value="">Select a student...</option>
-            </select>
-        </div>
+        <div id="alert-container"></div>
 
-        <!-- Stats Grid -->
-        <div class="stats-grid" id="stats-grid" style="display: none;">
-            <div class="stat-card">
-                <div class="stat-icon">🎯</div>
-                <div class="stat-value" id="cgpa-display">0.00</div>
-                <div class="stat-label">Current CGPA</div>
-                <div class="stat-badge">Excellent</div>
+        <!-- Role: FACULTY / ADMIN - Global Analytics Dashboard -->
+        <div id="global-analytics-panel" style="display: none; margin-bottom: 3.5rem;">
+            
+            <div style="margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--crimson); font-weight: 700;">
+                ✨ Institutional Excellence Leaderboard
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">📚</div>
-                <div class="stat-value" id="total-credits">0</div>
-                <div class="stat-label">Credits Earned</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📖</div>
-                <div class="stat-value" id="total-courses">0</div>
-                <div class="stat-label">Courses Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <div class="stat-value" id="semesters-count">0</div>
-                <div class="stat-label">Semesters Active</div>
-            </div>
-        </div>
 
-        <!-- Charts -->
-        <div class="charts-grid" id="charts-grid" style="display: none;">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">GPA Progression</div>
-                    <div class="chart-subtitle">Semester by semester performance</div>
+            <!-- Toppers Podium -->
+            <div class="podium-container" id="podium-container-div">
+                <!-- Injected dynamically -->
+            </div>
+
+            <!-- Global Class Statistics Grid -->
+            <div class="stat-grid" style="margin-bottom: 3rem;">
+                <div class="stat-box">
+                    <div class="stat-value" id="global-avg-cgpa">0.00</div>
+                    <div class="stat-label">Class-wide Average CGPA</div>
                 </div>
-                <div class="bar-list" id="gpa-chart">
-                    <!-- Populated by JS -->
+                <div class="stat-box gold">
+                    <div class="stat-value" id="global-pass-rate">0%</div>
+                    <div class="stat-label">System Passing Ratio</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="global-student-count">0</div>
+                    <div class="stat-label">Enrolled Student Cohort</div>
+                </div>
+                <div class="stat-box gold" id="class-topper-box" style="cursor: pointer;">
+                    <div class="stat-value" style="font-size: 1.4rem; padding: 0.5rem 0;" id="global-topper-name">-</div>
+                    <div class="stat-label">Active Topper (Rank #1)</div>
                 </div>
             </div>
 
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">Grade Distribution</div>
-                    <div class="chart-subtitle">Breakdown by letter grade</div>
+            <!-- Rankings Grid Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">Institutional Standings</h3>
+                        <p class="card-subtitle">Active system students ranked by overall CGPA score.</p>
+                    </div>
+                    <div class="search-input-wrap">
+                        <span class="search-icon-decor">🔍</span>
+                        <input type="text" class="search-input" id="search-rankings" placeholder="Search standings..." oninput="filterRankingsTable()">
+                    </div>
                 </div>
-                <div class="grade-grid" id="grade-dist">
-                    <!-- Populated by JS -->
+
+                <div class="table-wrap">
+                    <table class="table" id="rankings-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Student Name</th>
+                                <th>Roll Number</th>
+                                <th>Cumulative CGPA</th>
+                                <th>Classification Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankings-tbody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            <!-- Student File Picker for Detail Lookup -->
+            <div style="margin-top: 3.5rem; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--crimson); font-weight: 700;">
+                🔍 Student File Visual Trend Lookup
+            </div>
+            <div class="card" style="background: var(--parchment); border: 1px solid var(--mist-dark); margin-bottom: 2rem; padding: 1.5rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Select Student File to Inspect Charts</label>
+                    <select class="form-select" id="student-picker" onchange="loadStudentAnalytics(this.value)">
+                        <option value="">Choose student target...</option>
+                    </select>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Quick Stats -->
-        <div class="stats-grid" id="quick-stats" style="display: none;">
-            <div class="stat-card">
-                <div class="stat-icon">⭐</div>
-                <div class="stat-value" id="highest-gpa">0.00</div>
-                <div class="stat-label">Highest SGPA</div>
+        <!-- Student Personal Details Dashboard Section (Or Faculty Inspect Section) -->
+        <div id="personal-analytics-panel" style="display: none;">
+            
+            <div id="inspector-heading" style="display: none; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold-dark); font-weight: 700;">
+                📊 Inspecting File: <span id="inspected-student-name">-</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-value" id="pass-rate">0%</div>
-                <div class="stat-label">Pass Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🌟</div>
-                <div class="stat-value" id="outstanding">0</div>
-                <div class="stat-label">O Grades</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📈</div>
-                <div class="stat-value" id="improvement">+0%</div>
-                <div class="stat-label">Trend</div>
-            </div>
-        </div>
-    </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p class="footer-text">GradePoint • Academic Excellence Tracker</p>
-        </div>
-    </footer>
+            <!-- Stats Overview Cards -->
+            <div class="stat-grid" style="margin-bottom: 2.5rem;">
+                <div class="stat-box">
+                    <div class="stat-value" id="stats-cgpa">0.00</div>
+                    <div class="stat-label">Cumulative CGPA</div>
+                </div>
+                <div class="stat-box gold">
+                    <div class="stat-value" id="stats-credits">0</div>
+                    <div class="stat-label">Credits Earned</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stats-courses">0</div>
+                    <div class="stat-label">Courses Completed</div>
+                </div>
+                <div class="stat-box gold">
+                    <div class="stat-value" id="stats-semesters">0</div>
+                    <div class="stat-label">Semesters Completed</div>
+                </div>
+            </div>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/calculator.js"></script>
-    <script src="/js/ui.js"></script>
-    <script src="/js/analytics.js"></script>
+            <!-- Visual Layout Charts -->
+            <div class="analytics-layout">
+                
+                <!-- Left: GPA Bar Progression Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">GPA Progression Index</h3>
+                            <p class="card-subtitle">SGPA performance curve across active academic semesters.</p>
+                        </div>
+                    </div>
+
+                    <div id="chart-progression-empty" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--slate-light);">
+                        <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">📊</span>
+                        <p>No semester grades recorded to plot progression curve.</p>
+                    </div>
+
+                    <div class="chart-bar-list" id="progression-chart-bars">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Right: Grade Distribution Counts Grid -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">Grade Ledger Distribution</h3>
+                            <p class="card-subtitle">Frequencies of assigned academic grade letters.</p>
+                        </div>
+                    </div>
+
+                    <div class="grade-distribution-grid" id="grade-dist-items">
+                        <!-- Dynamically injected counts -->
+                    </div>
+
+                    <div class="stat-box" style="margin-top: 2rem; padding: 1.25rem; border-left-color: var(--gold);">
+                        <div class="stat-value" style="font-size: 2rem;" id="anal-quick-highest">0.00</div>
+                        <div class="stat-label" style="font-size: 0.65rem;">Highest Semester SGPA Peak</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api-v2.js"></script>
+    <script>
+        // Check if token exists
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
+
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        let rankingsCached = [];
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type} show`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✨' : '⚠️'}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        async function init() {
+            document.getElementById('hero-welcome').textContent = `${user.role === 'STUDENT' ? 'Student' : user.role === 'FACULTY' ? 'Faculty' : 'Admin'} Analytics Center`;
+            
+            // Build Dynamic Header Nav
+            const navContainer = document.getElementById('nav-links-container');
+            const brandLink = document.getElementById('brand-link');
+            
+            let links = '';
+            if (user.role === 'ADMIN') {
+                brandLink.href = '/admin.html';
+                links = `
+                    <a href="/admin.html" class="nav-link">Admin Portal</a>
+                    <a href="/analytics.html" class="nav-link active">Analytics</a>
+                    <a href="/transcript.html" class="nav-link">Transcript</a>
+                    <a href="/profile.html" class="nav-link">Profile</a>
+                `;
+            } else if (user.role === 'FACULTY') {
+                brandLink.href = '/faculty-grades.html';
+                links = `
+                    <a href="/faculty-grades.html" class="nav-link">Grade Entry</a>
+                    <a href="/analytics.html" class="nav-link active">System Rankings</a>
+                    <a href="/transcript.html" class="nav-link">Transcripts</a>
+                    <a href="/profile.html" class="nav-link">Profile</a>
+                `;
+            } else {
+                brandLink.href = '/student.html';
+                links = `
+                    <a href="/student.html" class="nav-link">Dashboard</a>
+                    <a href="/analytics.html" class="nav-link active">Analytics</a>
+                    <a href="/transcript.html" class="nav-link">Transcript</a>
+                    <a href="/profile.html" class="nav-link">Profile</a>
+                `;
+            }
+
+            links += `
+                <div class="nav-user-info">
+                    <div class="user-pill">
+                        <span>${user.username}</span>
+                        <span class="user-badge" style="background: ${user.role==='ADMIN'?'var(--crimson)':user.role==='FACULTY'?'var(--gold-dark)':'var(--slate)'}">${user.role}</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="logout()">Logout</button>
+                </div>
+            `;
+            navContainer.innerHTML = links;
+
+            // Load Panels based on user roles
+            if (user.role === 'STUDENT') {
+                document.getElementById('personal-analytics-panel').style.display = 'block';
+                await loadStudentAnalytics(user.userId || user.id);
+            } else {
+                document.getElementById('global-analytics-panel').style.display = 'block';
+                document.getElementById('personal-analytics-panel').style.display = 'block';
+                await loadGlobalAnalytics();
+            }
+        }
+
+        // Global Analytics (Faculty/Admin Only)
+        async function loadGlobalAnalytics() {
+            try {
+                // Load Class stats
+                const classStats = await API.getClassStatistics();
+                document.getElementById('global-avg-cgpa').textContent = (classStats.averageCGPA || 0).toFixed(2);
+                document.getElementById('global-pass-rate').textContent = `${classStats.passRate || 0}%`;
+                document.getElementById('global-student-count').textContent = classStats.totalStudents || 0;
+                
+                if (classStats.topper) {
+                    document.getElementById('global-topper-name').textContent = classStats.topper.name;
+                    document.getElementById('class-topper-box').onclick = () => {
+                        document.getElementById('student-picker').value = classStats.topper.studentId;
+                        loadStudentAnalytics(classStats.topper.studentId);
+                        showToast(`Showing topper ${classStats.topper.name}'s trends.`, 'success');
+                    };
+                }
+
+                // Load Toppers
+                const toppers = await API.getToppers(5);
+                renderToppersPodium(toppers);
+
+                // Load Complete Rankings table
+                const rankings = await API.getRankings(50);
+                rankingsCached = rankings;
+                renderRankingsTable(rankings);
+
+                // Populate student picker dropdown
+                const students = await API.getStudents();
+                const picker = document.getElementById('student-picker');
+                picker.innerHTML = '<option value="">Choose student file...</option>' + 
+                    students.map(s => `<option value="${s.id}">${s.name} (${s.studentId})</option>`).join('');
+
+                // Auto inspect first student if present
+                if (students.length > 0) {
+                    picker.value = students[0].id;
+                    await loadStudentAnalytics(students[0].id);
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to retrieve class summaries from database.', 'error');
+            }
+        }
+
+        function renderToppersPodium(toppers) {
+            const container = document.getElementById('podium-container-div');
+            container.innerHTML = '';
+
+            if (toppers.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--slate-light);">No student scores present in rankings.</div>';
+                return;
+            }
+
+            // Podiums are arranged: 2nd Place, 1st Place, 3rd Place
+            const top1 = toppers[0];
+            const top2 = toppers[1] || null;
+            const top3 = toppers[2] || null;
+
+            let secondCard = '';
+            if (top2) {
+                secondCard = `
+                    <div class="podium-card second animate-fade-up">
+                        <div class="podium-rank">2</div>
+                        <div class="podium-name">${top2.name}</div>
+                        <div class="podium-roll">${top2.rollNumber}</div>
+                        <div class="podium-score">CGPA: ${top2.cgpa.toFixed(2)}</div>
+                    </div>
+                `;
+            }
+
+            let firstCard = `
+                <div class="podium-card first animate-fade-up" style="animation-delay: 0.1s;">
+                    <div class="podium-rank">1</div>
+                    <div class="podium-name">${top1.name}</div>
+                    <div class="podium-roll">${top1.rollNumber}</div>
+                    <div class="podium-score" style="font-size: 1.3rem;">CGPA: ${top1.cgpa.toFixed(2)}</div>
+                </div>
+            `;
+
+            let thirdCard = '';
+            if (top3) {
+                thirdCard = `
+                    <div class="podium-card third animate-fade-up" style="animation-delay: 0.2s;">
+                        <div class="podium-rank">3</div>
+                        <div class="podium-name">${top3.name}</div>
+                        <div class="podium-roll">${top3.rollNumber}</div>
+                        <div class="podium-score">CGPA: ${top3.cgpa.toFixed(2)}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = secondCard + firstCard + thirdCard;
+        }
+
+        function renderRankingsTable(rankings) {
+            const tbody = document.getElementById('rankings-tbody');
+            
+            if (rankings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--slate-light);">Rankings catalog empty.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rankings.map((r, index) => {
+                let status = 'Academic Warning';
+                let bg = 'F';
+                if (r.cgpa >= 9.0) { status = 'First Class with Distinction'; bg = 'O'; }
+                else if (r.cgpa >= 8.0) { status = 'First Class'; bg = 'A\\+'; }
+                else if (r.cgpa >= 7.0) { status = 'Second Class (Upper Division)'; bg = 'A'; }
+                else if (r.cgpa >= 6.0) { status = 'Second Class (Lower Division)'; bg = 'B\\+'; }
+                else if (r.cgpa >= 5.0) { status = 'Third Class'; bg = 'B'; }
+                else if (r.cgpa >= 4.0) { status = 'Pass'; bg = 'C'; }
+
+                return `
+                    <tr class="rank-row-item" data-name="${r.name.toLowerCase()}" data-roll="${r.rollNumber.toLowerCase()}">
+                        <td><strong>#${index + 1}</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span>${index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤'}</span>
+                                <strong>${r.name}</strong>
+                            </div>
+                        </td>
+                        <td>${r.rollNumber}</td>
+                        <td style="color: var(--crimson); font-weight: 700;">${r.cgpa.toFixed(2)}</td>
+                        <td><span class="grade-badge ${bg}">${status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterRankingsTable() {
+            const query = document.getElementById('search-rankings').value.toLowerCase().trim();
+            document.querySelectorAll('.rank-row-item').forEach(tr => {
+                const name = tr.getAttribute('data-name');
+                const roll = tr.getAttribute('data-roll');
+                tr.style.display = (name.includes(query) || roll.includes(query)) ? '' : 'none';
+            });
+        }
+
+        // Student Personal/Lookup Analytics Charts
+        async function loadStudentAnalytics(studentId) {
+            if (!studentId) {
+                document.getElementById('personal-analytics-panel').style.display = 'none';
+                return;
+            }
+
+            try {
+                // Load details from student dashboard
+                const dashboard = await API.getStudentDashboard(studentId);
+                
+                // Show title if inspecting
+                if (user.role !== 'STUDENT') {
+                    document.getElementById('inspector-heading').style.display = 'block';
+                    document.getElementById('inspected-student-name').textContent = dashboard.studentName || 'Student File';
+                }
+
+                // Update Stats boxes
+                document.getElementById('stats-cgpa').textContent = (dashboard.cgpa || 0).toFixed(2);
+                document.getElementById('stats-credits').textContent = dashboard.totalCredits || 0;
+                document.getElementById('stats-courses').textContent = dashboard.totalCourses || 0;
+                document.getElementById('stats-semesters').textContent = dashboard.semestersCompleted || 0;
+
+                // Load GPA Progression chart trends
+                const trends = await API.getSGPATrends(studentId);
+                const barsList = document.getElementById('progression-chart-bars');
+                const chartEmpty = document.getElementById('chart-progression-empty');
+                
+                barsList.innerHTML = '';
+                
+                if (trends.length === 0) {
+                    chartEmpty.style.display = 'block';
+                } else {
+                    chartEmpty.style.display = 'none';
+                    
+                    // Sort trends by semester number
+                    trends.sort((a,b) => {
+                        const semA = parseInt(a.semester.replace('Sem ', '')) || 0;
+                        const semB = parseInt(b.semester.replace('Sem ', '')) || 0;
+                        return semA - semB;
+                    });
+
+                    // Quick Peak SGPA
+                    const sgpasList = trends.map(t => t.sgpa || 0);
+                    const highestSGPA = Math.max(...sgpasList, 0);
+                    document.getElementById('anal-quick-highest').textContent = highestSGPA.toFixed(2);
+
+                    const colors = ['var(--crimson)', 'var(--gold)', '#6366f1', '#22d3ee', '#10b981'];
+
+                    trends.forEach((t, index) => {
+                        const percent = Math.min((t.sgpa / 10) * 100, 100);
+                        const color1 = colors[index % colors.length];
+                        const color2 = colors[(index + 1) % colors.length];
+
+                        const barHtml = `
+                            <div class="chart-bar-item animate-fade-up">
+                                <span class="chart-bar-label">${t.semester}</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill" style="width: 0%; background: linear-gradient(90deg, ${color1} 0%, ${color2} 100%)" id="prog-fill-${index}"></div>
+                                </div>
+                                <span class="chart-bar-value">${t.sgpa.toFixed(2)}</span>
+                            </div>
+                        `;
+                        barsList.insertAdjacentHTML('beforeend', barHtml);
+
+                        // Trigger visual micro animation
+                        setTimeout(() => {
+                            const fill = document.getElementById(`prog-fill-${index}`);
+                            if (fill) fill.style.width = `${percent}%`;
+                        }, 50);
+                    });
+                }
+
+                // Render Grade distribution counts
+                const dist = dashboard.gradeDistribution || {};
+                const distList = document.getElementById('grade-dist-items');
+                distList.innerHTML = '';
+
+                const LETTER_GRADES = ['O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
+                
+                LETTER_GRADES.forEach(g => {
+                    const count = dist[g] || 0;
+                    const cleanGClass = g.replace('+', '\\+');
+
+                    const countCardHtml = `
+                        <div class="grade-count-card">
+                            <div class="grade-count-letter grade-badge ${cleanGClass}" style="border: none; padding: 0.15rem 0.5rem; font-size: 1.4rem;">${g}</div>
+                            <div class="grade-count-val" style="margin-top: 0.5rem;">${count} Count</div>
+                        </div>
+                    `;
+                    distList.insertAdjacentHTML('beforeend', countCardHtml);
+                });
+
+                document.getElementById('personal-analytics-panel').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to pull student charts information.', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        init();
+    </script>
 </body>
 </html>

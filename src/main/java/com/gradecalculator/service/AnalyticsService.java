@@ -5,6 +5,7 @@ import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
  * Analytics Service for charts and rankings
  */
 @Service
+@Transactional(readOnly = true)
 public class AnalyticsService {
 
     private final EnrollmentRepository enrollmentRepository;

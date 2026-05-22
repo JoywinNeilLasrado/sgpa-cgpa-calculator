@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal | GradePoint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <style>
+        .student-hero {
+            background: linear-gradient(135deg, var(--crimson-dark) 0%, var(--crimson) 50%, #9e1f44 100%);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .student-hero::before {
+            content: '';
+            position: absolute;
+            right: -10%;
+            bottom: -30%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .student-hero h2 {
+            font-size: 2.8rem;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .student-hero p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 0.05em;
+        }
+
+        /* Circular progress styling */
+        .circle-progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+        }
+
+        .circle-progress-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .circle-progress-bg {
+            fill: none;
+            stroke: rgba(13, 17, 23, 0.05);
+            stroke-width: 8;
+        }
+
+        .circle-progress-bar {
+            fill: none;
+            stroke: var(--crimson);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 339.29;
+            stroke-dashoffset: 339.29;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .circle-progress-value {
+            position: absolute;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--crimson);
+        }
+
+        .stat-card-luxury {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-card-luxury:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+            border-color: rgba(201, 162, 39, 0.3);
+        }
+
+        .stat-card-luxury::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gold);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card-luxury:hover::after {
+            opacity: 1;
+        }
+
+        .stat-card-luxury.crimson-line::after {
+            background: var(--crimson);
+        }
+
+        .stat-title-lux {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--slate-light);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value-lux {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--crimson);
+            line-height: 1.1;
+        }
+
+        .stat-badge-lux {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+        }
+
+        /* GPA Simulator Styling */
+        .sim-container {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .sim-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sim-table th {
+            background: var(--parchment);
+            font-size: 0.75rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .sim-table td {
+            padding: 0.75rem 1rem;
+        }
+
+        .sim-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+        }
+
+        .sim-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-sim-action {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            border: 1px solid var(--mist-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sim-action:hover {
+            border-color: var(--crimson);
+            color: var(--crimson);
+            background: rgba(139, 21, 56, 0.04);
+        }
+
+        .sim-stat-box {
+            background: var(--parchment);
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .sim-stat-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="nav-header">
+        <div class="container nav-inner">
+            <a href="/student.html" class="nav-logo">
+                <div class="nav-logo-icon">🎓</div>
+                <div class="nav-logo-text">
+                    <h1>GradePoint</h1>
+                    <span>Academic Excellence</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="/student.html" class="nav-link active">Dashboard</a>
+                <a href="/analytics.html" class="nav-link">Analytics</a>
+                <a href="/transcript.html" class="nav-link">Transcript</a>
+                <a href="/profile.html" class="nav-link">Profile</a>
+                <div class="nav-user-info">
+                    <div class="user-pill">
+                        <span id="nav-username">Student</span>
+                        <span class="user-badge">Student</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container" style="margin-top: 2.5rem; margin-bottom: 4rem;">
+        
+        <!-- Welcome Hero -->
+        <div class="student-hero">
+            <h2 id="hero-welcome">Welcome back, Student</h2>
+            <p>Your academic standing, semester results, and interactive tools are aggregated below.</p>
+        </div>
+
+        <!-- Multi-column Circular/Luxury Stats -->
+        <div class="stat-grid" style="margin-bottom: 3rem;">
+            
+            <div class="stat-card-luxury">
+                <span class="stat-title-lux">Overall CGPA</span>
+                <div class="stat-value-lux" id="cgpa-val">0.00</div>
+                <span id="standing-badge" class="stat-badge-lux" style="background: rgba(139, 21, 56, 0.08); color: var(--crimson);">First Class</span>
+            </div>
+
+            <div class="stat-card-luxury crimson-line">
+                <span class="stat-title-lux">Degree Completion</span>
+                <div class="circle-progress-container">
+                    <svg class="circle-progress-svg">
+                        <circle class="circle-progress-bg" cx="60" cy="60" r="54"></circle>
+                        <circle class="circle-progress-bar" id="credit-progress-bar" cx="60" cy="60" r="54"></circle>
+                    </svg>
+                    <div class="circle-progress-value" id="credits-percentage">0%</div>
+                </div>
+                <span class="stat-title-lux" style="font-size: 0.7rem;" id="credits-fraction">0 / 120 Credits</span>
+            </div>
+
+            <div class="stat-card-luxury">
+                <span class="stat-title-lux">Active Courses</span>
+                <div class="stat-value-lux" id="courses-count">0</div>
+                <span class="stat-badge-lux" style="background: var(--success-bg); color: var(--success);" id="pass-rate-val">100% Pass Rate</span>
+            </div>
+
+            <div class="stat-card-luxury crimson-line">
+                <span class="stat-title-lux">Outstanding Performance</span>
+                <div class="stat-value-lux" id="outstanding-val">0</div>
+                <span class="stat-title-lux" style="font-size: 0.65rem;">Courses with 'O' Grade</span>
+            </div>
+
+        </div>
+
+        <!-- Tabbed Dashboard Details -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('semester-tab', this)">Semester Breakdown</button>
+            <button class="tab-btn" onclick="switchTab('simulator-tab', this)">GPA Simulator Sandbox</button>
+            <button class="tab-btn" onclick="switchTab('quick-tab', this)">Academic Quick Actions</button>
+        </div>
+
+        <!-- Semester Breakdown Tab -->
+        <div id="semester-tab" class="tab-content active">
+            
+            <div id="semester-sections-container">
+                <div class="card" style="text-align: center; padding: 3rem;">
+                    <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                    <p>Aggregating official university records...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GPA Simulator Tab -->
+        <div id="simulator-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">GPA Projection Sandbox</h3>
+                        <p class="card-subtitle">Hypothesize future semesters or projected grades to estimate your cumulative scale.</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="addMockRow()">+ Add Course Row</button>
+                </div>
+                
+                <div class="sim-container">
+                    <div>
+                        <div class="table-wrap">
+                            <table class="table sim-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40%;">Course Code / Name</th>
+                                        <th style="width: 25%;">Credits</th>
+                                        <th style="width: 25%;">Projected Grade</th>
+                                        <th style="width: 10%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mock-courses-tbody">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--slate-light); margin-top: 1rem;">
+                            💡 <strong>Formula Check:</strong> CGPA ignores 'F' grades in credit summation but tracks passed points. 
+                            SGPA weights all grades weighted directly.
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <div class="sim-stat-box">
+                            <div class="stat-title-lux">Projected CGPA</div>
+                            <div class="sim-stat-val" id="projected-cgpa">0.00</div>
+                            <p style="font-size: 0.8rem; color: var(--slate); margin-top: 0.5rem;" id="projected-cgpa-diff">No change from current status</p>
+                        </div>
+                        <div class="sim-stat-box" style="background: rgba(139, 21, 56, 0.04); border-color: rgba(139, 21, 56, 0.1);">
+                            <div class="stat-title-lux" style="color: var(--crimson);">Projected Additional Credits</div>
+                            <div class="sim-stat-val" id="projected-credits" style="color: var(--crimson);">0</div>
+                            <p style="font-size: 0.8rem; color: var(--slate); margin-top: 0.5rem;" id="projected-credits-total">Total: 0 / 120 completed</p>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="resetSimulator()">Reset Sandbox</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Tab -->
+        <div id="quick-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Authorized Student Actions</h3>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                    
+                    <div class="stat-card-luxury" style="padding: 2rem; cursor: pointer;" onclick="window.location.href='/transcript.html'">
+                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">📜</span>
+                        <h4 style="font-size: 1.2rem; color: var(--crimson); font-weight: 600; margin-bottom: 0.5rem;">Official Academic Transcript</h4>
+                        <p style="font-size: 0.85rem; color: var(--slate);">Generate and print a double-ruled, watermark-certified academic record.</p>
+                    </div>
+
+                    <div class="stat-card-luxury" style="padding: 2rem; cursor: pointer;" onclick="window.location.href='/analytics.html'">
+                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">📊</span>
+                        <h4 style="font-size: 1.2rem; color: var(--crimson); font-weight: 600; margin-bottom: 0.5rem;">Performance Analytics</h4>
+                        <p style="font-size: 0.85rem; color: var(--slate);">View statistical course grade distributions, topper tables, and overall trends.</p>
+                    </div>
+
+                    <div class="stat-card-luxury" style="padding: 2rem; cursor: pointer;" onclick="window.location.href='/profile.html'">
+                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚙️</span>
+                        <h4 style="font-size: 1.2rem; color: var(--crimson); font-weight: 600; margin-bottom: 0.5rem;">Account Settings</h4>
+                        <p style="font-size: 0.85rem; color: var(--slate);">Modify your credentials, manage security questions, or extract API tokens.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification Wrapper -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api-v2.js"></script>
+    <script>
+        let currentStudentId = null;
+        let originalCGPA = 0;
+        let originalCredits = 0;
+        let originalPointsSum = 0; // Cumulative (credits * points) excluding F for CGPA calculation
+        let originalCreditsExcludingF = 0;
+        let currentSemestersList = [];
+
+        // Check login credentials
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type} show`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✨' : '⚠️'}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        function switchTab(tabId, btn) {
+            // Manage active buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Manage active tabs
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        async function init() {
+            const userJson = localStorage.getItem('user');
+            if (!userJson) {
+                logout();
+                return;
+            }
+            const user = JSON.parse(userJson);
+            document.getElementById('nav-username').textContent = user.username;
+            document.getElementById('hero-welcome').textContent = `Welcome back, ${user.username}`;
+            currentStudentId = user.userId || user.id;
+
+            await fetchAndRenderDashboard();
+        }
+
+        async function fetchAndRenderDashboard() {
+            try {
+                // Call student dashboard API
+                const data = await API.getStudent(currentStudentId);
+                const dashboard = await request(`/students/${currentStudentId}/dashboard`);
+                
+                // Keep values for sandbox simulator
+                originalCGPA = dashboard.cgpa || 0;
+                originalCredits = dashboard.totalCredits || 0;
+                
+                // Update stats
+                document.getElementById('cgpa-val').textContent = originalCGPA.toFixed(2);
+                document.getElementById('credits-fraction').textContent = `${originalCredits} / 120 Credits`;
+                document.getElementById('courses-count').textContent = dashboard.totalCourses || 0;
+                document.getElementById('outstanding-val').textContent = dashboard.outstandingCount || 0;
+                document.getElementById('pass-rate-val').textContent = `${dashboard.passRate}% Pass Rate`;
+
+                // Update standing standing class
+                const standingBadge = document.getElementById('standing-badge');
+                if (originalCGPA >= 9.0) {
+                    standingBadge.textContent = 'First Class with Distinction';
+                    standingBadge.style.background = 'rgba(201, 162, 39, 0.15)';
+                    standingBadge.style.color = 'var(--gold-dark)';
+                } else if (originalCGPA >= 8.0) {
+                    standingBadge.textContent = 'First Class';
+                    standingBadge.style.background = 'rgba(139, 21, 56, 0.08)';
+                    standingBadge.style.color = 'var(--crimson)';
+                } else if (originalCGPA >= 7.0) {
+                    standingBadge.textContent = 'Second Class (Upper Division)';
+                    standingBadge.style.background = 'rgba(5, 150, 105, 0.08)';
+                    standingBadge.style.color = 'var(--success)';
+                } else if (originalCGPA >= 6.0) {
+                    standingBadge.textContent = 'Second Class (Lower Division)';
+                    standingBadge.style.background = 'rgba(59, 130, 246, 0.08)';
+                    standingBadge.style.color = '#1d4ed8';
+                } else if (originalCGPA >= 5.0) {
+                    standingBadge.textContent = 'Third Class';
+                    standingBadge.style.background = 'rgba(219, 39, 119, 0.08)';
+                    standingBadge.style.color = '#db2777';
+                } else if (originalCGPA >= 4.0) {
+                    standingBadge.textContent = 'Pass';
+                    standingBadge.style.background = 'rgba(71, 85, 105, 0.08)';
+                    standingBadge.style.color = 'var(--slate)';
+                } else {
+                    standingBadge.textContent = 'Academic Warning';
+                    standingBadge.style.background = 'rgba(220, 38, 38, 0.08)';
+                    standingBadge.style.color = 'var(--error)';
+                }
+
+                // Animate credit circular progress bar
+                // Circumference is 2 * PI * r = 2 * 3.14159 * 54 = 339.29
+                const completionPercentage = Math.min((originalCredits / 120) * 100, 100);
+                document.getElementById('credits-percentage').textContent = `${Math.round(completionPercentage)}%`;
+                
+                const offset = 339.29 - (completionPercentage / 100) * 339.29;
+                const progressBar = document.getElementById('credit-progress-bar');
+                progressBar.style.strokeDashoffset = offset;
+
+                // Load cumulative calculation aggregates excluding F grades
+                // We'll calculate point sums directly from the response records for pristine math
+                let pointsSum = 0;
+                let creditsExcludingF = 0;
+
+                // Render semesters breakdown
+                const sectionsContainer = document.getElementById('semester-sections-container');
+                sectionsContainer.innerHTML = '';
+
+                if (dashboard.semesterResults && dashboard.semesterResults.length > 0) {
+                    currentSemestersList = dashboard.semesterResults;
+                    
+                    dashboard.semesterResults.forEach(sem => {
+                        const semCard = document.createElement('div');
+                        semCard.className = 'card';
+                        
+                        let coursesRows = '';
+                        sem.courses.forEach(c => {
+                            const isF = c.grade === 'F';
+                            const gradeClass = `grade-badge ${c.grade ? c.grade.replace('+', '\\+') : 'none'}`;
+                            
+                            // Add points if not F
+                            if (c.grade && !isF) {
+                                pointsSum += (c.credits * c.gradePoints);
+                                creditsExcludingF += c.credits;
+                            }
+
+                            coursesRows += `
+                                <tr>
+                                    <td><strong>${c.courseCode}</strong></td>
+                                    <td>${c.courseName}</td>
+                                    <td>${c.credits} Credits</td>
+                                    <td><span class="grade-badge ${c.grade || 'none'}">${c.grade || 'Not Graded'}</span></td>
+                                    <td><strong>${c.gradePoints !== undefined ? c.gradePoints : '-'}</strong></td>
+                                    <td><strong>${c.creditPoints !== undefined ? c.creditPoints : '-'}</strong></td>
+                                </tr>
+                            `;
+                        });
+
+                        semCard.innerHTML = `
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title" style="color: var(--crimson);">Semester ${sem.semesterNumber} Results</h3>
+                                    <p class="card-subtitle">SGPA: <strong>${sem.sgpa.toFixed(2)}</strong> | Total Credits: <strong>${sem.totalCredits}</strong></p>
+                                </div>
+                                <span class="grade-badge O" style="padding: 0.5rem 1rem; border-radius: var(--radius-md);">Verified</span>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course Name</th>
+                                            <th>Credits</th>
+                                            <th>Grade</th>
+                                            <th>Grade Points</th>
+                                            <th>Credit Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${coursesRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        sectionsContainer.appendChild(semCard);
+                    });
+
+                    originalPointsSum = pointsSum;
+                    originalCreditsExcludingF = creditsExcludingF;
+                } else {
+                    sectionsContainer.innerHTML = `
+                        <div class="card" style="text-align: center; padding: 3rem;">
+                            <p style="color: var(--slate-light);">No semester records are currently enrolled. Contact administration.</p>
+                        </div>
+                    `;
+                }
+
+                // Initialize simulator rows with standard default
+                resetSimulator();
+
+            } catch (err) {
+                console.error(err);
+                showToast('Error syncing with academic databases.', 'error');
+            }
+        }
+
+        // Generic HTTP requester helper
+        async function request(endpoint) {
+            const url = `/api${endpoint}`;
+            const token = localStorage.getItem('token');
+            const res = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            if (res.status === 401) {
+                logout();
+            }
+            if (!res.ok) throw new Error('API request failed');
+            return res.json();
+        }
+
+        // Simulator Logic
+        const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0 };
+
+        function addMockRow(code = '', credits = 4, grade = 'A') {
+            const tbody = document.getElementById('mock-courses-tbody');
+            const tr = document.createElement('tr');
+            
+            tr.innerHTML = `
+                <td>
+                    <input type="text" class="sim-input" placeholder="e.g. CS-202 Algorithm Design" value="${code}" oninput="calculateSimulator()">
+                </td>
+                <td>
+                    <input type="number" class="sim-input" min="1" max="8" value="${credits}" oninput="calculateSimulator()">
+                </td>
+                <td>
+                    <select class="sim-select" onchange="calculateSimulator()">
+                        <option value="O" ${grade==='O'?'selected':''}>O (Outstanding - 10)</option>
+                        <option value="A+" ${grade==='A+'?'selected':''}>A+ (Excellent - 9)</option>
+                        <option value="A" ${grade==='A'?'selected':''}>A (Very Good - 8)</option>
+                        <option value="B+" ${grade==='B+'?'selected':''}>B+ (Good - 7)</option>
+                        <option value="B" ${grade==='B'?'selected':''}>B (Above Average - 6)</option>
+                        <option value="C" ${grade==='C'?'selected':''}>C (Average - 5)</option>
+                        <option value="P" ${grade==='P'?'selected':''}>P (Pass - 4)</option>
+                        <option value="F" ${grade==='F'?'selected':''}>F (Fail - 0)</option>
+                    </select>
+                </td>
+                <td style="text-align: center;">
+                    <button class="btn-sim-action" onclick="deleteMockRow(this)" style="color: var(--error); border-color: rgba(220,38,38,0.2);">✕</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            calculateSimulator();
+        }
+
+        function deleteMockRow(btn) {
+            btn.closest('tr').remove();
+            calculateSimulator();
+            showToast('Row removed from Sandbox.', 'error');
+        }
+
+        function resetSimulator() {
+            const tbody = document.getElementById('mock-courses-tbody');
+            tbody.innerHTML = '';
+            
+            // Add two default simulator rows
+            addMockRow('Project Elective I', 4, 'A+');
+            addMockRow('Machine Learning Lab', 3, 'O');
+            
+            showToast('Simulator sandbox reset.', 'success');
+        }
+
+        function calculateSimulator() {
+            const rows = document.querySelectorAll('#mock-courses-tbody tr');
+            
+            let simulatedPointsSum = 0;
+            let simulatedCreditsSum = 0;
+            let simulatedCreditsExcludingF = 0;
+            let mockCreditsTotal = 0;
+
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('.sim-input');
+                const select = row.querySelector('.sim-select');
+                
+                const credits = parseFloat(inputs[1].value) || 0;
+                const grade = select.value;
+                const points = GRADE_POINTS[grade] || 0;
+
+                mockCreditsTotal += credits;
+
+                if (grade !== 'F') {
+                    simulatedPointsSum += (credits * points);
+                    simulatedCreditsExcludingF += credits;
+                }
+            });
+
+            // Calculate overall projected CGPA using exclusions
+            const totalPoints = originalPointsSum + simulatedPointsSum;
+            const totalCreditsExF = originalCreditsExcludingF + simulatedCreditsExcludingF;
+
+            let projectedCGPA = 0;
+            if (totalCreditsExF > 0) {
+                projectedCGPA = totalPoints / totalCreditsExF;
+            }
+
+            // Cap projected CGPA at 10.0
+            projectedCGPA = Math.min(projectedCGPA, 10.0);
+
+            // Update UI
+            document.getElementById('projected-cgpa').textContent = projectedCGPA.toFixed(2);
+            document.getElementById('projected-credits').textContent = `+${mockCreditsTotal}`;
+            document.getElementById('projected-credits-total').textContent = `Total: ${originalCredits + mockCreditsTotal} Credits`;
+
+            const diff = projectedCGPA - originalCGPA;
+            const diffElem = document.getElementById('projected-cgpa-diff');
+            if (diff > 0.005) {
+                diffElem.innerHTML = `<span style="color: var(--success); font-weight: 600;">↗ +${diff.toFixed(2)}</span> increase from actual CGPA`;
+            } else if (diff < -0.005) {
+                diffElem.innerHTML = `<span style="color: var(--error); font-weight: 600;">↘ ${diff.toFixed(2)}</span> decrease from actual CGPA`;
+            } else {
+                diffElem.innerHTML = `Identical to current standing (0.00 shift)`;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        init();
+    </script>
+</body>
+</html>

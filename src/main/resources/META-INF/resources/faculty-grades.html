@@ -3,416 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty Grade Management | GradePoint</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <title>Faculty Portal | GradePoint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/theme.css">
     <style>
-        :root {
-            --ink: #0d1117;
-            --paper: #faf9f7;
-            --parchment: #f5f3ef;
-            --crimson: #8b1538;
-            --crimson-light: #a5294d;
-            --gold: #c9a227;
-            --gold-light: #e4bc3a;
-            --slate: #475569;
-            --slate-light: #64748b;
-            --mist: #e2e8f0;
-            --white: #ffffff;
-            --success: #10b981;
-            --error: #ef4444;
-            --shadow-soft: 0 4px 24px rgba(13, 17, 23, 0.08);
-            --shadow-medium: 0 8px 40px rgba(13, 17, 23, 0.12);
+        .faculty-hero {
+            background: linear-gradient(135deg, var(--ink) 0%, #1a2230 100%);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--paper);
-            color: var(--ink);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        body::before {
+        .faculty-hero::before {
             content: '';
-            position: fixed;
-            inset: 0;
-            background: 
-                radial-gradient(ellipse at 20% 20%, rgba(139, 21, 56, 0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(201, 162, 39, 0.04) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        h1, h2, h3, h4 {
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
-
-        /* Navigation */
-        .navbar {
-            background: var(--white);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--mist);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow-soft);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--crimson);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--ink);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--crimson);
-        }
-
-        .btn-logout {
-            background: var(--crimson);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            border: none;
-            font-size: 0.9rem;
-            transition: background 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: var(--crimson-light);
-        }
-
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: var(--shadow-soft);
-            margin-bottom: 2rem;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--mist);
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            color: var(--ink);
-            margin: 0;
-        }
-
-        .card-meta {
-            color: var(--slate-light);
-            font-size: 0.9rem;
-        }
-
-        /* Forms */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--ink);
-        }
-
-        .form-input, .form-select {
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--mist);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--crimson);
-            box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: var(--crimson);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--crimson-light);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 21, 56, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--mist);
-            color: var(--ink);
-        }
-
-        .btn-secondary:hover {
-            background: var(--slate-light);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        /* Tables */
-        .table-responsive {
-            overflow-x: auto;
-            margin-top: 1.5rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        th {
-            background: var(--parchment);
-            color: var(--ink);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid var(--mist);
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--mist);
-        }
-
-        tr:hover {
-            background: var(--parchment);
-        }
-
-        /* Alerts */
-        .alert {
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: none;
-        }
-
-        .alert.show {
-            display: block;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border-left: 4px solid var(--success);
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #7f1d1d;
-            border-left: 4px solid var(--error);
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            border-bottom: 2px solid var(--mist);
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 1rem;
-            cursor: pointer;
-            color: var(--slate);
-            font-weight: 500;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            color: var(--crimson);
-            border-bottom-color: var(--crimson);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--slate-light);
-        }
-
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid var(--mist);
-            border-top-color: var(--crimson);
+            position: absolute;
+            right: -5%;
+            top: -20%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(139, 21, 56, 0.2) 0%, transparent 70%);
             border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            margin-left: 0.5rem;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .hero {
-            padding: 2rem 0;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .hero h2 {
-            font-size: 2rem;
-            color: var(--ink);
+        .faculty-hero h2 {
+            font-size: 2.8rem;
+            color: var(--white);
             margin-bottom: 0.5rem;
         }
 
-        .hero p {
-            color: var(--slate);
+        .faculty-hero p {
             font-size: 1rem;
-        }
-
-        .section-divider {
-            height: 1px;
-            background: var(--mist);
-            margin: 2rem 0;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .stat-box {
-            background: var(--parchment);
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--crimson);
-        }
-
-        .stat-label {
             color: var(--slate-light);
-            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
         }
 
-        .action-cell {
+        .faculty-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .faculty-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .bulk-floating-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-premium), 0 10px 40px rgba(0,0,0,0.3);
             display: flex;
-            gap: 0.5rem;
+            align-items: center;
+            gap: 1.5rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 500;
+        .bulk-floating-bar.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
-        .badge-primary {
-            background: rgba(139, 21, 56, 0.1);
+        .analytics-empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--slate-light);
+        }
+
+        .course-badge-icon {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--parchment);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--mist-dark);
             color: var(--crimson);
         }
 
-        .badge-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
+        /* Spreadsheet highlight */
+        .spreadsheet-select-custom {
+            width: 100%;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid var(--mist-dark);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .spreadsheet-select-custom:focus {
+            border-color: var(--crimson);
+            box-shadow: 0 0 0 3px var(--crimson-glow);
+        }
+
+        .modified-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 1.5s infinite;
+            opacity: 0;
+        }
+
+        .spreadsheet-row-modified .modified-indicator {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+
+    <!-- Header Navigation -->
     <nav class="nav-header">
         <div class="container nav-inner">
-            <a href="/home.html" class="nav-logo">
+            <a href="/faculty-grades.html" class="nav-logo">
                 <div class="nav-logo-icon">🎓</div>
                 <div class="nav-logo-text">
                     <h1>GradePoint</h1>
@@ -420,367 +150,538 @@
                 </div>
             </a>
             <div class="nav-links">
-                <a href="/home.html" class="nav-link">Home</a>
-                <a href="/analytics.html" class="nav-link">Analytics</a>
-                <a href="/transcript.html" class="nav-link">Transcript</a>
+                <a href="/faculty-grades.html" class="nav-link active">Grade Entry</a>
+                <a href="/analytics.html" class="nav-link">System Rankings</a>
+                <a href="/transcript.html" class="nav-link">Transcripts</a>
                 <a href="/profile.html" class="nav-link">Profile</a>
-                <a href="#" class="nav-link" onclick="logout()">Logout</a>
+                <div class="nav-user-info">
+                    <div class="user-pill">
+                        <span id="nav-username">Faculty</span>
+                        <span class="user-badge" style="background: var(--gold-dark);">Faculty</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="logout()">Logout</button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container">
-        <div class="hero">
-            <h2>Faculty Grade Management</h2>
-            <p>Enter and manage student grades by course or semester</p>
+    <!-- Main Container -->
+    <div class="container" style="margin-top: 2.5rem; margin-bottom: 5rem;">
+        
+        <!-- Welcome Hero -->
+        <div class="faculty-hero">
+            <h2 id="hero-welcome">Faculty Grade Hub</h2>
+            <p>Select courses, modify marks, and analyze classroom performance parameters instantly.</p>
         </div>
 
         <div id="alert-container"></div>
 
-        <!-- Tabs -->
-        <div class="card">
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('by-course')">By Course</button>
-                <button class="tab-btn" onclick="switchTab('by-semester')">By Semester</button>
-                <button class="tab-btn" onclick="switchTab('by-student')">By Student</button>
-            </div>
-
-            <!-- By Course Tab -->
-            <div id="by-course" class="tab-content active">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Select Course</label>
-                        <select class="form-select" id="course-select" onchange="loadEnrollmentsByCourse()">
-                            <option value="">Choose a course...</option>
-                        </select>
+        <!-- Layout grid: Left is bulk editor, Right is real-time analytics -->
+        <div class="faculty-grid">
+            
+            <!-- Left Side: Grade Spreadsheet -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">Grade Spreadsheet Grid</h3>
+                            <p class="card-subtitle">Select filters, input grades, and save collectively via single action.</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-primary" onclick="loadEnrollmentsByCourse()">Load Enrollments</button>
-                    </div>
-                </div>
 
-                <div id="enrollments-by-course" class="table-responsive" style="display: none;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Student ID</th>
-                                <th>Current Grade</th>
-                                <th>New Grade</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="course-enrollments-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- By Semester Tab -->
-            <div id="by-semester" class="tab-content">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Select Semester</label>
-                        <select class="form-select" id="semester-select" onchange="loadEnrollmentsBySemester()">
-                            <option value="">Choose a semester...</option>
-                        </select>
+                    <div class="tabs" style="margin-bottom: 1.5rem;">
+                        <button class="tab-btn active" onclick="switchFilterTab('course', this)">By Course</button>
+                        <button class="tab-btn" onclick="switchFilterTab('semester', this)">By Semester</button>
+                        <button class="tab-btn" onclick="switchFilterTab('student', this)">By Student</button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-primary" onclick="loadEnrollmentsBySemester()">Load Enrollments</button>
-                    </div>
-                </div>
 
-                <div id="enrollments-by-semester" class="table-responsive" style="display: none;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Course</th>
-                                <th>Current Grade</th>
-                                <th>New Grade</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="semester-enrollments-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- By Student Tab -->
-            <div id="by-student" class="tab-content">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Select Student</label>
-                        <select class="form-select" id="student-select" onchange="loadStudentEnrollments()">
-                            <option value="">Choose a student...</option>
-                        </select>
+                    <!-- Filter Control Groups -->
+                    <div id="filter-course-group" class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label class="form-label">Select Active Course</label>
+                            <select class="form-select" id="course-select" onchange="loadSpreadsheet('course')">
+                                <option value="">Loading courses...</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-primary" onclick="loadStudentEnrollments()">Load Enrollments</button>
-                    </div>
-                </div>
 
-                <div id="enrollments-by-student" class="table-responsive" style="display: none;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Course</th>
-                                <th>Semester</th>
-                                <th>Current Grade</th>
-                                <th>New Grade</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-enrollments-body"></tbody>
-                    </table>
+                    <div id="filter-semester-group" class="form-grid" style="margin-bottom: 2rem; display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Select Semester</label>
+                            <select class="form-select" id="semester-select" onchange="loadSpreadsheet('semester')">
+                                <option value="">Loading semesters...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="filter-student-group" class="form-grid" style="margin-bottom: 2rem; display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Select Student File</label>
+                            <select class="form-select" id="student-select" onchange="loadSpreadsheet('student')">
+                                <option value="">Loading students...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid Container -->
+                    <div id="spreadsheet-loading" style="display: none; text-align: center; padding: 3rem;">
+                        <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                        <p>Syncing class records...</p>
+                    </div>
+
+                    <div id="spreadsheet-empty" style="text-align: center; padding: 4rem 2rem; color: var(--slate-light);">
+                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🗂️</span>
+                        <p>Select a category filter above to populate the interactive grade spreadsheet.</p>
+                    </div>
+
+                    <div id="spreadsheet-wrap" class="table-wrap" style="display: none;">
+                        <table class="table">
+                            <thead>
+                                <tr id="spreadsheet-headers">
+                                    <!-- Rendered dynamically -->
+                                </tr>
+                            </thead>
+                            <tbody id="spreadsheet-tbody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
+
+            <!-- Right Side: Course Analytics & Distribution Charts -->
+            <div class="sticky-sidebar">
+                <div class="card" style="min-height: 400px;">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">Real-Time Performance Analytics</h3>
+                            <p class="card-subtitle" id="analytics-subtitle">Select a course to load analytical distributions.</p>
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div id="analytics-empty" class="analytics-empty-state">
+                        <span style="font-size: 3.5rem; display: block; margin-bottom: 1rem;">📈</span>
+                        <p>Real-time statistical averages, passed ratios, and grade bell curves populate once a course is active.</p>
+                    </div>
+
+                    <!-- Real Content -->
+                    <div id="analytics-content" style="display: none;">
+                        
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                            <div class="course-badge-icon">📊</div>
+                            <div>
+                                <h4 style="font-size: 1.3rem; color: var(--crimson); font-weight: 700;" id="anal-course-title">CS-101 Introduction to CS</h4>
+                                <p style="font-size: 0.8rem; text-transform: uppercase; color: var(--slate-light); letter-spacing: 0.05em;" id="anal-course-code">Course Details</p>
+                            </div>
+                        </div>
+
+                        <!-- Statistics Grid -->
+                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                            <div class="stat-box" style="padding: 1.25rem; border-left-width: 3px;">
+                                <div class="stat-value" style="font-size: 2.2rem;" id="anal-average">8.54</div>
+                                <div class="stat-label" style="font-size: 0.65rem;">Average GPA Points</div>
+                            </div>
+                            <div class="stat-box gold" style="padding: 1.25rem; border-left-width: 3px;">
+                                <div class="stat-value" style="font-size: 2.2rem;" id="anal-pass-rate">95%</div>
+                                <div class="stat-label" style="font-size: 0.65rem;">Pass Ratio</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate);">
+                            Grade Frequency Distribution
+                        </div>
+
+                        <!-- CSS distribution charts -->
+                        <div class="chart-bar-list" id="grade-distribution-bars">
+                            <!-- Rendered dynamically -->
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bulk Action Floating Bar -->
+    <div class="bulk-floating-bar" id="bulk-bar">
+        <div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--white);">
+                ⚠️ Spreadsheet records modified!
+            </div>
+            <div style="font-size: 0.75rem; color: var(--slate-light);" id="modified-count-text">
+                3 entries are pending database sync.
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-secondary btn-sm" onclick="discardSpreadsheetChanges()" style="background: rgba(255,255,255,0.05); color: var(--white); border: 1px solid rgba(255,255,255,0.1);">
+                Discard
+            </button>
+            <button class="btn btn-gold btn-sm" onclick="saveBulkChanges()">
+                Save All Changes
+            </button>
         </div>
     </div>
 
-    <script>
-        const API_BASE = '/api';
-        let token = localStorage.getItem('token');
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
 
-        if (!token) {
-            window.location.href = '/login.html';
+    <script src="/js/api-v2.js"></script>
+    <script>
+        let pendingChanges = {}; // Maps enrollmentId -> newGrade string
+        let originalEnrollments = [];
+        let activeFilterType = 'course'; // course, semester, student
+
+        // Check if token exists
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type} show`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✨' : '⚠️'}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        function switchFilterTab(type, btn) {
+            // Manage buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Show filter select
+            document.getElementById('filter-course-group').style.display = type === 'course' ? 'grid' : 'none';
+            document.getElementById('filter-semester-group').style.display = type === 'semester' ? 'grid' : 'none';
+            document.getElementById('filter-student-group').style.display = type === 'student' ? 'grid' : 'none';
+
+            activeFilterType = type;
+            discardSpreadsheetChanges();
+            resetGridDisplay();
+        }
+
+        function resetGridDisplay() {
+            document.getElementById('spreadsheet-wrap').style.display = 'none';
+            document.getElementById('spreadsheet-empty').style.display = 'block';
+            document.getElementById('spreadsheet-loading').style.display = 'none';
         }
 
         async function init() {
-            await loadCourses();
-            await loadSemesters();
-            await loadStudents();
-        }
-
-        async function loadCourses() {
-            try {
-                const res = await fetch(API_BASE + '/faculty/courses', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to load courses');
-                const courses = await res.json();
-                const select = document.getElementById('course-select');
-                select.innerHTML = '<option value="">Choose a course...</option>' +
-                    courses.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
-            } catch (err) {
-                showAlert('Error loading courses: ' + err.message, 'error');
+            const userJson = localStorage.getItem('user');
+            if (userJson) {
+                const user = JSON.parse(userJson);
+                document.getElementById('nav-username').textContent = user.username;
+                document.getElementById('hero-welcome').textContent = `Faculty Control: ${user.username}`;
             }
+
+            await loadFilters();
         }
 
-        async function loadSemesters() {
+        async function loadFilters() {
             try {
-                const res = await fetch(API_BASE + '/faculty/semesters', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to load semesters');
-                const semesters = await res.json();
-                const select = document.getElementById('semester-select');
-                select.innerHTML = '<option value="">Choose a semester...</option>' +
-                    semesters.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-            } catch (err) {
-                showAlert('Error loading semesters: ' + err.message, 'error');
-            }
-        }
+                // Fetch drop downs using client wrapper
+                const courses = await API.getCourses();
+                const courseSelect = document.getElementById('course-select');
+                courseSelect.innerHTML = '<option value="">Choose an active course...</option>' +
+                    courses.map(c => `<option value="${c.id}">${c.courseCode} - ${c.courseName}</option>`).join('');
 
-        async function loadStudents() {
-            try {
-                const res = await fetch(API_BASE + '/students', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to load students');
-                const students = await res.json();
-                const select = document.getElementById('student-select');
-                select.innerHTML = '<option value="">Choose a student...</option>' +
+                const semesters = await API.getSemesters();
+                const semesterSelect = document.getElementById('semester-select');
+                semesterSelect.innerHTML = '<option value="">Choose a semester...</option>' +
+                    semesters.map(s => `<option value="${s.id}">Semester ${s.semesterNumber}</option>`).join('');
+
+                const students = await API.getStudents();
+                const studentSelect = document.getElementById('student-select');
+                studentSelect.innerHTML = '<option value="">Choose a student file...</option>' +
                     students.map(s => `<option value="${s.id}">${s.name} (${s.studentId})</option>`).join('');
+
             } catch (err) {
-                showAlert('Error loading students: ' + err.message, 'error');
+                console.error(err);
+                showToast('Failed to pull portal filters from backend.', 'error');
             }
         }
 
-        async function loadEnrollmentsByCourse() {
-            const courseId = document.getElementById('course-select').value;
-            if (!courseId) return;
+        async function loadSpreadsheet(type) {
+            const loading = document.getElementById('spreadsheet-loading');
+            const empty = document.getElementById('spreadsheet-empty');
+            const wrap = document.getElementById('spreadsheet-wrap');
+
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+            wrap.style.display = 'none';
+
+            discardSpreadsheetChanges();
 
             try {
-                const res = await fetch(API_BASE + `/faculty/enrollments/course/${courseId}`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to load enrollments');
-                const enrollments = await res.json();
+                let enrollments = [];
+                let headersHtml = '';
                 
-                const tbody = document.getElementById('course-enrollments-body');
-                tbody.innerHTML = enrollments.map((e, idx) => `
-                    <tr>
-                        <td>${e.student?.name || 'N/A'}</td>
-                        <td>${e.student?.studentId || 'N/A'}</td>
-                        <td><span class="badge badge-primary">${e.grade || 'Not Graded'}</span></td>
-                        <td>
-                            <select class="form-select" id="grade-${idx}">
-                                <option value="">Select...</option>
-                                <option value="O">O</option>
-                                <option value="A+">A+</option>
-                                <option value="A">A</option>
-                                <option value="B+">B+</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="P">P</option>
-                                <option value="F">F</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-success btn-sm" onclick="updateGrade(${e.id}, ${idx})">Update</button>
-                        </td>
-                    </tr>
-                `).join('');
+                if (type === 'course') {
+                    const courseId = document.getElementById('course-select').value;
+                    if (!courseId) { resetGridDisplay(); return; }
 
-                document.getElementById('enrollments-by-course').style.display = 'block';
+                    enrollments = await API.getFacultyEnrollmentsByCourse(courseId);
+                    
+                    headersHtml = `
+                        <th><span class="modified-indicator"></span>Student Name</th>
+                        <th>Student Roll</th>
+                        <th>Credits</th>
+                        <th style="width: 25%;">Assigned Grade Letter</th>
+                    `;
+
+                    // Load analytics for this course
+                    loadCourseAnalytics(courseId);
+
+                } else if (type === 'semester') {
+                    const semesterId = document.getElementById('semester-select').value;
+                    if (!semesterId) { resetGridDisplay(); return; }
+
+                    enrollments = await API.getFacultyEnrollmentsBySemester(semesterId);
+
+                    headersHtml = `
+                        <th><span class="modified-indicator"></span>Student Name</th>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th style="width: 25%;">Assigned Grade Letter</th>
+                    `;
+                    hideCourseAnalytics();
+
+                } else if (type === 'student') {
+                    const studentId = document.getElementById('student-select').value;
+                    if (!studentId) { resetGridDisplay(); return; }
+
+                    enrollments = await API.getFacultyEnrollmentsByStudent(studentId);
+
+                    headersHtml = `
+                        <th><span class="modified-indicator"></span>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Semester</th>
+                        <th style="width: 25%;">Assigned Grade Letter</th>
+                    `;
+                    hideCourseAnalytics();
+                }
+
+                originalEnrollments = enrollments;
+
+                const tbody = document.getElementById('spreadsheet-tbody');
+                document.getElementById('spreadsheet-headers').innerHTML = headersHtml;
+
+                if (enrollments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--slate-light);">No enrollment files found matching filter.</td></tr>`;
+                } else {
+                    tbody.innerHTML = enrollments.map(e => {
+                        let col1 = '', col2 = '', col3 = '';
+
+                        if (type === 'course') {
+                            col1 = e.studentName || e.student?.name || 'N/A';
+                            col2 = e.studentRollNumber || e.student?.studentId || 'N/A';
+                            col3 = `${e.credits || e.course?.credits || 4} Credits`;
+                        } else if (type === 'semester') {
+                            col1 = e.studentName || e.student?.name || 'N/A';
+                            col2 = e.courseCode || e.course?.courseCode || 'N/A';
+                            col3 = e.courseName || e.course?.courseName || 'N/A';
+                        } else if (type === 'student') {
+                            col1 = e.courseCode || e.course?.courseCode || 'N/A';
+                            col2 = e.courseName || e.course?.courseName || 'N/A';
+                            col3 = `Semester ${e.semesterNumber || e.course?.semester?.semesterNumber || 'N/A'}`;
+                        }
+
+                        return `
+                            <tr id="row-${e.id}">
+                                <td>
+                                    <div style="display: flex; align-items: center;">
+                                        <span class="modified-indicator"></span>
+                                        <strong>${col1}</strong>
+                                    </div>
+                                </td>
+                                <td>${col2}</td>
+                                <td>${col3}</td>
+                                <td>
+                                    <select class="spreadsheet-select-custom" onchange="trackGradeChange(${e.id}, this)">
+                                        <option value="" ${!e.grade?'selected':''}>Not Graded</option>
+                                        <option value="O" ${e.grade==='O'?'selected':''}>O (Outstanding)</option>
+                                        <option value="A+" ${e.grade==='A+'?'selected':''}>A+ (Excellent)</option>
+                                        <option value="A" ${e.grade==='A'?'selected':''}>A (Very Good)</option>
+                                        <option value="B+" ${e.grade==='B+'?'selected':''}>B+ (Good)</option>
+                                        <option value="B" ${e.grade==='B'?'selected':''}>B (Above Average)</option>
+                                        <option value="C" ${e.grade==='C'?'selected':''}>C (Average)</option>
+                                        <option value="P" ${e.grade==='P'?'selected':''}>P (Pass)</option>
+                                        <option value="F" ${e.grade==='F'?'selected':''}>F (Fail)</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                loading.style.display = 'none';
+                wrap.style.display = 'block';
+
             } catch (err) {
-                showAlert('Error loading enrollments: ' + err.message, 'error');
+                console.error(err);
+                showToast('Failed to pull classroom spreadsheets.', 'error');
+                resetGridDisplay();
             }
         }
 
-        async function loadEnrollmentsBySemester() {
-            const semesterId = document.getElementById('semester-select').value;
-            if (!semesterId) return;
+        // Live analytical course metrics
+        async function loadCourseAnalytics(courseId) {
+            try {
+                const analytics = await API.getCourseAnalytics(courseId);
+                const courseSelect = document.getElementById('course-select');
+                const courseText = courseSelect.options[courseSelect.selectedIndex].text;
+
+                document.getElementById('anal-course-title').textContent = courseText.split(' - ')[1] || courseText;
+                document.getElementById('anal-course-code').textContent = courseText.split(' - ')[0] || 'Course Details';
+
+                document.getElementById('anal-average').textContent = (analytics.averageGrade || 0).toFixed(2);
+                
+                const total = analytics.totalStudents || 0;
+                const passed = analytics.passed || 0;
+                const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+                document.getElementById('anal-pass-rate').textContent = `${passRate}%`;
+
+                // Render CSS Grade Distribution Curve
+                const dist = analytics.gradeDistribution || {};
+                const list = document.getElementById('grade-distribution-bars');
+                list.innerHTML = '';
+
+                const GRADES_LIST = ['O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
+                let maxCount = 1;
+                GRADES_LIST.forEach(g => {
+                    if ((dist[g] || 0) > maxCount) maxCount = dist[g];
+                });
+
+                GRADES_LIST.forEach(g => {
+                    const count = dist[g] || 0;
+                    const pct = total > 0 ? (count / maxCount) * 100 : 0;
+
+                    const barHtml = `
+                        <div class="chart-bar-item">
+                            <span class="chart-bar-label">${g} Grade</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 0%;" id="bar-fill-${g}"></div>
+                            </div>
+                            <span class="chart-bar-value">${count}</span>
+                        </div>
+                    `;
+                    list.insertAdjacentHTML('beforeend', barHtml);
+
+                    // Smooth keyframe fill trigger
+                    setTimeout(() => {
+                        const fill = document.getElementById(`bar-fill-${g}`);
+                        if (fill) fill.style.width = `${pct}%`;
+                    }, 50);
+                });
+
+                document.getElementById('analytics-empty').style.display = 'none';
+                document.getElementById('analytics-content').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                hideCourseAnalytics();
+            }
+        }
+
+        function hideCourseAnalytics() {
+            document.getElementById('analytics-empty').style.display = 'block';
+            document.getElementById('analytics-content').style.display = 'none';
+        }
+
+        function trackGradeChange(enrollmentId, select) {
+            const row = document.getElementById(`row-${enrollmentId}`);
+            const originalGrade = originalEnrollments.find(e => e.id === enrollmentId)?.grade || '';
+            const newGrade = select.value;
+
+            if (originalGrade === newGrade) {
+                // Removed modification
+                delete pendingChanges[enrollmentId];
+                row.classList.remove('spreadsheet-row-modified');
+            } else {
+                pendingChanges[enrollmentId] = newGrade;
+                row.classList.add('spreadsheet-row-modified');
+            }
+
+            renderBulkFloatingBar();
+        }
+
+        function renderBulkFloatingBar() {
+            const bar = document.getElementById('bulk-bar');
+            const count = Object.keys(pendingChanges).length;
+
+            if (count > 0) {
+                document.getElementById('modified-count-text').textContent = `${count} spreadsheet row${count > 1 ? 's' : ''} modified and pending sync.`;
+                bar.classList.add('active');
+            } else {
+                bar.classList.remove('active');
+            }
+        }
+
+        function discardSpreadsheetChanges() {
+            pendingChanges = {};
+            document.querySelectorAll('#spreadsheet-tbody tr').forEach(row => {
+                row.classList.remove('spreadsheet-row-modified');
+            });
+            
+            // Re-sync selects to originals
+            originalEnrollments.forEach(e => {
+                const row = document.getElementById(`row-${e.id}`);
+                if (row) {
+                    const select = row.querySelector('.spreadsheet-select-custom');
+                    if (select) select.value = e.grade || '';
+                }
+            });
+
+            renderBulkFloatingBar();
+        }
+
+        async function saveBulkChanges() {
+            const count = Object.keys(pendingChanges).length;
+            if (count === 0) return;
+
+            // Pack bulk updates
+            const requests = Object.keys(pendingChanges).map(id => ({
+                enrollmentId: parseInt(id),
+                grade: pendingChanges[id] || null
+            }));
+
+            const bar = document.getElementById('bulk-bar');
+            bar.classList.remove('active');
 
             try {
-                const res = await fetch(API_BASE + `/faculty/enrollments/semester/${semesterId}`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to load enrollments');
-                const enrollments = await res.json();
+                // Call bulk PUT standard endpoint
+                await API.updateGradesBulk(requests);
+
+                showToast(`Successfully sync'd ${count} grade entries to university ledger.`, 'success');
                 
-                const tbody = document.getElementById('semester-enrollments-body');
-                tbody.innerHTML = enrollments.map((e, idx) => `
-                    <tr>
-                        <td>${e.student?.name || 'N/A'}</td>
-                        <td>${e.course?.code || 'N/A'}</td>
-                        <td><span class="badge badge-primary">${e.grade || 'Not Graded'}</span></td>
-                        <td>
-                            <select class="form-select" id="grade-${idx}">
-                                <option value="">Select...</option>
-                                <option value="O">O</option>
-                                <option value="A+">A+</option>
-                                <option value="A">A</option>
-                                <option value="B+">B+</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="P">P</option>
-                                <option value="F">F</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-success btn-sm" onclick="updateGrade(${e.id}, ${idx})">Update</button>
-                        </td>
-                    </tr>
-                `).join('');
-
-                document.getElementById('enrollments-by-semester').style.display = 'block';
-            } catch (err) {
-                showAlert('Error loading enrollments: ' + err.message, 'error');
-            }
-        }
-
-        async function loadStudentEnrollments() {
-            const studentId = document.getElementById('student-select').value;
-            if (!studentId) return;
-
-            try {
-                const res = await fetch(API_BASE + `/faculty/enrollments/student/${studentId}`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to load enrollments');
-                const enrollments = await res.json();
+                // Discard cache list
+                pendingChanges = {};
                 
-                const tbody = document.getElementById('student-enrollments-body');
-                tbody.innerHTML = enrollments.map((e, idx) => `
-                    <tr>
-                        <td>${e.course?.code || 'N/A'}</td>
-                        <td>${e.course?.semester?.name || 'N/A'}</td>
-                        <td><span class="badge badge-primary">${e.grade || 'Not Graded'}</span></td>
-                        <td>
-                            <select class="form-select" id="grade-${idx}">
-                                <option value="">Select...</option>
-                                <option value="O">O</option>
-                                <option value="A+">A+</option>
-                                <option value="A">A</option>
-                                <option value="B+">B+</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="P">P</option>
-                                <option value="F">F</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-success btn-sm" onclick="updateGrade(${e.id}, ${idx})">Update</button>
-                        </td>
-                    </tr>
-                `).join('');
+                // Re-trigger reload of spreadsheet
+                setTimeout(() => {
+                    loadSpreadsheet(activeFilterType);
+                }, 500);
 
-                document.getElementById('enrollments-by-student').style.display = 'block';
             } catch (err) {
-                showAlert('Error loading enrollments: ' + err.message, 'error');
+                console.error(err);
+                showToast('Failed to save bulk changes. Check roles or connectivity.', 'error');
+                bar.classList.add('active'); // Re-show bar on failure
             }
-        }
-
-        async function updateGrade(enrollmentId, rowIdx) {
-            const gradeSelect = document.getElementById(`grade-${rowIdx}`);
-            const newGrade = gradeSelect.value;
-
-            if (!newGrade) {
-                showAlert('Please select a grade', 'error');
-                return;
-            }
-
-            try {
-                const res = await fetch(API_BASE + '/faculty/grades', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ enrollmentId, grade: newGrade })
-                });
-
-                if (!res.ok) throw new Error('Failed to update grade');
-                showAlert('Grade updated successfully', 'success');
-                
-                // Reload enrollments
-                const activeTab = document.querySelector('.tab-btn.active').getAttribute('onclick');
-                eval(activeTab.replace('switchTab(', 'loadEnrollmentsBy').replace(')', '()'));
-            } catch (err) {
-                showAlert('Error updating grade: ' + err.message, 'error');
-            }
-        }
-
-        function switchTab(tabId) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-            // Show selected tab
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function showAlert(message, type) {
-            const alertContainer = document.getElementById('alert-container');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} show`;
-            alert.textContent = message;
-            alertContainer.innerHTML = '';
-            alertContainer.appendChild(alert);
-
-            setTimeout(() => alert.remove(), 5000);
         }
 
         function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login.html';
+            localStorage.clear();
+            window.location.href = '/';
         }
 
         init();

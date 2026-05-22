@@ -19,44 +19,26 @@ public class HomeController {
 
     @GetMapping("/")
     @ResponseBody
-    public String home() throws IOException {
-        return servePage("home.html");
+    public String index() throws IOException {
+        return servePage("index.html");
     }
 
-    @GetMapping("/home.html")
+    @GetMapping("/index.html")
     @ResponseBody
-    public String homeHtml() throws IOException {
-        return servePage("home.html");
+    public String indexHtml() throws IOException {
+        return servePage("index.html");
     }
 
-    @GetMapping("/analytics")
+    @GetMapping("/admin.html")
     @ResponseBody
-    public String analytics() throws IOException {
-        return servePage("analytics.html");
+    public String adminHtml() throws IOException {
+        return servePage("admin.html");
     }
 
-    @GetMapping("/transcript")
+    @GetMapping("/student.html")
     @ResponseBody
-    public String transcript() throws IOException {
-        return servePage("transcript.html");
-    }
-
-    @GetMapping("/faculty-grades")
-    @ResponseBody
-    public String facultyGrades() throws IOException {
-        return servePage("faculty-grades.html");
-    }
-
-    @GetMapping("/student-dashboard")
-    @ResponseBody
-    public String studentDashboard() throws IOException {
-        return servePage("student-dashboard.html");
-    }
-
-    @GetMapping("/profile")
-    @ResponseBody
-    public String profile() throws IOException {
-        return servePage("profile.html");
+    public String studentHtml() throws IOException {
+        return servePage("student.html");
     }
 
     private String servePage(String page) throws IOException {

@@ -51,6 +51,20 @@ public class EnrollmentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<EnrollmentResponse> findByCourseId(Long courseId) {
+        return enrollmentRepository.findByCourseId(courseId).stream()
+                .map(this::toEnrollmentResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EnrollmentResponse> findBySemesterId(Long semesterId) {
+        return enrollmentRepository.findBySemesterId(semesterId).stream()
+                .map(this::toEnrollmentResponse)
+                .toList();
+    }
+
     @Transactional
     public EnrollmentResponse create(EnrollmentRequest request) {
         Student student = studentRepository.findById(request.getStudentId())

@@ -6,8 +6,10 @@ import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.SemesterRepository;
 import com.gradecalculator.repository.StudentRepository;
+import com.gradecalculator.service.EnrollmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,20 +21,23 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/faculty")
+@Transactional
 public class FacultyGradeController {
 
     private final EnrollmentRepository enrollmentRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final SemesterRepository semesterRepository;
+    private final EnrollmentService enrollmentService;
 
     public FacultyGradeController(EnrollmentRepository enrollmentRepository,
             StudentRepository studentRepository, CourseRepository courseRepository,
-            SemesterRepository semesterRepository) {
+            SemesterRepository semesterRepository, EnrollmentService enrollmentService) {
         this.enrollmentRepository = enrollmentRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.semesterRepository = semesterRepository;
+        this.enrollmentService = enrollmentService;
     }
 
     /**
@@ -59,7 +64,7 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/course/{courseId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getEnrollmentsByCourse(@PathVariable Long courseId) {
-        return ResponseEntity.ok(enrollmentRepository.findByCourseId(courseId));
+        return ResponseEntity.ok(enrollmentService.findByCourseId(courseId));
     }
 
     /**
@@ -68,11 +73,7 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/semester/{semesterId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getEnrollmentsBySemester(@PathVariable Long semesterId) {
-        // Get all enrollments and filter by semester
-        var enrollments = enrollmentRepository.findAll().stream()
-            .filter(e -> e.getCourse().getSemester().getId().equals(semesterId))
-            .toList();
-        return ResponseEntity.ok(enrollments);
+        return ResponseEntity.ok(enrollmentService.findBySemesterId(semesterId));
     }
 
     /**
@@ -81,7 +82,7 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/student/{studentId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getStudentEnrollments(@PathVariable Long studentId) {
-        return ResponseEntity.ok(enrollmentRepository.findByStudentId(studentId));
+        return ResponseEntity.ok(enrollmentService.findByStudentId(studentId));
     }
 
     /**
