@@ -368,6 +368,16 @@
             activeFilterType = type;
             discardSpreadsheetChanges();
             resetGridDisplay();
+
+            // Dynamic captions update for course, semester, and student
+            let typeLabel = 'course';
+            if (type === 'semester') typeLabel = 'semester';
+            if (type === 'student') typeLabel = 'student';
+
+            document.getElementById('analytics-subtitle').textContent = `Select a ${typeLabel} to load analytical distributions.`;
+            document.querySelector('#analytics-empty p').textContent = `Real-time statistical averages, passed ratios, and grade bell curves populate once a ${typeLabel} is active.`;
+            
+            hideCourseAnalytics();
         }
 
         function resetGridDisplay() {
@@ -454,7 +464,10 @@
                         <th>Course Name</th>
                         <th style="width: 25%;">Assigned Grade Letter</th>
                     `;
-                    hideCourseAnalytics();
+                    
+                    const semesterSelect = document.getElementById('semester-select');
+                    const semesterText = semesterSelect.options[semesterSelect.selectedIndex].text;
+                    renderLocalAnalytics(semesterText, 'Semester Level Summary', enrollments);
 
                 } else if (type === 'student') {
                     const studentId = document.getElementById('student-select').value;
@@ -468,7 +481,10 @@
                         <th>Semester</th>
                         <th style="width: 25%;">Assigned Grade Letter</th>
                     `;
-                    hideCourseAnalytics();
+                    
+                    const studentSelect = document.getElementById('student-select');
+                    const studentText = studentSelect.options[studentSelect.selectedIndex].text;
+                    renderLocalAnalytics(studentText, 'Student Level Summary', enrollments);
                 }
 
                 originalEnrollments = enrollments;
@@ -591,6 +607,72 @@
                 console.error(err);
                 hideCourseAnalytics();
             }
+        }
+
+        // Render local client-side analytics dynamically
+        function renderLocalAnalytics(title, subtitle, enrollments) {
+            const GRADE_POINTS = {
+                'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0
+            };
+
+            document.getElementById('anal-course-title').textContent = title;
+            document.getElementById('anal-course-code').textContent = subtitle;
+
+            // Filter out enrollments without grades
+            const gradedEnrollments = enrollments.filter(e => e.grade && GRADE_POINTS[e.grade] !== undefined);
+            
+            let total = gradedEnrollments.length;
+            let sumPoints = 0;
+            let passed = 0;
+            const dist = { 'O': 0, 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C': 0, 'P': 0, 'F': 0 };
+
+            gradedEnrollments.forEach(e => {
+                const gp = GRADE_POINTS[e.grade];
+                sumPoints += gp;
+                dist[e.grade]++;
+                if (e.grade !== 'F') passed++;
+            });
+
+            const averageGrade = total > 0 ? (sumPoints / total) : 0;
+            const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+            document.getElementById('anal-average').textContent = averageGrade.toFixed(2);
+            document.getElementById('anal-pass-rate').textContent = `${passRate}%`;
+
+            // Render CSS Grade Distribution Curve
+            const list = document.getElementById('grade-distribution-bars');
+            list.innerHTML = '';
+
+            const GRADES_LIST = ['O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
+            let maxCount = 1;
+            GRADES_LIST.forEach(g => {
+                if ((dist[g] || 0) > maxCount) maxCount = dist[g];
+            });
+
+            GRADES_LIST.forEach(g => {
+                const count = dist[g] || 0;
+                const pct = total > 0 ? (count / maxCount) * 100 : 0;
+
+                const barHtml = `
+                    <div class="chart-bar-item">
+                        <span class="chart-bar-label">${g} Grade</span>
+                        <div class="chart-bar-track">
+                            <div class="chart-bar-fill" style="width: 0%;" id="bar-fill-${g}"></div>
+                        </div>
+                        <span class="chart-bar-value">${count}</span>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', barHtml);
+
+                // Smooth keyframe fill trigger
+                setTimeout(() => {
+                    const fill = document.getElementById(`bar-fill-${g}`);
+                    if (fill) fill.style.width = `${pct}%`;
+                }, 50);
+            });
+
+            document.getElementById('analytics-empty').style.display = 'none';
+            document.getElementById('analytics-content').style.display = 'block';
         }
 
         function hideCourseAnalytics() {

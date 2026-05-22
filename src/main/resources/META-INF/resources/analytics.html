@@ -215,8 +215,19 @@
         <!-- Role: FACULTY / ADMIN - Global Analytics Dashboard -->
         <div id="global-analytics-panel" style="display: none; margin-bottom: 3.5rem;">
             
-            <div style="margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--crimson); font-weight: 700;">
-                ✨ Institutional Excellence Leaderboard
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--crimson); font-weight: 700; margin-bottom: 0;">
+                    ✨ Institutional Excellence Leaderboard
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <label for="branch-filter" style="font-size: 0.85rem; font-weight: 600; color: var(--slate-light); text-transform: uppercase; letter-spacing: 0.05em;">Filter by Branch:</label>
+                    <select id="branch-filter" class="form-select" onchange="handleBranchFilterChange(this.value)" style="width: 260px; padding: 0.5rem 2rem 0.5rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--mist-dark); background-color: var(--parchment); font-size: 0.9rem; font-weight: 600; color: var(--ink); cursor: pointer; box-shadow: var(--shadow-soft);">
+                        <option value="All">All Branches</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics & Communication">Electronics & Communication</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Toppers Podium -->
@@ -264,6 +275,7 @@
                                 <th>Rank</th>
                                 <th>Student Name</th>
                                 <th>Roll Number</th>
+                                <th>Branch</th>
                                 <th>Cumulative CGPA</th>
                                 <th>Classification Status</th>
                             </tr>
@@ -470,6 +482,9 @@
                 const toppers = await API.getToppers(5);
                 renderToppersPodium(toppers);
 
+                // Reset branch selector
+                document.getElementById('branch-filter').value = 'All';
+
                 // Load Complete Rankings table
                 const rankings = await API.getRankings(50);
                 rankingsCached = rankings;
@@ -547,7 +562,7 @@
             const tbody = document.getElementById('rankings-tbody');
             
             if (rankings.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--slate-light);">Rankings catalog empty.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--slate-light);">Rankings catalog empty.</td></tr>';
                 return;
             }
 
@@ -571,11 +586,59 @@
                             </div>
                         </td>
                         <td>${r.rollNumber}</td>
+                        <td><span class="grade-badge ${r.branch === 'Computer Science' ? 'O' : r.branch === 'Information Technology' ? 'B-plus' : 'A-plus'}" style="border: none; padding: 0.15rem 0.5rem; font-size: 0.75rem;">${r.branch || 'Computer Science'}</span></td>
                         <td style="color: var(--crimson); font-weight: 700;">${r.cgpa.toFixed(2)}</td>
                         <td><span class="grade-badge ${bg}">${status}</span></td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function handleBranchFilterChange(selectedBranch) {
+            let filteredRankings = rankingsCached;
+            if (selectedBranch !== 'All') {
+                filteredRankings = rankingsCached.filter(r => r.branch === selectedBranch);
+            }
+
+            // 1. Re-render Toppers Podium with top 3 of filtered rankings
+            renderToppersPodium(filteredRankings.slice(0, 3));
+
+            // 2. Re-render Rankings Table with sequential rank indices calculated within this branch
+            renderRankingsTable(filteredRankings);
+
+            // 3. Recalculate Class Metrics dynamically using the filtered array
+            const cohortSize = filteredRankings.length;
+            let avgCGPA = 0;
+            let passRate = 0;
+            let topperName = '-';
+
+            if (cohortSize > 0) {
+                const cgpaSum = filteredRankings.reduce((sum, r) => sum + r.cgpa, 0);
+                avgCGPA = cgpaSum / cohortSize;
+
+                const passCount = filteredRankings.filter(r => r.cgpa >= 5.0).length;
+                passRate = (passCount / cohortSize) * 100;
+
+                topperName = filteredRankings[0].name;
+            }
+
+            document.getElementById('global-avg-cgpa').textContent = avgCGPA.toFixed(2);
+            document.getElementById('global-pass-rate').textContent = `${Math.round(passRate)}%`;
+            document.getElementById('global-student-count').textContent = cohortSize;
+            document.getElementById('global-topper-name').textContent = topperName;
+
+            // Setup topper inspect click binding if topper exists
+            const topperBox = document.getElementById('class-topper-box');
+            if (cohortSize > 0) {
+                const topperId = filteredRankings[0].studentId;
+                topperBox.onclick = () => {
+                    document.getElementById('student-picker').value = topperId;
+                    loadStudentAnalytics(topperId);
+                    showToast(`Showing topper ${topperName}'s trends.`, 'success');
+                };
+            } else {
+                topperBox.onclick = null;
+            }
         }
 
         function filterRankingsTable() {

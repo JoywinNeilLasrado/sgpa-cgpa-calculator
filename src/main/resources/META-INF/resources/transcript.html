@@ -185,7 +185,7 @@
         /* Registry Details Grid */
         .registry-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
             margin-bottom: 2rem;
             border-top: 1px solid var(--mist-dark);
@@ -699,6 +699,10 @@
                     <div class="registry-item">
                         <span class="registry-label">Student Full Name</span>
                         <span class="registry-value" id="student-name">-</span>
+                    </div>
+                    <div class="registry-item">
+                        <span class="registry-label">Academic Program / Branch</span>
+                        <span class="registry-value" id="student-branch">-</span>
                     </div>
                     <div class="registry-item">
                         <span class="registry-label">Institutional Roll Number</span>

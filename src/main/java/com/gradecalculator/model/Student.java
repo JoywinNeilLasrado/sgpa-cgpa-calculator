@@ -30,6 +30,9 @@ public class Student {
     @Column(name = "student_id", nullable = false)
     private String studentId; // University roll number
 
+    @Column(name = "branch")
+    private String branch = "Computer Science";
+
     @OneToMany(mappedBy = "student")
     @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
@@ -40,6 +43,13 @@ public class Student {
     public Student(String name, String studentId) {
         this.name = name;
         this.studentId = studentId;
+        this.branch = "Computer Science";
+    }
+
+    public Student(String name, String studentId, String branch) {
+        this.name = name;
+        this.studentId = studentId;
+        this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";
     }
 
     // Getters and Setters
@@ -65,6 +75,14 @@ public class Student {
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";
     }
 
     public List<Enrollment> getEnrollments() {

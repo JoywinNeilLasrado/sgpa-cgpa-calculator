@@ -179,12 +179,14 @@
             // 1. Get registry details of student if not cached
             let studentName = defaultName;
             let rollNumber = '-';
+            let branchName = 'Computer Science';
             
             try {
                 const registryStudent = await API.getStudent(studentId);
                 if (registryStudent) {
                     studentName = registryStudent.name;
                     rollNumber = registryStudent.studentId;
+                    branchName = registryStudent.branch || 'Computer Science';
                 }
             } catch (regErr) {
                 console.warn('Student details not in main registry list, using local username', regErr);
@@ -192,6 +194,7 @@
             }
 
             document.getElementById('student-name').textContent = studentName;
+            document.getElementById('student-branch').textContent = branchName;
             document.getElementById('student-roll').textContent = rollNumber;
 
             // 2. Fetch transcript grade ledger

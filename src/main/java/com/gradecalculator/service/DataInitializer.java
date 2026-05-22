@@ -58,26 +58,26 @@ public class DataInitializer implements CommandLineRunner {
 
         String studentPasswordHash = passwordEncoder.encode("password123");
 
-        // 12 students with different grades
-        createStudent("CS2024001", "Alice Johnson", "alice", allCourses, LetterGrade.O, LetterGrade.A_PLUS, studentPasswordHash);
-        createStudent("CS2024002", "Bob Smith", "bob", allCourses, LetterGrade.A_PLUS, LetterGrade.A, studentPasswordHash);
-        createStudent("CS2024003", "Charlie Brown", "charlie", allCourses, LetterGrade.A_PLUS, LetterGrade.A, studentPasswordHash);
-        createStudent("CS2024004", "Diana Prince", "diana", allCourses, LetterGrade.A, LetterGrade.B_PLUS, studentPasswordHash);
-        createStudent("CS2024005", "Edward Norton", "edward", allCourses, LetterGrade.A, LetterGrade.B_PLUS, studentPasswordHash);
-        createStudent("CS2024006", "Fiona Apple", "fiona", allCourses, LetterGrade.B_PLUS, LetterGrade.A, studentPasswordHash);
-        createStudent("CS2024007", "George Miller", "george", allCourses, LetterGrade.B_PLUS, LetterGrade.B, studentPasswordHash);
-        createStudent("CS2024008", "Hannah Lee", "hannah", allCourses, LetterGrade.B, LetterGrade.C, studentPasswordHash);
-        createStudent("CS2024009", "Ian Curtis", "ian", allCourses, LetterGrade.B, LetterGrade.C, studentPasswordHash);
-        createStudent("CS2024010", "Julia Roberts", "julia", allCourses, LetterGrade.C, LetterGrade.B_PLUS, studentPasswordHash);
-        createStudent("CS2024011", "Kevin Perry", "kevin", allCourses, LetterGrade.C, LetterGrade.C, studentPasswordHash);
-        createStudent("CS2024012", "Laura Palmer", "laura", allCourses, LetterGrade.C, LetterGrade.P, studentPasswordHash);
+        // 12 students divided into different branches with different grades
+        createStudent("CS2024001", "Alice Johnson", "alice", "Computer Science", allCourses, LetterGrade.O, LetterGrade.A_PLUS, studentPasswordHash);
+        createStudent("CS2024002", "Bob Smith", "bob", "Computer Science", allCourses, LetterGrade.A_PLUS, LetterGrade.A, studentPasswordHash);
+        createStudent("CS2024003", "Charlie Brown", "charlie", "Computer Science", allCourses, LetterGrade.A_PLUS, LetterGrade.A, studentPasswordHash);
+        createStudent("CS2024004", "Diana Prince", "diana", "Computer Science", allCourses, LetterGrade.A, LetterGrade.B_PLUS, studentPasswordHash);
+        createStudent("CS2024005", "Edward Norton", "edward", "Information Technology", allCourses, LetterGrade.A, LetterGrade.B_PLUS, studentPasswordHash);
+        createStudent("CS2024006", "Fiona Apple", "fiona", "Information Technology", allCourses, LetterGrade.B_PLUS, LetterGrade.A, studentPasswordHash);
+        createStudent("CS2024007", "George Miller", "george", "Information Technology", allCourses, LetterGrade.B_PLUS, LetterGrade.B, studentPasswordHash);
+        createStudent("CS2024008", "Hannah Lee", "hannah", "Information Technology", allCourses, LetterGrade.B, LetterGrade.C, studentPasswordHash);
+        createStudent("CS2024009", "Ian Curtis", "ian", "Electronics & Communication", allCourses, LetterGrade.B, LetterGrade.C, studentPasswordHash);
+        createStudent("CS2024010", "Julia Roberts", "julia", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.B_PLUS, studentPasswordHash);
+        createStudent("CS2024011", "Kevin Perry", "kevin", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.C, studentPasswordHash);
+        createStudent("CS2024012", "Laura Palmer", "laura", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.P, studentPasswordHash);
 
         createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
         createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
     }
 
-    private void createStudent(String roll, String name, String username, List<List<Course>> courses, LetterGrade best, LetterGrade avg, String passwordHash) {
-        Student student = studentRepository.save(new Student(name, roll));
+    private void createStudent(String roll, String name, String username, String branch, List<List<Course>> courses, LetterGrade best, LetterGrade avg, String passwordHash) {
+        Student student = studentRepository.save(new Student(name, roll, branch));
         
         AppUser u = new AppUser();
         u.setUsername(username);

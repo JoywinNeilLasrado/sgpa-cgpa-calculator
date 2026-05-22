@@ -41,12 +41,12 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(studentService.create(request.get("name"), request.get("studentId")));
+        return ResponseEntity.ok(studentService.create(request.get("name"), request.get("studentId"), request.get("branch")));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(studentService.update(id, request.get("name"), request.get("studentId")));
+        return ResponseEntity.ok(studentService.update(id, request.get("name"), request.get("studentId"), request.get("branch")));
     }
 
     @DeleteMapping("/{id}")

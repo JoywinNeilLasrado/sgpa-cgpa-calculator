@@ -29,15 +29,23 @@ public class StudentService {
     }
 
     public Student create(String name, String rollNumber) {
+        return create(name, rollNumber, "Computer Science");
+    }
+
+    public Student create(String name, String rollNumber, String branch) {
         validateStudent(name, rollNumber);
         studentRepository.findByStudentId(rollNumber)
                 .ifPresent(student -> {
                     throw new IllegalArgumentException("A student with this roll number already exists");
                 });
-        return studentRepository.save(new Student(name, rollNumber));
+        return studentRepository.save(new Student(name, rollNumber, branch));
     }
 
     public Student update(Long id, String name, String rollNumber) {
+        return update(id, name, rollNumber, "Computer Science");
+    }
+
+    public Student update(Long id, String name, String rollNumber, String branch) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
         validateStudent(name, rollNumber);
@@ -49,6 +57,7 @@ public class StudentService {
 
         student.setName(name);
         student.setStudentId(rollNumber);
+        student.setBranch(branch);
         return studentRepository.save(student);
     }
 

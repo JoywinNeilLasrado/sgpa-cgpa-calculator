@@ -50,13 +50,13 @@ const API = (() => {
         getStudents: () => request('/students', { method: 'GET' }),
         getStudent: (id) => request(`/students/${id}`, { method: 'GET' }),
         getStudentDashboard: (id) => request(`/students/${id}/dashboard`, { method: 'GET' }),
-        createStudent: (name, studentId) => request('/students', {
+        createStudent: (name, studentId, branch) => request('/students', {
             method: 'POST',
-            body: JSON.stringify({ name, studentId })
+            body: JSON.stringify({ name, studentId, branch })
         }),
-        updateStudent: (id, name, studentId) => request(`/students/${id}`, {
+        updateStudent: (id, name, studentId, branch) => request(`/students/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({ name, studentId })
+            body: JSON.stringify({ name, studentId, branch })
         }),
         deleteStudent: (id) => request(`/students/${id}`, { method: 'DELETE' }),
 

@@ -71,6 +71,7 @@ public class AnalyticsService {
             rank.put("name", student.getName());
             rank.put("rollNumber", student.getStudentId());
             rank.put("cgpa", cgpa);
+            rank.put("branch", student.getBranch() != null ? student.getBranch() : "Computer Science");
             rankings.add(rank);
         }
         

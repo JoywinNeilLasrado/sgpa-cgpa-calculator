@@ -256,7 +256,7 @@
         <!-- Welcome Hero -->
         <div class="student-hero">
             <h2 id="hero-welcome">Welcome back, Student</h2>
-            <p>Your academic standing, semester results, and interactive tools are aggregated below.</p>
+            <p id="hero-subtitle">Loading academic profile...</p>
         </div>
 
         <!-- Multi-column Circular/Luxury Stats -->
@@ -457,6 +457,11 @@
                 // Call student dashboard API
                 const data = await API.getStudent(currentStudentId);
                 const dashboard = await request(`/students/${currentStudentId}/dashboard`);
+                
+                if (data) {
+                    document.getElementById('hero-welcome').textContent = `Welcome back, ${data.name || 'Student'}`;
+                    document.getElementById('hero-subtitle').textContent = `ID: ${data.studentId || '-'} | Branch: ${data.branch || 'Computer Science'}`;
+                }
                 
                 // Keep values for sandbox simulator
                 originalCGPA = dashboard.cgpa || 0;
