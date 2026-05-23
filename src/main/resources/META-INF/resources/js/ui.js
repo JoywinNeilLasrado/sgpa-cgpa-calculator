@@ -156,3 +156,5 @@ const UI = (function() {
         debounce
     };
 })();
+
+export { UI };
