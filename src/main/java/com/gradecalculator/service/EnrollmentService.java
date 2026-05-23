@@ -75,7 +75,13 @@ public class EnrollmentService {
             throw new IllegalArgumentException("This student is already enrolled in this course");
         }
 
-        Enrollment enrollment = new Enrollment(student, course, LetterGrade.fromGrade(request.getGrade()));
+        String gradeStr = request.getGrade();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT") || a.getAuthority().equals("STUDENT"))) {
+            gradeStr = null;
+        }
+
+        Enrollment enrollment = new Enrollment(student, course, LetterGrade.fromGrade(gradeStr));
         return toEnrollmentResponse(enrollmentRepository.save(enrollment));
     }
 
@@ -123,8 +129,8 @@ public class EnrollmentService {
                 course.getCredits(),
                 course.getSemester().getId(),
                 course.getSemester().getSemesterNumber(),
-                enrollment.getGrade().getGrade(),
-                enrollment.getGrade().getGradePoints(),
+                enrollment.getGrade() != null ? enrollment.getGrade().getGrade() : null,
+                enrollment.getGrade() != null ? enrollment.getGrade().getGradePoints() : 0,
                 enrollment.getCreditPoints()
         );
     }

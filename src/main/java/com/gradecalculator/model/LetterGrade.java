@@ -40,6 +40,9 @@ public enum LetterGrade {
      * Get the LetterGrade from the grade string representation.
      */
     public static LetterGrade fromGrade(String grade) {
+        if (grade == null || grade.trim().isEmpty()) {
+            return null;
+        }
         for (LetterGrade lg : values()) {
             if (lg.grade.equalsIgnoreCase(grade)) {
                 return lg;

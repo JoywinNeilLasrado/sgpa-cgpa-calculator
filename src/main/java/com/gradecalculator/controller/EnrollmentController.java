@@ -52,7 +52,7 @@ public class EnrollmentController {
     }
 
     @PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and @sec.isStudentOwner(principal, #request.studentId))")
     public ResponseEntity<EnrollmentResponse> createEnrollment(@Valid @RequestBody EnrollmentRequest request) {
         return ResponseEntity.ok(enrollmentService.create(request));
     }

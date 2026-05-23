@@ -276,6 +276,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('semester-tab', this)">Semester Breakdown</button>
             <button class="tab-btn" onclick="switchTab('simulator-tab', this)">GPA Simulator Sandbox</button>
+            <button class="tab-btn" onclick="switchTab('registration-tab', this)">Self Course Registration</button>
             <button class="tab-btn" onclick="switchTab('quick-tab', this)">Academic Quick Actions</button>
         </div>
 
@@ -337,6 +338,34 @@
                             <p style="font-size: 0.8rem; color: var(--slate); margin-top: 0.5rem;" id="projected-credits-total">Total: 0 / 120 completed</p>
                         </div>
                         <button class="btn btn-primary" style="width: 100%;" onclick="resetSimulator()">Reset Sandbox</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Self Course Registration Tab -->
+        <div id="registration-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header" style="border-bottom: 1px solid var(--mist-dark); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+                    <div>
+                        <h3 class="card-title" style="color: var(--crimson);">Self Course Registration Portal</h3>
+                        <p class="card-subtitle">Select your target semester stage to register for available curriculum syllabus courses.</p>
+                    </div>
+                </div>
+
+                <!-- Semester Selector Stage -->
+                <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem; background: var(--parchment); padding: 1.5rem; border: 1px dashed var(--gold); border-radius: var(--radius-md);">
+                    <label for="reg-semester-select" style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--crimson-dark); min-width: max-content;">Target Semester Stage:</label>
+                    <select id="reg-semester-select" class="sim-select" style="max-width: 320px; font-weight: 500;" onchange="loadRegistrationCourses()">
+                        <option value="">-- Choose Semester Stage --</option>
+                    </select>
+                </div>
+
+                <!-- Registration Course Catalog -->
+                <div id="reg-courses-container">
+                    <div style="text-align: center; padding: 3rem; color: var(--slate-light);">
+                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📚</span>
+                        <p>Select a semester stage from the dropdown to load available courses.</p>
                     </div>
                 </div>
             </div>
@@ -429,6 +458,19 @@
             currentStudentId = user.userId || user.id;
 
             await fetchAndRenderDashboard();
+
+            // Populate registration semester dropdown
+            try {
+                const semesters = await API.getSemesters();
+                semesters.sort((a, b) => a.semesterNumber - b.semesterNumber);
+                const regSelect = document.getElementById('reg-semester-select');
+                if (regSelect) {
+                    regSelect.innerHTML = '<option value="">-- Choose Semester Stage --</option>' + 
+                        semesters.map(s => `<option value="${s.id}">Semester ${s.semesterNumber}</option>`).join('');
+                }
+            } catch (err) {
+                console.error("Failed to load registration semesters:", err);
+            }
         }
 
         async function fetchAndRenderDashboard() {
@@ -698,6 +740,108 @@
                 diffElem.innerHTML = `<span style="color: var(--error); font-weight: 600;">↘ ${diff.toFixed(2)}</span> decrease from actual CGPA`;
             } else {
                 diffElem.innerHTML = `Identical to current standing (0.00 shift)`;
+            }
+        }
+
+        async function loadRegistrationCourses() {
+            const select = document.getElementById('reg-semester-select');
+            const semesterId = select.value;
+            const container = document.getElementById('reg-courses-container');
+            
+            if (!semesterId) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--slate-light);">
+                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📚</span>
+                        <p>Select a semester stage from the dropdown to load available courses.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                    <p>Loading course catalog...</p>
+                </div>
+            `;
+
+            try {
+                // Fetch all courses in this semester
+                const courses = await API.getCoursesBySemester(semesterId);
+                // Fetch all current enrollments of the student
+                const studentEnrollments = await API.getEnrollmentsByStudent(currentStudentId);
+                
+                // Map registered course IDs
+                const registeredCourseIds = new Set(studentEnrollments.map(e => e.courseId));
+
+                if (courses.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: var(--slate-light);">
+                            <p>No courses are assigned to this semester stage yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let rowsHtml = '';
+                courses.forEach(course => {
+                    const isRegistered = registeredCourseIds.has(course.id);
+                    const actionBtn = isRegistered 
+                        ? `<span class="badge" style="background: var(--success-bg); color: var(--success); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-weight: 600;">✓ Registered</span>`
+                        : `<button class="btn btn-primary btn-sm" style="padding: 0.5rem 1.2rem; min-width: 110px;" onclick="registerCourse(${course.id}, '${course.courseCode}')">Register</button>`;
+
+                    rowsHtml += `
+                        <tr style="transition: all 0.2s ease;">
+                            <td><strong style="color: var(--crimson); font-size: 0.95rem;">${course.courseCode}</strong></td>
+                            <td style="font-weight: 500;">${course.courseName}</td>
+                            <td><span style="background: rgba(201, 162, 39, 0.1); color: var(--gold-dark); padding: 0.25rem 0.50rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600;">${course.credits} Credits</span></td>
+                            <td style="text-align: right; padding-right: 1.5rem;">${actionBtn}</td>
+                        </tr>
+                    `;
+                });
+
+                container.innerHTML = `
+                    <div class="table-wrap" style="border: 1px solid var(--mist-dark); border-radius: var(--radius-md); overflow: hidden;">
+                        <table class="table" style="margin-bottom: 0;">
+                            <thead>
+                                <tr style="background: var(--parchment);">
+                                    <th style="width: 20%;">Course Code</th>
+                                    <th style="width: 50%;">Course Name</th>
+                                    <th style="width: 15%;">Weightage</th>
+                                    <th style="width: 15%; text-align: right; padding-right: 1.5rem;">Status / Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                console.error("Failed to load courses for registration:", err);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--error);">
+                        <p>Error loading courses. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function registerCourse(courseId, courseCode) {
+            try {
+                // Call create enrollment endpoint
+                await API.createEnrollment(currentStudentId, courseId);
+                
+                showToast(`Enrolled in ${courseCode} successfully!`, 'success');
+                
+                // Reload course list to update button state to '✓ Registered'
+                await loadRegistrationCourses();
+                
+                // Also update the dashboard stats and Breakdown in the background!
+                await fetchAndRenderDashboard();
+            } catch (err) {
+                console.error("Registration error:", err);
+                showToast(err.message || 'Self-registration failed.', 'error');
             }
         }
 

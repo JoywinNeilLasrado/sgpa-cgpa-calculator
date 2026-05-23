@@ -75,14 +75,16 @@ public class DashboardService {
                 Course course = e.getCourse();
                 LetterGrade grade = e.getGrade();
                 
-                if (grade == null) continue;
-                totalWithGrades++;
-                
-                if (grade != LetterGrade.F) {
-                    totalPassed++;
-                    int cp = course.getCredits() * grade.getGradePoints();
+                if (grade != null) {
+                    totalWithGrades++;
+                    int gp = grade.getGradePoints();
+                    int cp = course.getCredits() * gp;
                     semCredits += course.getCredits();
                     semPoints += cp;
+                    
+                    if (grade != LetterGrade.F) {
+                        totalPassed++;
+                    }
                     
                     // Count grades
                     gradeDistribution.put(grade.getGrade(), gradeDistribution.getOrDefault(grade.getGrade(), 0) + 1);
@@ -96,21 +98,31 @@ public class DashboardService {
                             course.getCourseName(),
                             course.getCredits(),
                             grade.getGrade(),
-                            grade.getGradePoints(),
+                            gp,
                             cp
+                    ));
+                } else {
+                    // Add ungraded course result
+                    courseResults.add(new CourseResultResponse(
+                            course.getCourseCode(),
+                            course.getCourseName(),
+                            course.getCredits(),
+                            null,
+                            0,
+                            0
                     ));
                 }
             }
 
+            double semGpa = semCredits > 0 ? roundToTwo((double) semPoints / semCredits) : 0.0;
             if (semCredits > 0) {
-                double semGpa = roundToTwo((double) semPoints / semCredits);
                 sgpaBySemester.put("Sem " + sem.getSemesterNumber(), semGpa);
-                
-                // Create semester result for transcript
-                SemesterResultResponse semResult = new SemesterResultResponse(sem.getSemesterNumber(), semGpa, semCredits, semPoints);
-                semResult.setCourses(courseResults);
-                semesterResults.add(semResult);
             }
+            
+            // Create semester result for transcript
+            SemesterResultResponse semResult = new SemesterResultResponse(sem.getSemesterNumber(), semGpa, semCredits, semPoints);
+            semResult.setCourses(courseResults);
+            semesterResults.add(semResult);
         }
 
         response.setSgpaBySemester(sgpaBySemester);
@@ -140,9 +152,9 @@ public class DashboardService {
                             course.getCourseCode(),
                             course.getCourseName(),
                             course.getCredits(),
-                            grade.getGrade(),
-                            grade.getGradePoints(),
-                            course.getCredits() * grade.getGradePoints()
+                            grade != null ? grade.getGrade() : null,
+                            grade != null ? grade.getGradePoints() : 0,
+                            grade != null ? course.getCredits() * grade.getGradePoints() : 0
                     );
                 })
                 .collect(Collectors.toList());
