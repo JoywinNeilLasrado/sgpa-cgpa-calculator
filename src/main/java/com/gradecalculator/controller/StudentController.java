@@ -45,14 +45,14 @@ public class StudentController {
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Student> createStudent(@RequestBody Map<String, String> request) {
         validateStudentRequest(request);
-        return ResponseEntity.ok(studentService.create(request.get("name"), request.get("studentId"), request.get("branch")));
+        return ResponseEntity.ok(studentService.create(request.get("name"), request.get("studentId"), request.get("branch"), request.get("dateOfBirth")));
     }
 
     @PutMapping("/{id}")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Map<String, String> request) {
         validateStudentRequest(request);
-        return ResponseEntity.ok(studentService.update(id, request.get("name"), request.get("studentId"), request.get("branch")));
+        return ResponseEntity.ok(studentService.update(id, request.get("name"), request.get("studentId"), request.get("branch"), request.get("dateOfBirth")));
     }
 
     @DeleteMapping("/{id}")

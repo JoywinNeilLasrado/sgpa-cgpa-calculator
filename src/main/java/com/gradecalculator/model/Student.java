@@ -36,6 +36,9 @@ public class Student {
     @Column(name = "username", unique = true)
     private String username;
 
+    @Column(name = "date_of_birth")
+    private String dateOfBirth;
+
     @OneToMany(mappedBy = "student")
     @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
@@ -94,6 +97,14 @@ public class Student {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public List<Enrollment> getEnrollments() {

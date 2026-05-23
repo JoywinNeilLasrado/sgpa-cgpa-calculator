@@ -43,7 +43,9 @@ public class UserService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
-        user.setName(request.getUsername()); // Fix: Name cannot be null in DB
+        user.setName(request.getName() != null && !request.getName().trim().isEmpty() ? request.getName() : request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setDepartment(request.getDepartment());
 
         return userRepository.save(user);
     }

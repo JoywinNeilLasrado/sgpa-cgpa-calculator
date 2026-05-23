@@ -84,13 +84,13 @@ const API = (() => {
         getStudents: () => request('/students', { method: 'GET' }),
         getStudent: (id) => request(`/students/${id}`, { method: 'GET' }),
         getStudentDashboard: (id) => request(`/students/${id}/dashboard`, { method: 'GET' }),
-        createStudent: (name, studentId, branch) => request('/students', {
+        createStudent: (name, studentId, branch, dateOfBirth) => request('/students', {
             method: 'POST',
-            body: JSON.stringify({ name, studentId, branch })
+            body: JSON.stringify({ name, studentId, branch, dateOfBirth })
         }),
-        updateStudent: (id, name, studentId, branch) => request(`/students/${id}`, {
+        updateStudent: (id, name, studentId, branch, dateOfBirth) => request(`/students/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({ name, studentId, branch })
+            body: JSON.stringify({ name, studentId, branch, dateOfBirth })
         }),
         deleteStudent: (id) => request(`/students/${id}`, { method: 'DELETE' }),
 
@@ -153,6 +153,11 @@ const API = (() => {
                 method: 'POST',
                 body: JSON.stringify({ name, username, password, email, department })
             }),
+        updateFaculty: (id, name, username, email, department) =>
+            request(`/faculty/members/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ name, username, email, department })
+            }),
         deleteFaculty: (id) => request(`/faculty/members/${id}`, { method: 'DELETE' }),
 
         getFacultyEnrollmentsByCourse: (courseId) => 
@@ -176,6 +181,11 @@ const API = (() => {
         createDepartment: (name, code) =>
             request('/departments', {
                 method: 'POST',
+                body: JSON.stringify({ name, code })
+            }),
+        updateDepartment: (id, name, code) =>
+            request(`/departments/${id}`, {
+                method: 'PUT',
                 body: JSON.stringify({ name, code })
             }),
         deleteDepartment: (id) => request(`/departments/${id}`, { method: 'DELETE' }),

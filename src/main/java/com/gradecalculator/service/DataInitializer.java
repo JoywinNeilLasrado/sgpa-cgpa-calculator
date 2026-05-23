@@ -126,14 +126,19 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createStudent(String roll, String name, String username, String branch, List<List<Course>> courses, LetterGrade best, LetterGrade avg, String passwordHash) {
+        String suffix = roll.substring(roll.length() - 2);
+        String dob = "2004-01-" + suffix;
+        String upperRoll = roll.trim().toUpperCase();
+
         Student student = new Student(name, roll, branch);
-        student.setUsername(username);
+        student.setUsername(upperRoll);
+        student.setDateOfBirth(dob);
         student = studentRepository.save(student);
         
         AppUser u = new AppUser();
-        u.setUsername(username);
-        u.setName(username); // default name same as username
-        u.setPassword(passwordHash);
+        u.setUsername(upperRoll);
+        u.setName(upperRoll);
+        u.setPassword(passwordEncoder.encode(dob)); // Password is date of birth!
         u.setRole(AppUser.Role.STUDENT);
         try { userRepository.save(u); } catch (Exception e) {}
 

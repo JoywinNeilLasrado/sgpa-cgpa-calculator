@@ -14,19 +14,24 @@ export function renderStudentList(tbody, students) {
   if (!Array.isArray(students) || students.length === 0) {
     const emptyRow = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 5;
+    td.colSpan = 6;
     td.textContent = "No student records found.";
     emptyRow.appendChild(td);
     tbody.appendChild(emptyRow);
     return;
   }
   students.forEach((s) => {
-    const actions = `<button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id})">Delete</button>`;
+    const actions = `
+      <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editStudent(${s.id}, '${s.name}', '${s.studentId}', '${s.branch}', '${s.dateOfBirth || ''}')">Edit</button>
+      <button class="btn btn-danger btn-sm" style="margin-right: 0.5rem;" onclick="deleteStudent(${s.id})">Delete</button>
+      <button class="btn btn-warning btn-sm" onclick="openPasswordModal('${s.username}')">Change Password</button>
+    `;
     const row = UI.createTableRow([
       s.id,
       s.name,
       s.studentId,
       s.branch,
+      '••••',
     ], actions);
     tbody.appendChild(row);
   });

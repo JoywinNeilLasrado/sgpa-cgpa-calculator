@@ -50,4 +50,28 @@ public class FacultyService {
         course.setFaculty(faculty);
         courseRepository.save(course);
     }
+
+    @Transactional
+    public AppUser updateFacultyMember(Long id, String name, String username, String email, String department) {
+        AppUser faculty = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Faculty member not found"));
+
+        if (!faculty.getUsername().equalsIgnoreCase(username) && userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Faculty name cannot be empty");
+        }
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+
+        faculty.setName(name.trim());
+        faculty.setUsername(username.trim());
+        faculty.setEmail(email != null ? email.trim() : null);
+        faculty.setDepartment(department != null ? department.trim() : null);
+
+        return userRepository.save(faculty);
+    }
 }

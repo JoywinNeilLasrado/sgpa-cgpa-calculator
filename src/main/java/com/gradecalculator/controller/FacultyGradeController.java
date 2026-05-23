@@ -71,6 +71,16 @@ public class FacultyGradeController {
         return ResponseEntity.ok("Faculty member deleted");
     }
 
+    @PutMapping("/members/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateFaculty(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String name = request.get("name");
+        String username = request.get("username");
+        String email = request.get("email");
+        String department = request.get("department");
+        return ResponseEntity.ok(facultyService.updateFacultyMember(id, name, username, email, department));
+    }
+
 
     // New endpoint to assign a faculty to a course
     @PostMapping("/assign-course")
