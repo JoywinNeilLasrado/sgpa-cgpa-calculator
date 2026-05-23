@@ -97,20 +97,8 @@ public class SecurityConfig {
                 auth
                     .requestMatchers("/", "/index.html", "/admin.html", "/student.html", "/home.html", "/login.html", "/analytics.html", "/transcript.html", "/faculty-grades.html", "/profile.html", "/student-dashboard.html", "/favicon.ico").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/grades/**").permitAll()
-                    .requestMatchers(
-                        "/api/students/**",
-                        "/api/semesters/**",
-                        "/api/courses/**",
-                        "/api/enrollments/**",
-                        "/api/results/**",
-                        "/api/sgpa/**",
-                        "/api/cgpa/**",
-                        "/api/grade-scale",
-                        "/api/faculty/**",
-                        "/api/departments/**"
-                    ).permitAll();
+                    .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/grade-scale", "/api/grades/from-marks").permitAll();
                 
                 if (h2ConsoleEnabled) {
                     auth.requestMatchers("/h2-console/**").permitAll();

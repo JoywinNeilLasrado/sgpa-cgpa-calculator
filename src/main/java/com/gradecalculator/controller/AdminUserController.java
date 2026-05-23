@@ -16,6 +16,7 @@ public class AdminUserController {
     }
 
     @PutMapping("/password")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> changePassword(@RequestBody PasswordChangeRequest request) {
         if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
             userService.adminChangePasswordByUsername(request.getUsername(), request.getNewPassword());

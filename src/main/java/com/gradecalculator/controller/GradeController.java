@@ -32,21 +32,28 @@ public class GradeController {
     }
 
     @GetMapping("/sgpa/student/{studentId}/semester/{semesterId}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
     public ResponseEntity<SgpaResponse> calculateSGPA(
             @PathVariable Long studentId,
-            @PathVariable Long semesterId) {
+            @PathVariable Long semesterId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(gradeCalculationService.calculateSGPA(studentId, semesterId));
     }
 
     @GetMapping("/cgpa/student/{studentId}/semester/{semesterId}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
     public ResponseEntity<CgpaResponse> calculateCGPA(
             @PathVariable Long studentId,
-            @PathVariable Long semesterId) {
+            @PathVariable Long semesterId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(gradeCalculationService.calculateCGPA(studentId, semesterId));
     }
 
     @GetMapping("/cgpa/student/{studentId}")
-    public ResponseEntity<CgpaResponse> calculateOverallCGPA(@PathVariable Long studentId) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
+    public ResponseEntity<CgpaResponse> calculateOverallCGPA(
+            @PathVariable Long studentId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(gradeCalculationService.calculateOverallCGPA(studentId));
     }
 

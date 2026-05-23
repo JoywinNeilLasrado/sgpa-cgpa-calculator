@@ -28,30 +28,35 @@ public class StudentController {
     }
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY')")
     public ResponseEntity<List<Student>> getAllStudents() {
         return ResponseEntity.ok(studentService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudent(@PathVariable Long id) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #id)")
+    public ResponseEntity<Student> getStudent(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return studentService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Student> createStudent(@RequestBody Map<String, String> request) {
         validateStudentRequest(request);
         return ResponseEntity.ok(studentService.create(request.get("name"), request.get("studentId"), request.get("branch")));
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Map<String, String> request) {
         validateStudentRequest(request);
         return ResponseEntity.ok(studentService.update(id, request.get("name"), request.get("studentId"), request.get("branch")));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.delete(id);
         return ResponseEntity.noContent().build();

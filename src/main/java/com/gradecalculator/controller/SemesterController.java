@@ -28,11 +28,13 @@ public class SemesterController {
     }
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Semester>> getAllSemesters() {
         return ResponseEntity.ok(semesterService.findAll());
     }
 
     @GetMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<Semester> getSemester(@PathVariable Long id) {
         return semesterService.findById(id)
                 .map(ResponseEntity::ok)
@@ -40,18 +42,21 @@ public class SemesterController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Semester> createSemester(@RequestBody Map<String, Integer> request) {
         validateSemesterRequest(request);
         return ResponseEntity.ok(semesterService.create(request.get("semesterNumber")));
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Semester> updateSemester(@PathVariable Long id, @RequestBody Map<String, Integer> request) {
         validateSemesterRequest(request);
         return ResponseEntity.ok(semesterService.update(id, request.get("semesterNumber")));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSemester(@PathVariable Long id) {
         semesterService.delete(id);
         return ResponseEntity.noContent().build();

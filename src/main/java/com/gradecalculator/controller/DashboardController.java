@@ -24,14 +24,19 @@ public class DashboardController {
     }
 
     @GetMapping("/students/{id}/dashboard")
-    public ResponseEntity<DashboardResponse> getStudentDashboard(@PathVariable Long id) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #id)")
+    public ResponseEntity<DashboardResponse> getStudentDashboard(
+            @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(dashboardService.getStudentDashboard(id));
     }
 
     @GetMapping("/results/student/{studentId}/semester/{semesterId}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
     public ResponseEntity<List<SemesterResultRowResponse>> getSemesterResult(
             @PathVariable Long studentId,
-            @PathVariable Long semesterId) {
+            @PathVariable Long semesterId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(dashboardService.getSemesterResult(studentId, semesterId));
     }
 }

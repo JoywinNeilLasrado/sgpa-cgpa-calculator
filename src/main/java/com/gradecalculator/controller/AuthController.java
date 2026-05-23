@@ -55,6 +55,7 @@ public class AuthController {
      * Register - POST /api/auth/register (Admin only initially)
      */
     @PostMapping("/register")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AppUser> register(@Valid @RequestBody RegisterRequest request) {
         AppUser user = userService.register(request);
         return ResponseEntity.ok(user);

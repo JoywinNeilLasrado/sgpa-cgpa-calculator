@@ -20,11 +20,13 @@ public class DepartmentController {
     }
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Department>> getAllDepartments() {
         return ResponseEntity.ok(departmentService.findAll());
     }
 
     @GetMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<Department> getDepartment(@PathVariable Long id) {
         return departmentService.findById(id)
                 .map(ResponseEntity::ok)
@@ -32,18 +34,21 @@ public class DepartmentController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Department> createDepartment(@RequestBody Map<String, String> request) {
         validateDepartmentRequest(request);
         return ResponseEntity.ok(departmentService.create(request.get("name"), request.get("code")));
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Map<String, String> request) {
         validateDepartmentRequest(request);
         return ResponseEntity.ok(departmentService.update(id, request.get("name"), request.get("code")));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.delete(id);
         return ResponseEntity.noContent().build();

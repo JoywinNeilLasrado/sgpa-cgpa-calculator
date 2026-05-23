@@ -25,7 +25,10 @@ public class AnalyticsController {
      * Get SGPA trends for charts
      */
     @GetMapping("/sgpa-trends/{studentId}")
-    public ResponseEntity<List<Map<String, Object>>> getSGPATrends(@PathVariable Long studentId) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
+    public ResponseEntity<List<Map<String, Object>>> getSGPATrends(
+            @PathVariable Long studentId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(analyticsService.getSGPATrends(studentId));
     }
 

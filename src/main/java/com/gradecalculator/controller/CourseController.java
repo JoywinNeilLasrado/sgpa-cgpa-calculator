@@ -29,16 +29,19 @@ public class CourseController {
     }
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Course>> getAllCourses() {
         return ResponseEntity.ok(courseService.findAll());
     }
 
     @GetMapping("/semester/{semesterId}")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Course>> getCoursesBySemester(@PathVariable Long semesterId) {
         return ResponseEntity.ok(courseService.findBySemesterId(semesterId));
     }
 
     @GetMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public ResponseEntity<Course> getCourse(@PathVariable Long id) {
         return courseService.findById(id)
                 .map(ResponseEntity::ok)
@@ -46,6 +49,7 @@ public class CourseController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Course> createCourse(@Valid @RequestBody CourseRequest request) {
         return ResponseEntity.ok(courseService.create(
                 request.getCourseCode(),
@@ -57,6 +61,7 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Course> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequest request) {
         return ResponseEntity.ok(courseService.update(
                 id,
@@ -69,6 +74,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
         courseService.delete(id);
         return ResponseEntity.noContent().build();

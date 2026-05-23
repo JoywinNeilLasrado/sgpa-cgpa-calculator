@@ -29,28 +29,36 @@ public class EnrollmentController {
     }
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY')")
     public ResponseEntity<List<EnrollmentResponse>> getAllEnrollments() {
         return ResponseEntity.ok(enrollmentService.findAll());
     }
 
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<EnrollmentResponse>> getEnrollmentsByStudent(@PathVariable Long studentId) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
+    public ResponseEntity<List<EnrollmentResponse>> getEnrollmentsByStudent(
+            @PathVariable Long studentId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(enrollmentService.findByStudentId(studentId));
     }
 
     @GetMapping("/student/{studentId}/semester/{semesterId}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY') or @sec.isStudentOwner(principal, #studentId)")
     public ResponseEntity<List<EnrollmentResponse>> getEnrollmentsByStudentAndSemester(
             @PathVariable Long studentId,
-            @PathVariable Long semesterId) {
+            @PathVariable Long semesterId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.gradecalculator.security.UserPrincipal principal) {
         return ResponseEntity.ok(enrollmentService.findByStudentIdAndSemesterId(studentId, semesterId));
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EnrollmentResponse> createEnrollment(@Valid @RequestBody EnrollmentRequest request) {
         return ResponseEntity.ok(enrollmentService.create(request));
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EnrollmentResponse> updateEnrollment(
             @PathVariable Long id,
             @Valid @RequestBody EnrollmentRequest request) {
@@ -58,6 +66,7 @@ public class EnrollmentController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteEnrollment(@PathVariable Long id) {
         enrollmentService.delete(id);
         return ResponseEntity.noContent().build();
