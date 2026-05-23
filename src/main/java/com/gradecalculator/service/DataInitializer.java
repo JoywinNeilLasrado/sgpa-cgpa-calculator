@@ -90,8 +90,12 @@ public class DataInitializer implements CommandLineRunner {
                 if (s < 3) {
                     if (code.startsWith("CS")) {
                         course.setFaculty(profJones);
-                    } else if (code.startsWith("MA") || code.startsWith("PH") || code.startsWith("EN")) {
+                    } else if (code.startsWith("MA")) {
                         course.setFaculty(profSmith);
+                    } else if (code.startsWith("PH")) {
+                        course.setFaculty(profSmith);
+                    } else if (code.startsWith("EN")) {
+                        course.setFaculty(defaultFaculty);
                     } else {
                         course.setFaculty(defaultFaculty);
                     }
