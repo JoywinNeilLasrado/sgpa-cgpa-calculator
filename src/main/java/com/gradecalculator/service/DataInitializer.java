@@ -51,7 +51,7 @@ public class DataInitializer implements CommandLineRunner {
             logger.warn("⚠️ SECURITY WARNING: Demo database is seeded with a weak default password 'password123'. Change 'app.demo.password' in application.properties for production.");
         }
 
-        AppUser adminUser = createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
+        createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
         AppUser defaultFaculty = createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
         AppUser profJones = createUserIfNotExists("prof.jones", demoPassword, AppUser.Role.FACULTY);
         AppUser profSmith = createUserIfNotExists("prof.smith", demoPassword, AppUser.Role.FACULTY);

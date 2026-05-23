@@ -5,9 +5,7 @@ import com.gradecalculator.dto.SgpaResponse;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
-import com.gradecalculator.model.Student;
 import com.gradecalculator.repository.EnrollmentRepository;
-import com.gradecalculator.repository.SemesterRepository;
 import com.gradecalculator.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,8 +30,9 @@ public class GradeCalculationService {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    @Autowired
-    private SemesterRepository semesterRepository;
+
+
+
 
     /**
      * Calculate SGPA for a student in a specific semester.
@@ -42,7 +41,7 @@ public class GradeCalculationService {
      * where Credit Points = Course Credits × Grade Points
      */
     public SgpaResponse calculateSGPA(Long studentId, Long semesterId) {
-        Student student = studentRepository.findById(studentId)
+        studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId);
@@ -81,7 +80,7 @@ public class GradeCalculationService {
      *        Sum(Course Credits excluding F grades)
      */
     public CgpaResponse calculateCGPA(Long studentId, Long semesterId) {
-        Student student = studentRepository.findById(studentId)
+        studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         // Get all enrollments up to the specified semester, excluding F grades
@@ -138,7 +137,7 @@ public class GradeCalculationService {
      * Calculate CGPA for a student across all enrolled semesters.
      */
     public CgpaResponse calculateOverallCGPA(Long studentId) {
-        Student student = studentRepository.findById(studentId)
+        studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);

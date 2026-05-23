@@ -114,7 +114,7 @@ public class AnalyticsService {
                 } else {
                     failed++;
                 }
-                gradeDist.merge(grade.getGrade(), 1, Integer::sum);
+                gradeDist.put(grade.getGrade(), gradeDist.getOrDefault(grade.getGrade(), 0) + 1);
             }
         }
 

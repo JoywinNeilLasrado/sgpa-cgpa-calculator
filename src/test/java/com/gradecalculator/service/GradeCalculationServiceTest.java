@@ -8,7 +8,6 @@ import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.model.Semester;
 import com.gradecalculator.model.Student;
 import com.gradecalculator.repository.EnrollmentRepository;
-import com.gradecalculator.repository.SemesterRepository;
 import com.gradecalculator.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +32,7 @@ class GradeCalculationServiceTest {
     @Mock
     private EnrollmentRepository enrollmentRepository;
 
-    @Mock
-    private SemesterRepository semesterRepository;
+
 
     private GradeCalculationService service;
     private Student student;
@@ -44,7 +42,6 @@ class GradeCalculationServiceTest {
         service = new GradeCalculationService();
         ReflectionTestUtils.setField(service, "studentRepository", studentRepository);
         ReflectionTestUtils.setField(service, "enrollmentRepository", enrollmentRepository);
-        ReflectionTestUtils.setField(service, "semesterRepository", semesterRepository);
 
         student = new Student("John Doe", "CS2024001");
         student.setId(1L);

@@ -85,7 +85,7 @@ public class DashboardService {
                     semPoints += cp;
                     
                     // Count grades
-                    gradeDistribution.merge(grade.getGrade(), 1, Integer::sum);
+                    gradeDistribution.put(grade.getGrade(), gradeDistribution.getOrDefault(grade.getGrade(), 0) + 1);
                     
                     // Count outstanding
                     if (grade == LetterGrade.O) outstandingCount++;

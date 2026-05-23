@@ -9,7 +9,6 @@ import com.gradecalculator.service.CourseService;
 import com.gradecalculator.service.SemesterService;
 import com.gradecalculator.service.EnrollmentService;
 import com.gradecalculator.model.Enrollment;
-import com.gradecalculator.model.AppUser;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.security.UserPrincipal;
 import org.springframework.http.HttpStatus;

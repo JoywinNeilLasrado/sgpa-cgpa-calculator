@@ -2,7 +2,6 @@ package com.gradecalculator.service;
 
 import com.gradecalculator.dto.request.RegisterRequest;
 import com.gradecalculator.model.AppUser;
-import com.gradecalculator.model.AppUser.Role;
 import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.security.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
