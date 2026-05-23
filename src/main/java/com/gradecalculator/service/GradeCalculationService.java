@@ -48,7 +48,7 @@ public class GradeCalculationService {
         List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId);
 
         if (enrollments.isEmpty()) {
-            return new SgpaResponse(studentId, semesterId, 0.0, 0, 0);
+            throw new IllegalArgumentException("No enrollments found for this student in the specified semester");
         }
 
         int totalCreditPoints = 0;
