@@ -28,14 +28,10 @@ public class JwtTokenProvider {
             @Value("${jwt.secret:}") String jwtSecret,
             @Value("${jwt.expiration:86400000}") long jwtExpiration) {
         this.jwtExpiration = jwtExpiration;
-        if (jwtSecret == null || jwtSecret.trim().isEmpty() || "mySecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong".equals(jwtSecret)) {
-            logger.warn("⚠️ SECURITY WARNING: No secure JWT secret key configured under 'jwt.secret'! Generating a dynamic cryptographically secure random key for this runtime session.");
-            byte[] keyBytes = new byte[32];
-            new SecureRandom().nextBytes(keyBytes);
-            this.jwtSecretKey = Keys.hmacShaKeyFor(keyBytes);
-        } else {
-            this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        if (jwtSecret == null || jwtSecret.trim().isEmpty()) {
+            throw new IllegalStateException("FATAL CONFIGURATION ERROR: The JWT signing secret key is not configured! Please configure 'jwt.secret' or set the 'JWT_SECRET' environment variable.");
         }
+        this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     private SecretKey getSigningKey() {

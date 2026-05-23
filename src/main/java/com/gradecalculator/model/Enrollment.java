@@ -41,6 +41,22 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     private LetterGrade grade;
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    private String lastModifiedBy;
+
+    private java.time.LocalDateTime lastModifiedAt;
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
+
+    public String getLastModifiedBy() { return lastModifiedBy; }
+    public void setLastModifiedBy(String lastModifiedBy) { this.lastModifiedBy = lastModifiedBy; }
+
+    public java.time.LocalDateTime getLastModifiedAt() { return lastModifiedAt; }
+    public void setLastModifiedAt(java.time.LocalDateTime lastModifiedAt) { this.lastModifiedAt = lastModifiedAt; }
+
     // Constructors
     public Enrollment() {}
 

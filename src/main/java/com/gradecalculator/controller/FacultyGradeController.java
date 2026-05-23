@@ -193,6 +193,8 @@ public class FacultyGradeController {
         }
 
         enrollment.setGrade(request.getGrade());
+        enrollment.setLastModifiedBy(principal.getUsername());
+        enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
         Enrollment saved = enrollmentRepository.save(enrollment);
         
         Map<String, Object> response = new HashMap<>();
@@ -226,6 +228,8 @@ public class FacultyGradeController {
             
             if (enrollment != null) {
                 enrollment.setGrade(request.getGrade());
+                enrollment.setLastModifiedBy(principal.getUsername());
+                enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
                 enrollmentRepository.save(enrollment);
                 
                 Map<String, Object> result = new HashMap<>();
