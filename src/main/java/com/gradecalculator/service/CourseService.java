@@ -141,4 +141,9 @@ public class CourseService {
             throw new IllegalArgumentException(message);
         }
     }
+
+    public List<Course> findByFacultyId(Long facultyId) {
+        return courseRepository.findByFacultyId(facultyId);
+    }
 }
+

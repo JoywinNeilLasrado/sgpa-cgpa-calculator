@@ -113,4 +113,9 @@ public class StudentService {
             throw new IllegalArgumentException(message);
         }
     }
+
+    public Optional<Student> findByUsername(String username) {
+        return studentRepository.findByUsername(username);
+    }
 }
+

@@ -128,4 +128,20 @@ public class EnrollmentService {
                 enrollment.getCreditPoints()
         );
     }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<Enrollment> findEnrollmentById(Long id) {
+        return enrollmentRepository.findById(id);
+    }
+
+    @Transactional
+    public Enrollment updateGrade(Long enrollmentId, LetterGrade grade, String username) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        enrollment.setGrade(grade);
+        enrollment.setLastModifiedBy(username);
+        enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
+        return enrollmentRepository.save(enrollment);
+    }
 }
+

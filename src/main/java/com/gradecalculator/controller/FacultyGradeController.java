@@ -4,16 +4,14 @@ import com.gradecalculator.dto.GradeUpdateRequest;
 import com.gradecalculator.dto.request.RegisterRequest;
 import com.gradecalculator.dto.request.AssignCourseRequest;
 import com.gradecalculator.service.UserService;
+import com.gradecalculator.service.FacultyService;
+import com.gradecalculator.service.CourseService;
+import com.gradecalculator.service.SemesterService;
+import com.gradecalculator.service.EnrollmentService;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.AppUser;
 import com.gradecalculator.model.Course;
-import com.gradecalculator.repository.CourseRepository;
-import com.gradecalculator.repository.EnrollmentRepository;
-import com.gradecalculator.repository.SemesterRepository;
-import com.gradecalculator.repository.StudentRepository;
-import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.security.UserPrincipal;
-import com.gradecalculator.service.EnrollmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,24 +31,19 @@ import java.util.Map;
 @Transactional
 public class FacultyGradeController {
 
-    private final EnrollmentRepository enrollmentRepository;
-    private final StudentRepository studentRepository;
-    private final CourseRepository courseRepository;
-    private final SemesterRepository semesterRepository;
+    private final FacultyService facultyService;
+    private final CourseService courseService;
+    private final SemesterService semesterService;
     private final EnrollmentService enrollmentService;
-    private final AppUserRepository userRepository;
     private final UserService userService;
 
-    public FacultyGradeController(EnrollmentRepository enrollmentRepository,
-            StudentRepository studentRepository, CourseRepository courseRepository,
-            SemesterRepository semesterRepository, EnrollmentService enrollmentService,
-            AppUserRepository userRepository, UserService userService) {
-        this.enrollmentRepository = enrollmentRepository;
-        this.studentRepository = studentRepository;
-        this.courseRepository = courseRepository;
-        this.semesterRepository = semesterRepository;
+    public FacultyGradeController(FacultyService facultyService,
+            CourseService courseService, SemesterService semesterService,
+            EnrollmentService enrollmentService, UserService userService) {
+        this.facultyService = facultyService;
+        this.courseService = courseService;
+        this.semesterService = semesterService;
         this.enrollmentService = enrollmentService;
-        this.userRepository = userRepository;
         this.userService = userService;
     }
 
@@ -61,7 +54,7 @@ public class FacultyGradeController {
     @GetMapping("/members")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllFaculty() {
-        return ResponseEntity.ok(userRepository.findByRole(AppUser.Role.FACULTY));
+        return ResponseEntity.ok(facultyService.findAllFacultyMembers());
     }
 
     @PostMapping("/register")
@@ -75,17 +68,7 @@ public class FacultyGradeController {
     @DeleteMapping("/members/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteFaculty(@PathVariable Long id) {
-        com.gradecalculator.model.AppUser faculty = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Faculty member not found"));
-        
-        // Nullify faculty in assigned courses
-        List<Course> courses = courseRepository.findByFacultyId(id);
-        for (Course course : courses) {
-            course.setFaculty(null);
-            courseRepository.save(course);
-        }
-        
-        userRepository.delete(faculty);
+        facultyService.deleteFacultyMember(id);
         return ResponseEntity.ok("Faculty member deleted");
     }
 
@@ -93,16 +76,8 @@ public class FacultyGradeController {
     // New endpoint to assign a faculty to a course
     @PostMapping("/assign-course")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> assignFacultyToCourse(@RequestBody com.gradecalculator.dto.request.AssignCourseRequest request) {
-        // Fetch course
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-        // Fetch faculty
-        com.gradecalculator.model.AppUser faculty = userRepository.findById(request.getFacultyId())
-                .orElseThrow(() -> new IllegalArgumentException("Faculty not found"));
-        // Assign and save
-        course.setFaculty(faculty);
-        courseRepository.save(course);
+    public ResponseEntity<?> assignFacultyToCourse(@RequestBody AssignCourseRequest request) {
+        facultyService.assignFacultyToCourse(request.courseId(), request.facultyId());
         return ResponseEntity.ok("Faculty assigned to course");
     }
 
@@ -114,9 +89,9 @@ public class FacultyGradeController {
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getAllCourses(@AuthenticationPrincipal UserPrincipal principal) {
         if (principal.getRole().equals("FACULTY")) {
-            return ResponseEntity.ok(courseRepository.findByFacultyId(principal.getId()));
+            return ResponseEntity.ok(courseService.findByFacultyId(principal.getId()));
         }
-        return ResponseEntity.ok(courseRepository.findAll());
+        return ResponseEntity.ok(courseService.findAll());
     }
 
     /**
@@ -125,7 +100,7 @@ public class FacultyGradeController {
     @GetMapping("/semesters")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getAllSemesters() {
-        return ResponseEntity.ok(semesterRepository.findAll());
+        return ResponseEntity.ok(semesterService.findAll());
     }
 
     /**
@@ -134,7 +109,7 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/course/{courseId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getEnrollmentsByCourse(@PathVariable Long courseId, @AuthenticationPrincipal UserPrincipal principal) {
-        Course course = courseRepository.findById(courseId)
+        Course course = courseService.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         if (principal.getRole().equals("FACULTY") && (course.getFaculty() == null || !course.getFaculty().getId().equals(principal.getId()))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: You are not assigned to this course.");
@@ -152,7 +127,7 @@ public class FacultyGradeController {
         if (principal.getRole().equals("FACULTY")) {
             enrollments = enrollments.stream()
                 .filter(e -> {
-                    Course course = courseRepository.findById(e.courseId()).orElse(null);
+                    Course course = courseService.findById(e.courseId()).orElse(null);
                     return course != null && course.getFaculty() != null && course.getFaculty().getId().equals(principal.getId());
                 }).toList();
         }
@@ -169,7 +144,7 @@ public class FacultyGradeController {
         if (principal.getRole().equals("FACULTY")) {
             enrollments = enrollments.stream()
                 .filter(e -> {
-                    Course course = courseRepository.findById(e.courseId()).orElse(null);
+                    Course course = courseService.findById(e.courseId()).orElse(null);
                     return course != null && course.getFaculty() != null && course.getFaculty().getId().equals(principal.getId());
                 }).toList();
         }
@@ -182,7 +157,7 @@ public class FacultyGradeController {
     @PutMapping("/grades")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> updateGrade(@RequestBody GradeUpdateRequest request, @AuthenticationPrincipal UserPrincipal principal) {
-        Enrollment enrollment = enrollmentRepository.findById(request.getEnrollmentId())
+        Enrollment enrollment = enrollmentService.findEnrollmentById(request.enrollmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
 
         if (principal.getRole().equals("FACULTY")) {
@@ -192,10 +167,7 @@ public class FacultyGradeController {
             }
         }
 
-        enrollment.setGrade(request.getGrade());
-        enrollment.setLastModifiedBy(principal.getUsername());
-        enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
-        Enrollment saved = enrollmentRepository.save(enrollment);
+        Enrollment saved = enrollmentService.updateGrade(request.enrollmentId(), request.grade(), principal.getUsername());
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", saved.getId());
@@ -213,28 +185,25 @@ public class FacultyGradeController {
     public ResponseEntity<?> bulkUpdateGrades(@RequestBody List<GradeUpdateRequest> requests, @AuthenticationPrincipal UserPrincipal principal) {
         if (principal.getRole().equals("FACULTY")) {
             for (GradeUpdateRequest request : requests) {
-                Enrollment enrollment = enrollmentRepository.findById(request.getEnrollmentId())
-                        .orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + request.getEnrollmentId()));
+                Enrollment enrollment = enrollmentService.findEnrollmentById(request.enrollmentId())
+                        .orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + request.enrollmentId()));
                 Course course = enrollment.getCourse();
                 if (course == null || course.getFaculty() == null || !course.getFaculty().getId().equals(principal.getId())) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: You are not assigned to course for enrollment " + request.getEnrollmentId());
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: You are not assigned to course for enrollment " + request.enrollmentId());
                 }
             }
         }
 
         List<Map<String, Object>> results = requests.stream().map(request -> {
-            Enrollment enrollment = enrollmentRepository.findById(request.getEnrollmentId())
+            Enrollment enrollment = enrollmentService.findEnrollmentById(request.enrollmentId())
                     .orElse(null);
             
             if (enrollment != null) {
-                enrollment.setGrade(request.getGrade());
-                enrollment.setLastModifiedBy(principal.getUsername());
-                enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
-                enrollmentRepository.save(enrollment);
+                Enrollment saved = enrollmentService.updateGrade(request.enrollmentId(), request.grade(), principal.getUsername());
                 
                 Map<String, Object> result = new HashMap<>();
-                result.put("id", enrollment.getId());
-                result.put("grade", enrollment.getGrade());
+                result.put("id", saved.getId());
+                result.put("grade", saved.getGrade());
                 return result;
             }
             return null;

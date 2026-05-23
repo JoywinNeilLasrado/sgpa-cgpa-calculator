@@ -18,11 +18,12 @@ public class AdminUserController {
     @PutMapping("/password")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> changePassword(@RequestBody PasswordChangeRequest request) {
-        if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
-            userService.adminChangePasswordByUsername(request.getUsername(), request.getNewPassword());
+        if (request.username() != null && !request.username().trim().isEmpty()) {
+            userService.adminChangePasswordByUsername(request.username(), request.newPassword());
         } else {
-            userService.adminChangePassword(request.getUserId(), request.getNewPassword());
+            userService.adminChangePassword(request.userId(), request.newPassword());
         }
         return ResponseEntity.ok("Password updated");
     }
 }
+

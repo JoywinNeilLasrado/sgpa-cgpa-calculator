@@ -6,6 +6,7 @@ import com.gradecalculator.dto.response.LoginResponse;
 import com.gradecalculator.model.AppUser;
 import com.gradecalculator.security.UserPrincipal;
 import com.gradecalculator.service.UserService;
+import com.gradecalculator.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,14 +22,14 @@ public class AuthController {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService;
-    private final com.gradecalculator.repository.StudentRepository studentRepository;
+    private final StudentService studentService;
     private final com.gradecalculator.security.LoginRateLimiterService rateLimiter;
 
     public AuthController(UserService userService, 
-                          com.gradecalculator.repository.StudentRepository studentRepository,
+                          StudentService studentService,
                           com.gradecalculator.security.LoginRateLimiterService rateLimiter) {
         this.userService = userService;
-        this.studentRepository = studentRepository;
+        this.studentService = studentService;
         this.rateLimiter = rateLimiter;
     }
 
@@ -54,7 +55,7 @@ public class AuthController {
 
             Long userId = user.getId();
             if (user.getRole() == AppUser.Role.STUDENT) {
-                userId = studentRepository.findByUsername(user.getUsername())
+                userId = studentService.findByUsername(user.getUsername())
                         .map(com.gradecalculator.model.Student::getId)
                         .orElse(user.getId());
             }
@@ -94,7 +95,7 @@ public class AuthController {
 
         Long userId = user.getId();
         if (user.getRole() == AppUser.Role.STUDENT) {
-            userId = studentRepository.findByUsername(user.getUsername())
+            userId = studentService.findByUsername(user.getUsername())
                     .map(com.gradecalculator.model.Student::getId)
                     .orElse(user.getId());
         }
