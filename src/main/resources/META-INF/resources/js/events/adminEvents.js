@@ -248,11 +248,12 @@ async function loadEnrollments() {
 
         const tbody = document.querySelector('#enrollments-table tbody');
         tbody.innerHTML = enrollments.length ? enrollments.map(e => `
-            <tr class="enroll-row-item" data-student="${(e.student?.name || '').toLowerCase()}" data-code="${(e.course?.code || '').toLowerCase()}">
-                <td><strong>${e.student?.name || 'N/A'}</strong></td>
-                <td>${e.course?.code || 'N/A'} - ${e.course?.name || 'N/A'}</td>
+            <tr class="enroll-row-item" data-student="${(e.studentName || '').toLowerCase()}" data-code="${(e.courseCode || '').toLowerCase()}">
+                <td><strong>${e.studentName || 'N/A'}</strong></td>
+                <td>${e.courseCode || 'N/A'} - ${e.courseName || 'N/A'}</td>
                 <td><span class="grade-badge ${e.grade || 'none'}">${e.grade || 'Pending'}</span></td>
                 <td style="text-align: right;">
+                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editEnrollment(${e.id}, ${e.studentId || 0}, ${e.courseId || 0}, '${e.grade || ''}')">Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteEnrollment(${e.id})">Delete</button>
                 </td>
             </tr>
@@ -676,6 +677,41 @@ function editDepartment(id, name, code) {
     modal.classList.add('active');
 }
 
+function editEnrollment(id, studentId, courseId, grade) {
+    const modal = document.getElementById('editModal');
+    document.getElementById('editModalTitle').textContent = 'Edit Course Enrollment';
+    
+    const studentOptions = cachedStudents.map(s => `<option value="${s.id}" ${s.id == studentId ? 'selected' : ''}>${s.name} (${s.studentId})</option>`).join('');
+    const courseOptions = cachedCourses.map(c => `<option value="${c.id}" ${c.id == courseId ? 'selected' : ''}>${c.code} - ${c.name}</option>`).join('');
+    const grades = ['', 'O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
+    const gradeOptions = grades.map(g => `<option value="${g}" ${g === grade ? 'selected' : ''}>${g || 'Pending'}</option>`).join('');
+    
+    document.getElementById('editModalBody').innerHTML = `
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Select Student Record</label>
+            <select class="form-select" id="edit-enrollment-student">
+                ${studentOptions}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Select Syllabus Course</label>
+            <select class="form-select" id="edit-enrollment-course">
+                ${courseOptions}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Assigned Grade</label>
+            <select class="form-select" id="edit-enrollment-grade">
+                ${gradeOptions}
+            </select>
+        </div>
+    `;
+    
+    modal.dataset.type = 'enrollment';
+    modal.dataset.id = id;
+    modal.classList.add('active');
+}
+
 async function submitEdit() {
     const modal = document.getElementById('editModal');
     const type = modal.dataset.type;
@@ -782,6 +818,25 @@ async function submitEdit() {
             console.error(err);
             showToast('Failed to update department record.', 'error');
         }
+    } else if (type === 'enrollment') {
+        const studentId = parseInt(document.getElementById('edit-enrollment-student').value);
+        const courseId = parseInt(document.getElementById('edit-enrollment-course').value);
+        const grade = document.getElementById('edit-enrollment-grade').value;
+        
+        if (isNaN(studentId) || isNaN(courseId)) {
+            showToast('Student and Course selections are required.', 'error');
+            return;
+        }
+        
+        try {
+            await API.updateEnrollment(id, studentId, courseId, grade);
+            await loadEnrollments();
+            showToast('Course registration modified successfully.', 'success');
+            closeEditModal();
+        } catch (err) {
+            console.error(err);
+            showToast('Failed to modify student registration.', 'error');
+        }
     }
 }
 
@@ -808,6 +863,7 @@ window.editSemester = editSemester;
 window.editCourse = editCourse;
 window.editFaculty = editFaculty;
 window.editDepartment = editDepartment;
+window.editEnrollment = editEnrollment;
 window.closeEditModal = closeEditModal;
 window.submitEdit = submitEdit;
 window.logout = logout;
