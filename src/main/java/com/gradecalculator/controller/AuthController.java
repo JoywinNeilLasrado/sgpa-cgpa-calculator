@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+
     private final UserService userService;
     private final com.gradecalculator.repository.StudentRepository studentRepository;
     private final com.gradecalculator.security.LoginRateLimiterService rateLimiter;
@@ -39,6 +41,7 @@ public class AuthController {
             jakarta.servlet.http.HttpServletRequest httpRequest) {
         String ip = httpRequest.getRemoteAddr();
         if (rateLimiter.isBlocked(ip)) {
+            logger.warn("Security Event: Blocked login attempt from IP: '{}' due to rate limiting", ip);
             throw new com.gradecalculator.exception.RateLimitException("Too many failed login attempts. Please try again after 15 minutes.");
         }
 
@@ -56,6 +59,8 @@ public class AuthController {
                         .orElse(user.getId());
             }
 
+            logger.info("Security Event: Successful login for username: '{}' from IP: '{}'", request.getUsername(), ip);
+
             return ResponseEntity.ok(new LoginResponse(
                     userId,
                     user.getUsername(),
@@ -63,6 +68,7 @@ public class AuthController {
                     token
             ));
         } catch (org.springframework.security.core.AuthenticationException e) {
+            logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", request.getUsername(), ip);
             rateLimiter.loginFailed(ip);
             throw e;
         }
