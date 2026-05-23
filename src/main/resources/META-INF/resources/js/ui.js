@@ -116,7 +116,6 @@ const UI = (function() {
         });
     }
 
-    // Debounce function
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -127,6 +126,8 @@ const UI = (function() {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
+    }
+
     function escapeHTML(str) {
         if (str == null) return '';
         return String(str)
@@ -136,6 +137,7 @@ const UI = (function() {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
+
 
     // Public API
     return {

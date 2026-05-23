@@ -297,25 +297,9 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="nav-header">
-        <div class="container nav-inner">
-            <a href="/home.html" class="nav-logo">
-                <div class="nav-logo-icon">🎓</div>
-                <div class="nav-logo-text">
-                    <h1>GradePoint</h1>
-                    <span>Academic Excellence</span>
-                </div>
-            </a>
-            <div class="nav-links">
-                <a href="/home.html" class="nav-link">Home</a>
-                <a href="/analytics.html" class="nav-link">Analytics</a>
-                <a href="/transcript.html" class="nav-link">Transcript</a>
-                <a href="/student-dashboard.html" class="nav-link">My Dashboard</a>
-                <a href="/profile.html" class="nav-link">Profile</a>
-                <a href="/login.html" class="nav-link" id="login-link">Login</a>
-            </div>
-        </div>
-    </nav>
+    <!-- Navigation -->
+    <nav class="nav-header" id="nav-placeholder"></nav>
+    <script src="/js/components/navbar.js"></script>
     
     <!-- Hero Section -->
     <div class="hero">
@@ -391,25 +375,6 @@
         </div>
     </div>
     
-    <script>
-        // Check login status and update nav
-        function updateNav() {
-            const token = localStorage.getItem('token');
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const loginLink = document.getElementById('login-link');
-            
-            if (token && user.username) {
-                loginLink.textContent = 'Logout (' + user.username + ')';
-                loginLink.href = '#';
-                loginLink.onclick = function() {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = '/home.html';
-                };
-            }
-        }
-        
-        updateNav();
-    </script>
+
 </body>
 </html>

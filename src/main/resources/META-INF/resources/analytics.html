@@ -186,20 +186,8 @@
 <body>
 
     <!-- Header Navigation -->
-    <nav class="nav-header">
-        <div class="container nav-inner">
-            <a href="#" id="brand-link" class="nav-logo">
-                <div class="nav-logo-icon">🎓</div>
-                <div class="nav-logo-text">
-                    <h1>GradePoint</h1>
-                    <span>Academic Excellence</span>
-                </div>
-            </a>
-            <div class="nav-links" id="nav-links-container">
-                <!-- Dynamically injected based on user role -->
-            </div>
-        </div>
-    </nav>
+    <nav class="nav-header" id="nav-placeholder"></nav>
+    <script src="/js/components/navbar.js"></script>
 
     <!-- Main Container -->
     <div class="container" style="margin-top: 2.5rem; margin-bottom: 5rem;">
@@ -407,48 +395,6 @@
         async function init() {
             document.getElementById('hero-welcome').textContent = `${user.role === 'STUDENT' ? 'Student' : user.role === 'FACULTY' ? 'Faculty' : 'Admin'} Analytics Center`;
             
-            // Build Dynamic Header Nav
-            const navContainer = document.getElementById('nav-links-container');
-            const brandLink = document.getElementById('brand-link');
-            
-            let links = '';
-            if (user.role === 'ADMIN') {
-                brandLink.href = '/admin.html';
-                links = `
-                    <a href="/admin.html" class="nav-link">Admin Portal</a>
-                    <a href="/analytics.html" class="nav-link active">Analytics</a>
-                    <a href="/transcript.html" class="nav-link">Transcript</a>
-                    <a href="/profile.html" class="nav-link">Profile</a>
-                `;
-            } else if (user.role === 'FACULTY') {
-                brandLink.href = '/faculty-grades.html';
-                links = `
-                    <a href="/faculty-grades.html" class="nav-link">Grade Entry</a>
-                    <a href="/analytics.html" class="nav-link active">System Rankings</a>
-                    <a href="/transcript.html" class="nav-link">Transcripts</a>
-                    <a href="/profile.html" class="nav-link">Profile</a>
-                `;
-            } else {
-                brandLink.href = '/student.html';
-                links = `
-                    <a href="/student.html" class="nav-link">Dashboard</a>
-                    <a href="/analytics.html" class="nav-link active">Analytics</a>
-                    <a href="/transcript.html" class="nav-link">Transcript</a>
-                    <a href="/profile.html" class="nav-link">Profile</a>
-                `;
-            }
-
-            links += `
-                <div class="nav-user-info">
-                    <div class="user-pill">
-                        <span>${user.username}</span>
-                        <span class="user-badge" style="background: ${user.role==='ADMIN'?'var(--crimson)':user.role==='FACULTY'?'var(--gold-dark)':'var(--slate)'}">${user.role}</span>
-                    </div>
-                    <button class="btn btn-primary btn-sm" onclick="logout()">Logout</button>
-                </div>
-            `;
-            navContainer.innerHTML = links;
-
             // Load Panels based on user roles
             if (user.role === 'STUDENT') {
                 document.getElementById('personal-analytics-panel').style.display = 'block';

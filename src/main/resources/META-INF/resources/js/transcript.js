@@ -28,52 +28,6 @@
         }, 3000);
     }
 
-    // Dynamic Navigation Header setup
-    function setupNavigation(user) {
-        const navContainer = document.getElementById('nav-links-container');
-        const brandLink = document.getElementById('brand-link');
-        
-        if (!navContainer || !brandLink) return;
-
-        let links = '';
-        if (user.role === 'ADMIN') {
-            brandLink.href = '/admin.html';
-            links = `
-                <a href="/admin.html" class="nav-link">Admin Portal</a>
-                <a href="/analytics.html" class="nav-link">Analytics</a>
-                <a href="/transcript.html" class="nav-link active">Transcript</a>
-                <a href="/profile.html" class="nav-link">Profile</a>
-            `;
-        } else if (user.role === 'FACULTY') {
-            brandLink.href = '/faculty-grades.html';
-            links = `
-                <a href="/faculty-grades.html" class="nav-link">Grade Entry</a>
-                <a href="/analytics.html" class="nav-link">System Rankings</a>
-                <a href="/transcript.html" class="nav-link active">Transcripts</a>
-                <a href="/profile.html" class="nav-link">Profile</a>
-            `;
-        } else {
-            brandLink.href = '/student.html';
-            links = `
-                <a href="/student.html" class="nav-link">Dashboard</a>
-                <a href="/analytics.html" class="nav-link">Analytics</a>
-                <a href="/transcript.html" class="nav-link active">Transcript</a>
-                <a href="/profile.html" class="nav-link">Profile</a>
-            `;
-        }
-
-        links += `
-            <div class="nav-user-info">
-                <div class="user-pill">
-                    <span>${user.username}</span>
-                    <span class="user-badge" style="background: ${user.role==='ADMIN'?'var(--crimson)':user.role==='FACULTY'?'var(--gold-dark)':'var(--slate)'}">${user.role}</span>
-                </div>
-                <button class="btn btn-primary btn-sm" onclick="logout()">Logout</button>
-            </div>
-        `;
-        navContainer.innerHTML = links;
-    }
-
     // Logout Helper
     window.logout = function() {
         localStorage.clear();
@@ -93,7 +47,7 @@
         }
 
         loggedInUser = JSON.parse(userJson);
-        setupNavigation(loggedInUser);
+
 
         // 2. Set static date and verification code
         const today = new Date();

@@ -57,7 +57,8 @@ async function init() {
     const userJson = localStorage.getItem('user');
     if (userJson) {
         const user = JSON.parse(userJson);
-        document.getElementById('nav-username').textContent = user.username;
+        const navUsername = document.getElementById('nav-username');
+        if (navUsername) navUsername.textContent = user.username;
         document.getElementById('hero-welcome').textContent = `Faculty Control: ${user.username}`;
     }
 

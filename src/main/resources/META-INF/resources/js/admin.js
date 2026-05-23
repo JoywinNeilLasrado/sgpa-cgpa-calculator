@@ -65,8 +65,10 @@ async function init() {
     const userJson = localStorage.getItem('user');
     if (userJson) {
         const user = JSON.parse(userJson);
-        document.getElementById('nav-username').textContent = user.username;
-        document.getElementById('nav-role').textContent = user.role;
+        const navUsername = document.getElementById('nav-username');
+        const navRole = document.getElementById('nav-role');
+        if (navUsername) navUsername.textContent = user.username;
+        if (navRole) navRole.textContent = user.role;
     }
 
     await loadAllData();
