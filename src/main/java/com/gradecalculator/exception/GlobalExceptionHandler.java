@@ -36,4 +36,10 @@ public class GlobalExceptionHandler {
                 "message", "This record conflicts with an existing student, course, or enrollment"
         ));
     }
+
+    @ExceptionHandler(com.gradecalculator.exception.RateLimitException.class)
+    public ResponseEntity<Map<String, String>> handleRateLimit(com.gradecalculator.exception.RateLimitException e) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("message", e.getMessage()));
+    }
 }

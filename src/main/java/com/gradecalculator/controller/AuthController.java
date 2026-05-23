@@ -20,35 +20,52 @@ public class AuthController {
 
     private final UserService userService;
     private final com.gradecalculator.repository.StudentRepository studentRepository;
+    private final com.gradecalculator.security.LoginRateLimiterService rateLimiter;
 
-    public AuthController(UserService userService, com.gradecalculator.repository.StudentRepository studentRepository) {
+    public AuthController(UserService userService, 
+                          com.gradecalculator.repository.StudentRepository studentRepository,
+                          com.gradecalculator.security.LoginRateLimiterService rateLimiter) {
         this.userService = userService;
         this.studentRepository = studentRepository;
+        this.rateLimiter = rateLimiter;
     }
 
     /**
      * Login - POST /api/auth/login
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        String token = userService.authenticate(request.getUsername(), request.getPassword());
-        
-        AppUser user = userService.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
-
-        Long userId = user.getId();
-        if (user.getRole() == AppUser.Role.STUDENT) {
-            userId = studentRepository.findByUsername(user.getUsername())
-                    .map(com.gradecalculator.model.Student::getId)
-                    .orElse(user.getId());
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        String ip = httpRequest.getRemoteAddr();
+        if (rateLimiter.isBlocked(ip)) {
+            throw new com.gradecalculator.exception.RateLimitException("Too many failed login attempts. Please try again after 15 minutes.");
         }
 
-        return ResponseEntity.ok(new LoginResponse(
-                userId,
-                user.getUsername(),
-                user.getRole().name(),
-                token
-        ));
+        try {
+            String token = userService.authenticate(request.getUsername(), request.getPassword());
+            rateLimiter.loginSucceeded(ip);
+            
+            AppUser user = userService.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
+
+            Long userId = user.getId();
+            if (user.getRole() == AppUser.Role.STUDENT) {
+                userId = studentRepository.findByUsername(user.getUsername())
+                        .map(com.gradecalculator.model.Student::getId)
+                        .orElse(user.getId());
+            }
+
+            return ResponseEntity.ok(new LoginResponse(
+                    userId,
+                    user.getUsername(),
+                    user.getRole().name(),
+                    token
+            ));
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            rateLimiter.loginFailed(ip);
+            throw e;
+        }
     }
 
     /**
