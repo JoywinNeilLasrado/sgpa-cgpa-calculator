@@ -58,7 +58,6 @@ class FacultyGradeControllerTest {
 
     private UserPrincipal adminPrincipal;
     private UserPrincipal facultyPrincipal;
-    private UserPrincipal studentPrincipal;
 
     private AppUser facultyUser;
     private AppUser anotherFacultyUser;
@@ -72,9 +71,6 @@ class FacultyGradeControllerTest {
         facultyPrincipal = new UserPrincipal(facultyUser);
 
         anotherFacultyUser = new AppUser(5L, "other", "pwd", AppUser.Role.FACULTY, "Prof. Alice", "alice@exam.com", "CS");
-
-        AppUser student = new AppUser(3L, "student", "pwd", AppUser.Role.STUDENT, "Student", "stud@exam.com", "CS");
-        studentPrincipal = new UserPrincipal(student);
 
         reset(facultyService, courseService, semesterService, enrollmentService, userService);
     }
