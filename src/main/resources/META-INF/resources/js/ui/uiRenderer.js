@@ -33,6 +33,9 @@ export function renderStudentList(tbody, students) {
       s.branch,
       '••••',
     ], actions);
+    row.classList.add('student-row-item');
+    row.setAttribute('data-name', s.name.toLowerCase());
+    row.setAttribute('data-roll', s.studentId.toLowerCase());
     tbody.appendChild(row);
   });
 }

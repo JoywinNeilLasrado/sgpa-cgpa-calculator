@@ -867,6 +867,7 @@ window.editEnrollment = editEnrollment;
 window.closeEditModal = closeEditModal;
 window.submitEdit = submitEdit;
 window.logout = logout;
+window.filterTable = filterTable;
 
 // Initialize page data
 init();
