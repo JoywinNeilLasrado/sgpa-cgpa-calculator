@@ -1,6 +1,5 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.request.RegisterRequest;
 import com.gradecalculator.model.*;
 import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.repository.EnrollmentRepository;

@@ -50,7 +50,7 @@ public class AnalyticsService {
             
             Map<String, Object> trend = new HashMap<>();
             trend.put("semester", "Sem " + enrollments.get(0).getCourse().getSemester().getSemesterNumber());
-            trend.put("sgpa", credits > 0 ? Math.round((double) points / credits * 100) / 100 : 0);
+            trend.put("sgpa", credits > 0 ? Math.round((double) points / credits * 100) / 100.0 : 0.0);
             trends.add(trend);
         });
         
@@ -122,7 +122,7 @@ public class AnalyticsService {
         analytics.put("passed", passed);
         analytics.put("failed", failed);
         analytics.put("averageGrade", totalCredits > 0 ? 
-            Math.round((double) totalPoints / totalCredits * 100) / 100 : 0);
+            Math.round((double) totalPoints / totalCredits * 100) / 100.0 : 0.0);
         analytics.put("gradeDistribution", gradeDist);
 
         return analytics;
@@ -147,7 +147,7 @@ public class AnalyticsService {
                 .count();
             
             stats.put("totalStudents", rankings.size());
-            stats.put("averageCGPA", Math.round(avgCGPA * 100) / 100);
+            stats.put("averageCGPA", Math.round(avgCGPA * 100) / 100.0);
             stats.put("passRate", Math.round((double) passCount / rankings.size() * 100));
             stats.put("topper", rankings.get(0));
         }
