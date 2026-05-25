@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal | GradePoint</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/theme.css">
+    
+    
     <style>
         .student-hero {
             background: linear-gradient(135deg, var(--crimson-dark) 0%, var(--crimson) 50%, #9e1f44 100%);
@@ -404,8 +404,9 @@
     </div>
 
     <!-- Toast Notification Wrapper -->
-    <div class="toast-container" id="toast-container"></div>
+    
 
+    <script src="/js/core.js"></script>
     <script src="/js/api-v2.js"></script>
     <script>
         let currentStudentId = null;
@@ -420,20 +421,7 @@
             window.location.href = '/';
         }
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type} show`;
-            toast.innerHTML = `
-                <span>${type === 'success' ? '✨' : '⚠️'}</span>
-                <span>${message}</span>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
+        
 
         function switchTab(tabId, btn) {
             // Manage active buttons

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Analytics | GradePoint</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/theme.css">
+    
+    
     <style>
         .analytics-hero {
             background: linear-gradient(135deg, var(--ink) 0%, #171f2a 100%);
@@ -365,8 +365,9 @@
     </div>
 
     <!-- Toast Notifications -->
-    <div class="toast-container" id="toast-container"></div>
+    
 
+    <script src="/js/core.js"></script>
     <script src="/js/api-v2.js"></script>
     <script>
         // Check if token exists
@@ -377,20 +378,7 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         let rankingsCached = [];
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type} show`;
-            toast.innerHTML = `
-                <span>${type === 'success' ? '✨' : '⚠️'}</span>
-                <span>${message}</span>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
+        
 
         async function init() {
             document.getElementById('hero-welcome').textContent = `${user.role === 'STUDENT' ? 'Student' : user.role === 'FACULTY' ? 'Faculty' : 'Admin'} Analytics Center`;

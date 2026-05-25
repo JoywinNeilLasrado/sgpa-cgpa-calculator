@@ -110,8 +110,7 @@
         const logoutBtn = document.getElementById('nav-logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
-                localStorage.clear();
-                window.location.href = '/';
+                window.logout();
             });
         }
     }
