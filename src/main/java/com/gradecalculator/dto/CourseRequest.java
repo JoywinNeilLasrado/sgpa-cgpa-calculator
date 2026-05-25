@@ -24,6 +24,8 @@ public class CourseRequest {
     @NotNull(message = "Semester mapping is required")
     private Long semesterId;
 
+    private com.gradecalculator.model.CourseType courseType = com.gradecalculator.model.CourseType.THEORY;
+
     private Long facultyId;
 
     public String getCourseCode() {
@@ -64,5 +66,13 @@ public class CourseRequest {
 
     public void setFacultyId(Long facultyId) {
         this.facultyId = facultyId;
+    }
+
+    public com.gradecalculator.model.CourseType getCourseType() {
+        return courseType;
+    }
+
+    public void setCourseType(com.gradecalculator.model.CourseType courseType) {
+        this.courseType = courseType;
     }
 }

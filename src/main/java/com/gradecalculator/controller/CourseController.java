@@ -56,7 +56,8 @@ public class CourseController {
                 request.getCourseName(),
                 request.getCredits(),
                 request.getSemesterId(),
-                request.getFacultyId()
+                request.getFacultyId(),
+                request.getCourseType()
         ));
     }
 
@@ -69,7 +70,8 @@ public class CourseController {
                 request.getCourseName(),
                 request.getCredits(),
                 request.getSemesterId(),
-                request.getFacultyId()
+                request.getFacultyId(),
+                request.getCourseType()
         ));
     }
 

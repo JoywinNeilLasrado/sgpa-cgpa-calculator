@@ -12,6 +12,18 @@ public class CourseResultResponse {
     private int gradePoints;
     private int creditPoints;
 
+    private String courseType;
+    private Integer test1Marks;
+    private Integer test2Marks;
+    private Integer assignmentMarks;
+    private Integer oaaMarks;
+    private Integer regularLabMarks;
+    private Integer labTestMarks;
+    private Integer labRecordMarks;
+    private Integer seeMarks;
+    private Integer graceMarks;
+    private Integer totalMarks;
+
     public CourseResultResponse() {}
 
     public CourseResultResponse(String courseCode, String courseName, int credits, String grade, int gradePoints, int creditPoints) {
@@ -41,4 +53,37 @@ public class CourseResultResponse {
 
     public int getCreditPoints() { return creditPoints; }
     public void setCreditPoints(int creditPoints) { this.creditPoints = creditPoints; }
+
+    public String getCourseType() { return courseType; }
+    public void setCourseType(String courseType) { this.courseType = courseType; }
+
+    public Integer getTest1Marks() { return test1Marks; }
+    public void setTest1Marks(Integer test1Marks) { this.test1Marks = test1Marks; }
+
+    public Integer getTest2Marks() { return test2Marks; }
+    public void setTest2Marks(Integer test2Marks) { this.test2Marks = test2Marks; }
+
+    public Integer getAssignmentMarks() { return assignmentMarks; }
+    public void setAssignmentMarks(Integer assignmentMarks) { this.assignmentMarks = assignmentMarks; }
+
+    public Integer getOaaMarks() { return oaaMarks; }
+    public void setOaaMarks(Integer oaaMarks) { this.oaaMarks = oaaMarks; }
+
+    public Integer getRegularLabMarks() { return regularLabMarks; }
+    public void setRegularLabMarks(Integer regularLabMarks) { this.regularLabMarks = regularLabMarks; }
+
+    public Integer getLabTestMarks() { return labTestMarks; }
+    public void setLabTestMarks(Integer labTestMarks) { this.labTestMarks = labTestMarks; }
+
+    public Integer getLabRecordMarks() { return labRecordMarks; }
+    public void setLabRecordMarks(Integer labRecordMarks) { this.labRecordMarks = labRecordMarks; }
+
+    public Integer getSeeMarks() { return seeMarks; }
+    public void setSeeMarks(Integer seeMarks) { this.seeMarks = seeMarks; }
+
+    public Integer getGraceMarks() { return graceMarks; }
+    public void setGraceMarks(Integer graceMarks) { this.graceMarks = graceMarks; }
+
+    public Integer getTotalMarks() { return totalMarks; }
+    public void setTotalMarks(Integer totalMarks) { this.totalMarks = totalMarks; }
 }

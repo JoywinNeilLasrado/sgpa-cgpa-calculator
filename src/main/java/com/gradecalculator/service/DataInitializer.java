@@ -146,7 +146,27 @@ public class DataInitializer implements CommandLineRunner {
         LetterGrade[] grades = {best, best, avg, avg, avg};
         for (int sem = 0; sem < 4; sem++) {
             for (int c = 0; c < 5; c++) {
-                Enrollment e = new Enrollment(student, courses.get(sem).get(c), grades[c]);
+                Enrollment e = new Enrollment(student, courses.get(sem).get(c));
+                // Set marks based on desired grade
+                LetterGrade desiredGrade = grades[c];
+                if (desiredGrade == LetterGrade.O) {
+                    e.setCieMarks(48); e.setSeeMarks(47);
+                } else if (desiredGrade == LetterGrade.A_PLUS) {
+                    e.setCieMarks(42); e.setSeeMarks(43);
+                } else if (desiredGrade == LetterGrade.A) {
+                    e.setCieMarks(38); e.setSeeMarks(37);
+                } else if (desiredGrade == LetterGrade.B_PLUS) {
+                    e.setCieMarks(33); e.setSeeMarks(32);
+                } else if (desiredGrade == LetterGrade.B) {
+                    e.setCieMarks(28); e.setSeeMarks(29);
+                } else if (desiredGrade == LetterGrade.C) {
+                    e.setCieMarks(26); e.setSeeMarks(26);
+                } else if (desiredGrade == LetterGrade.P) {
+                    e.setCieMarks(22); e.setSeeMarks(23);
+                } else if (desiredGrade == LetterGrade.F) {
+                    e.setCieMarks(15); e.setSeeMarks(15);
+                }
+                e.calculateGrade();
                 enrollmentRepository.save(e);
             }
         }

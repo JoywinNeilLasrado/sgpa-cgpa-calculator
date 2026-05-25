@@ -56,15 +56,12 @@ class EnrollmentServiceTest {
 
     @Test
     void createsEnrollmentForAdminWithGrade() {
-        // Setup authentication as ADMIN
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")))
-                .when(authentication).getAuthorities();
 
         EnrollmentRequest request = new EnrollmentRequest();
         request.setStudentId(1L);
         request.setCourseId(2L);
-        request.setGrade("A+");
+        request.setCieMarks(42);
+        request.setSeeMarks(43);
 
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseRepository.findById(2L)).thenReturn(Optional.of(course));
@@ -82,34 +79,7 @@ class EnrollmentServiceTest {
         verify(enrollmentRepository).save(any(Enrollment.class));
     }
 
-    @Test
-    void createsEnrollmentForStudentForcesNullGrade() {
-        // Setup authentication as STUDENT (testing Grade Injection Protection)
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_STUDENT")))
-                .when(authentication).getAuthorities();
 
-        EnrollmentRequest request = new EnrollmentRequest();
-        request.setStudentId(1L);
-        request.setCourseId(2L);
-        request.setGrade("O"); // Injecting grade 'O'
-
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-        when(courseRepository.findById(2L)).thenReturn(Optional.of(course));
-        when(enrollmentRepository.existsByStudentIdAndCourseId(1L, 2L)).thenReturn(false);
-
-        // Saved enrollment grade must be null (forced ungraded status)
-        Enrollment savedEnrollment = new Enrollment(student, course, null);
-        savedEnrollment.setId(100L);
-        when(enrollmentRepository.save(argThat(e -> e.getGrade() == null))).thenReturn(savedEnrollment);
-
-        EnrollmentResponse response = service.create(request);
-
-        assertThat(response.id()).isEqualTo(100L);
-        assertThat(response.grade()).isNull(); // Grade successfully set to null!
-        assertThat(response.gradePoints()).isEqualTo(0);
-        verify(enrollmentRepository).save(any(Enrollment.class));
-    }
 
     @Test
     void throwsWhenEnrollmentAlreadyExists() {

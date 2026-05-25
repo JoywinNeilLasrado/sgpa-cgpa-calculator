@@ -111,13 +111,13 @@ const API = (() => {
         getCourses: () => request('/courses', { method: 'GET' }),
         getCoursesBySemester: (semesterId) => request(`/courses/semester/${semesterId}`, { method: 'GET' }),
         getCourse: (id) => request(`/courses/${id}`, { method: 'GET' }),
-        createCourse: (courseCode, courseName, credits, semesterId, facultyId) => request('/courses', {
+        createCourse: (courseCode, courseName, credits, semesterId, facultyId, courseType = 'THEORY') => request('/courses', {
             method: 'POST',
-            body: JSON.stringify({ courseCode, courseName, credits, semesterId, facultyId })
+            body: JSON.stringify({ courseCode, courseName, credits, semesterId, facultyId, courseType })
         }),
-        updateCourse: (id, courseCode, courseName, credits, semesterId, facultyId) => request(`/courses/${id}`, {
+        updateCourse: (id, courseCode, courseName, credits, semesterId, facultyId, courseType = 'THEORY') => request(`/courses/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({ courseCode, courseName, credits, semesterId, facultyId })
+            body: JSON.stringify({ courseCode, courseName, credits, semesterId, facultyId, courseType })
         }),
         deleteCourse: (id) => request(`/courses/${id}`, { method: 'DELETE' }),
 
@@ -130,9 +130,9 @@ const API = (() => {
             method: 'POST',
             body: JSON.stringify({ studentId, courseId })
         }),
-        updateEnrollment: (id, studentId, courseId, grade) => request(`/enrollments/${id}`, {
+        updateEnrollment: (id, payload) => request(`/enrollments/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({ studentId, courseId, grade })
+            body: JSON.stringify(payload)
         }),
         deleteEnrollment: (id) => request(`/enrollments/${id}`, { method: 'DELETE' }),
 
@@ -160,15 +160,17 @@ const API = (() => {
             }),
         deleteFaculty: (id) => request(`/faculty/members/${id}`, { method: 'DELETE' }),
 
+        getFacultyCourses: () => request('/faculty/courses', { method: 'GET' }),
+
         getFacultyEnrollmentsByCourse: (courseId) => 
             request(`/faculty/enrollments/course/${courseId}`, { method: 'GET' }),
         getFacultyEnrollmentsBySemester: (semesterId) => 
             request(`/faculty/enrollments/semester/${semesterId}`, { method: 'GET' }),
         getFacultyEnrollmentsByStudent: (studentId) => 
             request(`/faculty/enrollments/student/${studentId}`, { method: 'GET' }),
-        updateGrade: (enrollmentId, grade) => request('/faculty/grades', {
+        updateGrade: (payload) => request('/faculty/grades', {
             method: 'PUT',
-            body: JSON.stringify({ enrollmentId, grade })
+            body: JSON.stringify(payload)
         }),
 
         updateGradesBulk: (requests) => request('/faculty/grades/bulk', {

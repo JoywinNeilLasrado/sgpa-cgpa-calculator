@@ -156,11 +156,11 @@ async function loadCourses() {
             <tr class="course-row-item" data-code="${c.code.toLowerCase()}" data-name="${c.name.toLowerCase()}">
                 <td><strong>${c.code}</strong></td>
                 <td>${c.name}</td>
-                <td>${c.credits} Credits</td>
+                <td>${c.credits} Credits<br><small style="color:var(--slate-light)">${c.courseType || 'THEORY'}</small></td>
                 <td><span class="grade-badge O">Sem ${c.semester?.semesterNumber || '-'}</span></td>
                 <td>${c.faculty?.name || '-'}</td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editCourse(${c.id}, '${c.code}', '${c.name.replace(/'/g, "\\'")}', ${c.credits}, ${c.semester?.id || 0}, ${c.faculty?.id || 0})">Edit</button>
+                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editCourse(${c.id}, '${c.code}', '${c.name.replace(/'/g, "\\'")}', ${c.credits}, ${c.semester?.id || 0}, ${c.faculty?.id || 0}, '${c.courseType || 'THEORY'}')">Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.id})">Delete</button>
                 </td>
             </tr>
@@ -253,7 +253,7 @@ async function loadEnrollments() {
                 <td>${e.courseCode || 'N/A'} - ${e.courseName || 'N/A'}</td>
                 <td><span class="grade-badge ${e.grade || 'none'}">${e.grade || 'Pending'}</span></td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editEnrollment(${e.id}, ${e.studentId || 0}, ${e.courseId || 0}, '${e.grade || ''}')">Edit</button>
+                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editEnrollment(${e.id}, ${e.studentId || 0}, ${e.courseId || 0}, ${e.cieMarks || 0}, ${e.cieTheoryMarks || 0}, ${e.cieLabMarks || 0}, ${e.seeMarks || 0}, ${e.graceMarks || 0})">Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteEnrollment(${e.id})">Delete</button>
                 </td>
             </tr>
@@ -380,9 +380,10 @@ async function addCourse() {
     const credits = document.getElementById('course-credits').value.trim();
     const semesterId = document.getElementById('course-semester').value;
     const facultyId = document.getElementById('course-faculty').value;
+    const courseType = document.getElementById('course-type').value;
     if (!code || !name || !credits || !semesterId || !facultyId) { showToast('Complete all course fields.', 'error'); return; }
     try {
-        await API.createCourse(code, name, parseInt(credits), semesterId, facultyId);
+        await API.createCourse(code, name, parseInt(credits), semesterId, facultyId, courseType);
         document.getElementById('course-code').value = '';
         document.getElementById('course-name').value = '';
         document.getElementById('course-credits').value = '';
@@ -585,7 +586,7 @@ function editSemester(id, semesterNumber) {
     modal.classList.add('active');
 }
 
-function editCourse(id, code, name, credits, semesterId, facultyId) {
+function editCourse(id, code, name, credits, semesterId, facultyId, courseType) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Syllabus Course';
     
@@ -615,6 +616,14 @@ function editCourse(id, code, name, credits, semesterId, facultyId) {
             <label class="form-label">Faculty Instructor</label>
             <select class="form-select" id="edit-course-faculty">
                 ${facOptions}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Course Type</label>
+            <select class="form-select" id="edit-course-type">
+                <option value="THEORY" ${courseType==='THEORY'?'selected':''}>Theory</option>
+                <option value="LABORATORY" ${courseType==='LABORATORY'?'selected':''}>Laboratory</option>
+                <option value="INTEGRATED" ${courseType==='INTEGRATED'?'selected':''}>Integrated (Theory + Lab)</option>
             </select>
         </div>
     `;
@@ -677,38 +686,67 @@ function editDepartment(id, name, code) {
     modal.classList.add('active');
 }
 
-function editEnrollment(id, studentId, courseId, grade) {
+function editEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLabMarks, seeMarks, graceMarks) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Course Enrollment';
     
     const studentOptions = cachedStudents.map(s => `<option value="${s.id}" ${s.id == studentId ? 'selected' : ''}>${s.name} (${s.studentId})</option>`).join('');
     const courseOptions = cachedCourses.map(c => `<option value="${c.id}" ${c.id == courseId ? 'selected' : ''}>${c.code} - ${c.name}</option>`).join('');
-    const grades = ['', 'O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
-    const gradeOptions = grades.map(g => `<option value="${g}" ${g === grade ? 'selected' : ''}>${g || 'Pending'}</option>`).join('');
     
+    const course = cachedCourses.find(c => c.id == courseId);
+    const courseType = course ? (course.courseType || 'THEORY') : 'THEORY';
+
+    let marksHtml = '';
+    if (courseType === 'INTEGRATED') {
+        marksHtml = `
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label">CIE Theory Marks</label>
+                <input type="number" class="form-input" id="edit-enrollment-cie-theory" value="${cieTheoryMarks}" min="0" max="50">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label">CIE Lab Marks</label>
+                <input type="number" class="form-input" id="edit-enrollment-cie-lab" value="${cieLabMarks}" min="0" max="50">
+            </div>
+        `;
+    } else {
+        marksHtml = `
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label">CIE Marks</label>
+                <input type="number" class="form-input" id="edit-enrollment-cie" value="${cieMarks}" min="0" max="50">
+            </div>
+        `;
+    }
+
+    marksHtml += `
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">SEE Marks</label>
+            <input type="number" class="form-input" id="edit-enrollment-see" value="${seeMarks}" min="0" max="50">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Grace Marks</label>
+            <input type="number" class="form-input" id="edit-enrollment-grace" value="${graceMarks}" min="0" max="5">
+        </div>
+    `;
+
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Select Student Record</label>
-            <select class="form-select" id="edit-enrollment-student">
+            <select class="form-select" id="edit-enrollment-student" disabled>
                 ${studentOptions}
             </select>
         </div>
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Select Syllabus Course</label>
-            <select class="form-select" id="edit-enrollment-course">
+            <select class="form-select" id="edit-enrollment-course" disabled>
                 ${courseOptions}
             </select>
         </div>
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-            <label class="form-label">Assigned Grade</label>
-            <select class="form-select" id="edit-enrollment-grade">
-                ${gradeOptions}
-            </select>
-        </div>
+        ${marksHtml}
     `;
     
     modal.dataset.type = 'enrollment';
     modal.dataset.id = id;
+    modal.dataset.courseType = courseType;
     modal.classList.add('active');
 }
 
@@ -759,6 +797,7 @@ async function submitEdit() {
         const creditsStr = document.getElementById('edit-course-credits').value.trim();
         const semId = parseInt(document.getElementById('edit-course-semester').value);
         const facId = parseInt(document.getElementById('edit-course-faculty').value);
+        const courseType = document.getElementById('edit-course-type').value;
         
         const credits = parseInt(creditsStr);
         if (isNaN(credits) || credits < 1 || credits > 6) {
@@ -772,7 +811,7 @@ async function submitEdit() {
         }
         
         try {
-            await API.updateCourse(id, code, name, credits, semId, facId);
+            await API.updateCourse(id, code, name, credits, semId, facId, courseType);
             await loadCourses();
             showToast(`Syllabus course '${code}' modified successfully!`, 'success');
             closeEditModal();
@@ -821,21 +860,33 @@ async function submitEdit() {
     } else if (type === 'enrollment') {
         const studentId = parseInt(document.getElementById('edit-enrollment-student').value);
         const courseId = parseInt(document.getElementById('edit-enrollment-course').value);
-        const grade = document.getElementById('edit-enrollment-grade').value;
         
         if (isNaN(studentId) || isNaN(courseId)) {
             showToast('Student and Course selections are required.', 'error');
             return;
         }
         
+        const courseType = modal.dataset.courseType;
+        
+        let cieMarks = 0, cieTheoryMarks = 0, cieLabMarks = 0;
+        if (courseType === 'INTEGRATED') {
+            cieTheoryMarks = parseInt(document.getElementById('edit-enrollment-cie-theory').value) || 0;
+            cieLabMarks = parseInt(document.getElementById('edit-enrollment-cie-lab').value) || 0;
+        } else {
+            cieMarks = parseInt(document.getElementById('edit-enrollment-cie').value) || 0;
+        }
+        
+        const seeMarks = parseInt(document.getElementById('edit-enrollment-see').value) || 0;
+        const graceMarks = parseInt(document.getElementById('edit-enrollment-grace').value) || 0;
+        
         try {
-            await API.updateEnrollment(id, studentId, courseId, grade);
+            await API.updateEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLabMarks, seeMarks, graceMarks);
             await loadEnrollments();
-            showToast('Course registration modified successfully.', 'success');
+            showToast('Course enrollment successfully updated!', 'success');
             closeEditModal();
         } catch (err) {
             console.error(err);
-            showToast('Failed to modify student registration.', 'error');
+            showToast('Failed to update course enrollment marks.', 'error');
         }
     }
 }

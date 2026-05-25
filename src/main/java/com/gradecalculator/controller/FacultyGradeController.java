@@ -176,7 +176,10 @@ public class FacultyGradeController {
             }
         }
 
-        Enrollment saved = enrollmentService.updateGrade(request.enrollmentId(), request.grade(), principal.getUsername());
+        Enrollment saved = enrollmentService.updateMarks(
+            request,
+            principal.getUsername()
+        );
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", saved.getId());
@@ -208,7 +211,10 @@ public class FacultyGradeController {
                     .orElse(null);
             
             if (enrollment != null) {
-                Enrollment saved = enrollmentService.updateGrade(request.enrollmentId(), request.grade(), principal.getUsername());
+                Enrollment saved = enrollmentService.updateMarks(
+                    request,
+                    principal.getUsername()
+                );
                 
                 Map<String, Object> result = new HashMap<>();
                 result.put("id", saved.getId());

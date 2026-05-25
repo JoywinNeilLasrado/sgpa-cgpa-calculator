@@ -224,8 +224,8 @@ class FacultyGradeControllerTest {
 
     @Test
     void getEnrollmentsBySemesterFiltersByFaculty() throws Exception {
-        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Stud", "R1", 20L, "CS101", "Intro", 4, 10L, 1, "O", 10, 40);
-        EnrollmentResponse r2 = new EnrollmentResponse(101L, 3L, "Stud", "R1", 21L, "CS102", "Data", 4, 10L, 1, "A+", 9, 36);
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Stud", "R1", 20L, "CS101", "Intro", 4, "THEORY", 10L, 1, "O", 10, 40, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 95);
+        EnrollmentResponse r2 = new EnrollmentResponse(101L, 3L, "Stud", "R1", 21L, "CS102", "Data", 4, "THEORY", 10L, 1, "A+", 9, 36, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 85);
 
         when(enrollmentService.findBySemesterId(10L)).thenReturn(Arrays.asList(r1, r2));
 
@@ -266,9 +266,9 @@ class FacultyGradeControllerTest {
         
         Enrollment savedEnrollment = new Enrollment(stud, course, LetterGrade.A);
         savedEnrollment.setId(100L);
-        when(enrollmentService.updateGrade(eq(100L), eq(LetterGrade.A), anyString())).thenReturn(savedEnrollment);
+        when(enrollmentService.updateMarks(any(GradeUpdateRequest.class), anyString())).thenReturn(savedEnrollment);
 
-        GradeUpdateRequest request = new GradeUpdateRequest(100L, LetterGrade.A);
+        GradeUpdateRequest request = new GradeUpdateRequest(100L, LetterGrade.A, null, null, null, null, null, null, null, null, null, null, null, null);
 
         // Faculty Bob (assigned): Success
         mockMvc.perform(put("/api/faculty/grades")
@@ -312,9 +312,9 @@ class FacultyGradeControllerTest {
         
         Enrollment savedEnrollment = new Enrollment(stud, course, LetterGrade.A);
         savedEnrollment.setId(100L);
-        when(enrollmentService.updateGrade(eq(100L), eq(LetterGrade.A), anyString())).thenReturn(savedEnrollment);
+        when(enrollmentService.updateMarks(any(GradeUpdateRequest.class), anyString())).thenReturn(savedEnrollment);
 
-        List<GradeUpdateRequest> requests = Collections.singletonList(new GradeUpdateRequest(100L, LetterGrade.A));
+        List<GradeUpdateRequest> requests = Collections.singletonList(new GradeUpdateRequest(100L, LetterGrade.A, null, null, null, null, null, null, null, null, null, null, null, null));
 
         // Faculty Bob (assigned): Success
         mockMvc.perform(put("/api/faculty/grades/bulk")

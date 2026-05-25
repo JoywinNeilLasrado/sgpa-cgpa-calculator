@@ -41,6 +41,25 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     private LetterGrade grade;
 
+    private Integer cieMarks; // Kept for backward compatibility
+    private Integer cieTheoryMarks; // Kept for backward compatibility
+    private Integer cieLabMarks; // Kept for backward compatibility
+    
+    // Detailed Theory Marks
+    private Integer test1Marks;
+    private Integer test2Marks;
+    private Integer assignmentMarks;
+    private Integer oaaMarks;
+    
+    // Detailed Lab Marks
+    private Integer regularLabMarks;
+    private Integer labTestMarks;
+    private Integer labRecordMarks;
+
+    private Integer seeMarks;
+    private Integer graceMarks;
+    private Integer totalMarks;
+
     @jakarta.persistence.Version
     private Long version;
 
@@ -60,10 +79,15 @@ public class Enrollment {
     // Constructors
     public Enrollment() {}
 
+    public Enrollment(Student student, Course course) {
+        this.student = student;
+        this.course = course;
+    }
+
     public Enrollment(Student student, Course course, LetterGrade grade) {
         this.student = student;
         this.course = course;
-        this.grade = grade;
+        this.grade = grade; // Kept for backwards compatibility
     }
 
     // Getters and Setters
@@ -97,6 +121,135 @@ public class Enrollment {
 
     public void setGrade(LetterGrade grade) {
         this.grade = grade;
+    }
+
+    public Integer getCieMarks() {
+        return cieMarks;
+    }
+
+    public void setCieMarks(Integer cieMarks) {
+        this.cieMarks = cieMarks;
+    }
+
+    public Integer getCieTheoryMarks() {
+        return cieTheoryMarks;
+    }
+
+    public void setCieTheoryMarks(Integer cieTheoryMarks) {
+        this.cieTheoryMarks = cieTheoryMarks;
+    }
+
+    public Integer getCieLabMarks() {
+        return cieLabMarks;
+    }
+
+    public void setCieLabMarks(Integer cieLabMarks) {
+        this.cieLabMarks = cieLabMarks;
+    }
+
+    public Integer getTest1Marks() { return test1Marks; }
+    public void setTest1Marks(Integer test1Marks) { this.test1Marks = test1Marks; }
+
+    public Integer getTest2Marks() { return test2Marks; }
+    public void setTest2Marks(Integer test2Marks) { this.test2Marks = test2Marks; }
+
+    public Integer getAssignmentMarks() { return assignmentMarks; }
+    public void setAssignmentMarks(Integer assignmentMarks) { this.assignmentMarks = assignmentMarks; }
+
+    public Integer getOaaMarks() { return oaaMarks; }
+    public void setOaaMarks(Integer oaaMarks) { this.oaaMarks = oaaMarks; }
+
+    public Integer getRegularLabMarks() { return regularLabMarks; }
+    public void setRegularLabMarks(Integer regularLabMarks) { this.regularLabMarks = regularLabMarks; }
+
+    public Integer getLabTestMarks() { return labTestMarks; }
+    public void setLabTestMarks(Integer labTestMarks) { this.labTestMarks = labTestMarks; }
+
+    public Integer getLabRecordMarks() { return labRecordMarks; }
+    public void setLabRecordMarks(Integer labRecordMarks) { this.labRecordMarks = labRecordMarks; }
+
+    public Integer getSeeMarks() {
+        return seeMarks;
+    }
+
+    public void setSeeMarks(Integer seeMarks) {
+        this.seeMarks = seeMarks;
+    }
+
+    public Integer getGraceMarks() {
+        return graceMarks;
+    }
+
+    public void setGraceMarks(Integer graceMarks) {
+        this.graceMarks = graceMarks;
+    }
+
+    public Integer getTotalMarks() {
+        return totalMarks;
+    }
+
+    public void setTotalMarks(Integer totalMarks) {
+        this.totalMarks = totalMarks;
+    }
+
+    public void calculateGrade() {
+        if (course == null || course.getCourseType() == null) {
+            return;
+        }
+
+        CourseType type = course.getCourseType();
+        int finalCie = 0;
+        // The SEE is initially conducted for a total of 100 marks and is then proportionally reduced to 50 marks.
+        // If the user inputs the 50 marks, we just take it. If they input out of 100, we'd need to divide by 2.
+        // The plan stated seeMarks out of 50. Let's assume seeMarks is already the reduced 50.
+        int finalSee = (seeMarks != null ? seeMarks : 0) + (graceMarks != null ? graceMarks : 0);
+        boolean passesCie = false;
+
+        if (type == CourseType.THEORY) {
+            int t1 = (test1Marks != null ? test1Marks : 0);
+            int t2 = (test2Marks != null ? test2Marks : 0);
+            int avgTests = (int) Math.round((t1 + t2) / 2.0);
+            int assign = (assignmentMarks != null ? assignmentMarks : 0);
+            int oaa = (oaaMarks != null ? oaaMarks : 0);
+            finalCie = avgTests + assign + oaa;
+            this.cieMarks = finalCie;
+            passesCie = finalCie >= 20;
+        } else if (type == CourseType.LABORATORY) {
+            int reg = (regularLabMarks != null ? regularLabMarks : 0);
+            int test = (labTestMarks != null ? labTestMarks : 0);
+            int rec = (labRecordMarks != null ? labRecordMarks : 0);
+            finalCie = reg + test + rec;
+            this.cieMarks = finalCie;
+            passesCie = finalCie >= 25;
+        } else if (type == CourseType.INTEGRATED) {
+            int t1 = (test1Marks != null ? test1Marks : 0);
+            int t2 = (test2Marks != null ? test2Marks : 0);
+            int avgTests = (int) Math.round((t1 + t2) / 2.0);
+            int assign = (assignmentMarks != null ? assignmentMarks : 0);
+            int oaa = (oaaMarks != null ? oaaMarks : 0);
+            int theory = avgTests + assign + oaa;
+            
+            int reg = (regularLabMarks != null ? regularLabMarks : 0);
+            int test = (labTestMarks != null ? labTestMarks : 0);
+            int rec = (labRecordMarks != null ? labRecordMarks : 0);
+            int lab = reg + test + rec;
+            
+            this.cieTheoryMarks = theory;
+            this.cieLabMarks = lab;
+            finalCie = theory + lab;
+            passesCie = theory >= 12 && lab >= 8;
+        }
+
+        this.totalMarks = finalCie + finalSee;
+
+        boolean passesSee = finalSee >= 18;
+        boolean overallPass = passesCie && passesSee && this.totalMarks >= 40;
+
+        if (!overallPass) {
+            this.grade = LetterGrade.F;
+        } else {
+            this.grade = LetterGrade.fromMarks(this.totalMarks);
+        }
     }
 
     /**

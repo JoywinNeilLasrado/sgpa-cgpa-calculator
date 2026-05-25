@@ -83,7 +83,7 @@ class EnrollmentControllerTest {
 
     @Test
     void getAllEnrollmentsPermittedForAdminAndFaculty() throws Exception {
-        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, 10L, 1, "O", 10, 40);
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, "THEORY", 10L, 1, "O", 10, 40, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 95);
         when(enrollmentService.findAll()).thenReturn(Arrays.asList(r1));
 
         // Admin: Success
@@ -105,7 +105,7 @@ class EnrollmentControllerTest {
 
     @Test
     void getEnrollmentsByStudentPermittedForOwnerAndStaff() throws Exception {
-        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, 10L, 1, "O", 10, 40);
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, "THEORY", 10L, 1, "O", 10, 40, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 95);
         when(enrollmentService.findByStudentId(3L)).thenReturn(Collections.singletonList(r1));
 
         // Owner: Success
@@ -134,7 +134,7 @@ class EnrollmentControllerTest {
 
     @Test
     void getEnrollmentsByStudentAndSemesterPermittedForOwnerAndStaff() throws Exception {
-        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, 10L, 1, "O", 10, 40);
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, "THEORY", 10L, 1, "O", 10, 40, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 95);
         when(enrollmentService.findByStudentIdAndSemesterId(3L, 10L)).thenReturn(Collections.singletonList(r1));
 
         // Owner: Success
@@ -156,9 +156,10 @@ class EnrollmentControllerTest {
         EnrollmentRequest request = new EnrollmentRequest();
         request.setStudentId(3L);
         request.setCourseId(20L);
-        request.setGrade("O");
+        request.setCieMarks(48);
+        request.setSeeMarks(47);
 
-        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, 10L, 1, "O", 10, 40);
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, "THEORY", 10L, 1, "O", 10, 40, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 95);
         when(enrollmentService.create(any(EnrollmentRequest.class))).thenReturn(r1);
 
         // Owner Student: Success
@@ -195,9 +196,10 @@ class EnrollmentControllerTest {
         EnrollmentRequest request = new EnrollmentRequest();
         request.setStudentId(3L);
         request.setCourseId(20L);
-        request.setGrade("A+");
+        request.setCieMarks(42);
+        request.setSeeMarks(43);
 
-        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, 10L, 1, "A+", 9, 36);
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, "THEORY", 10L, 1, "A+", 9, 36, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 85);
         when(enrollmentService.update(eq(100L), any(EnrollmentRequest.class))).thenReturn(r1);
 
         // Admin: Success

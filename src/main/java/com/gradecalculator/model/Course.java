@@ -32,6 +32,10 @@ public class Course {
     @Column(nullable = false)
     private Integer credits;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "course_type", nullable = false)
+    private CourseType courseType = CourseType.THEORY;
+
     @ManyToOne
     @JoinColumn(name = "semester_id")
     private Semester semester;
@@ -47,6 +51,14 @@ public class Course {
         this.courseCode = courseCode;
         this.courseName = courseName;
         this.credits = credits;
+        this.courseType = CourseType.THEORY;
+    }
+
+    public Course(String courseCode, String courseName, Integer credits, CourseType courseType) {
+        this.courseCode = courseCode;
+        this.courseName = courseName;
+        this.credits = credits;
+        this.courseType = courseType != null ? courseType : CourseType.THEORY;
     }
 
     // Getters and Setters
@@ -80,6 +92,14 @@ public class Course {
 
     public void setCredits(Integer credits) {
         this.credits = credits;
+    }
+
+    public CourseType getCourseType() {
+        return courseType;
+    }
+
+    public void setCourseType(CourseType courseType) {
+        this.courseType = courseType;
     }
 
     public Semester getSemester() {

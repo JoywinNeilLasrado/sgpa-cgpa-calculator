@@ -563,14 +563,30 @@
                                 creditsExcludingF += c.credits;
                             }
 
+                            const t1 = c.courseType === 'THEORY' || c.courseType === 'INTEGRATED' ? (c.test1Marks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+                            const t2 = c.courseType === 'THEORY' || c.courseType === 'INTEGRATED' ? (c.test2Marks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+                            const assign = c.courseType === 'THEORY' || c.courseType === 'INTEGRATED' ? (c.assignmentMarks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+                            const oaa = c.courseType === 'THEORY' || c.courseType === 'INTEGRATED' ? (c.oaaMarks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+                            
+                            const rl = c.courseType === 'LABORATORY' || c.courseType === 'INTEGRATED' ? (c.regularLabMarks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+                            const lt = c.courseType === 'LABORATORY' || c.courseType === 'INTEGRATED' ? (c.labTestMarks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+                            const lr = c.courseType === 'LABORATORY' || c.courseType === 'INTEGRATED' ? (c.labRecordMarks ?? '-') : '<span style="color:var(--mist-dark)">-</span>';
+
                             coursesRows += `
                                 <tr>
                                     <td><strong>${c.courseCode}</strong></td>
                                     <td>${c.courseName}</td>
-                                    <td>${c.credits} Credits</td>
-                                    <td><span class="grade-badge ${c.grade || 'none'}">${c.grade || 'Not Graded'}</span></td>
+                                    <td>${c.credits}</td>
+                                    <td>${t1}</td>
+                                    <td>${t2}</td>
+                                    <td>${assign}</td>
+                                    <td>${oaa}</td>
+                                    <td>${rl}</td>
+                                    <td>${lt}</td>
+                                    <td>${lr}</td>
+                                    <td><strong>${c.seeMarks ?? '-'}</strong></td>
+                                    <td><span class="grade-badge ${c.grade || 'none'}">${c.grade || 'Pending'}</span></td>
                                     <td><strong>${c.gradePoints !== undefined ? c.gradePoints : '-'}</strong></td>
-                                    <td><strong>${c.creditPoints !== undefined ? c.creditPoints : '-'}</strong></td>
                                 </tr>
                             `;
                         });
@@ -590,9 +606,16 @@
                                             <th>Course Code</th>
                                             <th>Course Name</th>
                                             <th>Credits</th>
+                                            <th title="Test 1">T1</th>
+                                            <th title="Test 2">T2</th>
+                                            <th title="Assignments">Asg</th>
+                                            <th title="Other Assessment">OAA</th>
+                                            <th title="Regular Lab">RegLab</th>
+                                            <th title="Lab Test">L.Test</th>
+                                            <th title="Lab Record">L.Rec</th>
+                                            <th>SEE</th>
                                             <th>Grade</th>
-                                            <th>Grade Points</th>
-                                            <th>Credit Points</th>
+                                            <th>GP</th>
                                         </tr>
                                     </thead>
                                     <tbody>

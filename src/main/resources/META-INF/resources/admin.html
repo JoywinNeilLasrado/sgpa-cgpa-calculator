@@ -328,12 +328,20 @@
                                     <select class="form-select" id="course-semester">
                                         <!-- Loaded dynamically -->
                                     </select>
-                                    <div class="form-group">
-                                        <label class="form-label">Faculty Instructor</label>
-                                        <select class="form-select" id="course-faculty">
-                                            <!-- Loaded dynamically -->
-                                        </select>
-                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Faculty Instructor</label>
+                                    <select class="form-select" id="course-faculty">
+                                        <!-- Loaded dynamically -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Course Type</label>
+                                    <select class="form-select" id="course-type">
+                                        <option value="THEORY">Theory</option>
+                                        <option value="LABORATORY">Laboratory</option>
+                                        <option value="INTEGRATED">Integrated (Theory + Lab)</option>
+                                    </select>
                                 </div>
                             </div>
                             <button class="btn btn-primary" onclick="addCourse()" style="width: 100%;">Create Syllabus Course</button>

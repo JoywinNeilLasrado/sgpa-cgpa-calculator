@@ -93,24 +93,48 @@ public class DashboardService {
                     if (grade == LetterGrade.O) outstandingCount++;
                     
                     // Add course result
-                    courseResults.add(new CourseResultResponse(
+                    CourseResultResponse cr = new CourseResultResponse(
                             course.getCourseCode(),
                             course.getCourseName(),
                             course.getCredits(),
                             grade.getGrade(),
                             gp,
                             cp
-                    ));
+                    );
+                    cr.setCourseType(course.getCourseType() != null ? course.getCourseType().name() : "THEORY");
+                    cr.setTest1Marks(e.getTest1Marks());
+                    cr.setTest2Marks(e.getTest2Marks());
+                    cr.setAssignmentMarks(e.getAssignmentMarks());
+                    cr.setOaaMarks(e.getOaaMarks());
+                    cr.setRegularLabMarks(e.getRegularLabMarks());
+                    cr.setLabTestMarks(e.getLabTestMarks());
+                    cr.setLabRecordMarks(e.getLabRecordMarks());
+                    cr.setSeeMarks(e.getSeeMarks());
+                    cr.setGraceMarks(e.getGraceMarks());
+                    cr.setTotalMarks(e.getTotalMarks());
+                    courseResults.add(cr);
                 } else {
                     // Add ungraded course result
-                    courseResults.add(new CourseResultResponse(
+                    CourseResultResponse cr = new CourseResultResponse(
                             course.getCourseCode(),
                             course.getCourseName(),
                             course.getCredits(),
                             null,
                             0,
                             0
-                    ));
+                    );
+                    cr.setCourseType(course.getCourseType() != null ? course.getCourseType().name() : "THEORY");
+                    cr.setTest1Marks(e.getTest1Marks());
+                    cr.setTest2Marks(e.getTest2Marks());
+                    cr.setAssignmentMarks(e.getAssignmentMarks());
+                    cr.setOaaMarks(e.getOaaMarks());
+                    cr.setRegularLabMarks(e.getRegularLabMarks());
+                    cr.setLabTestMarks(e.getLabTestMarks());
+                    cr.setLabRecordMarks(e.getLabRecordMarks());
+                    cr.setSeeMarks(e.getSeeMarks());
+                    cr.setGraceMarks(e.getGraceMarks());
+                    cr.setTotalMarks(e.getTotalMarks());
+                    courseResults.add(cr);
                 }
             }
 

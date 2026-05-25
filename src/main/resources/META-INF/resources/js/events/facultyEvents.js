@@ -3,8 +3,9 @@
 // Export a single init function to be called by the thin bootstrap script.
 
 export function initFaculty() {
-  let pendingChanges = {}; // Maps enrollmentId -> newGrade string
+  let pendingChanges = {}; // Maps enrollmentId -> new marks object
   let originalEnrollments = [];
+  let cachedCourses = [];
   let activeFilterType = 'course'; // course, semester, student
 
   // Check if token exists
@@ -67,10 +68,10 @@ export function initFaculty() {
 
     async function loadFilters() {
       try {
-        const courses = await API.getCourses();
+        cachedCourses = await API.getFacultyCourses();
         const courseSelect = document.getElementById('course-select');
         courseSelect.innerHTML = `<option value="">Choose an active course...</option>` +
-          courses.map(c => `<option value="${c.id}">${c.courseCode} - ${c.courseName}</option>`).join('');
+          cachedCourses.map(c => `<option value="${c.id}">${c.courseCode} - ${c.courseName}</option>`).join('');
         const semesters = await API.getSemesters();
         const semesterSelect = document.getElementById('semester-select');
         semesterSelect.innerHTML = `<option value="">Choose a semester...</option>` +
@@ -79,6 +80,19 @@ export function initFaculty() {
         const studentSelect = document.getElementById('student-select');
         studentSelect.innerHTML = `<option value="">Choose a student file...</option>` +
           students.map(s => `<option value="${s.id}">${s.name} (${s.studentId})</option>`).join('');
+
+        // Initialize TomSelect for searchability
+        const tsConfig = {
+            create: false,
+            sortField: { field: "text", direction: "asc" },
+            placeholder: "Type to search...",
+            allowEmptyOption: true
+        };
+        if (window.TomSelect) {
+            new TomSelect(courseSelect, tsConfig);
+            new TomSelect(semesterSelect, tsConfig);
+            new TomSelect(studentSelect, tsConfig);
+        }
       } catch (err) {
         console.error(err);
         showToast('Failed to pull portal filters from backend.', 'error');
@@ -100,46 +114,52 @@ export function initFaculty() {
           const courseId = document.getElementById('course-select').value;
           if (!courseId) { resetGridDisplay(); return; }
           enrollments = await API.getFacultyEnrollmentsByCourse(courseId);
-          headersHtml = `
-            <th><span class="modified-indicator"></span>Student Name</th>
-            <th>Student Roll</th>
-            <th>Credits</th>
-            <th style="width: 25%;">Assigned Grade Letter</th>
-          `;
           loadCourseAnalytics(courseId);
         } else if (type === 'semester') {
           const semesterId = document.getElementById('semester-select').value;
           if (!semesterId) { resetGridDisplay(); return; }
           enrollments = await API.getFacultyEnrollmentsBySemester(semesterId);
-          headersHtml = `
-            <th><span class="modified-indicator"></span>Student Name</th>
-            <th>Course Code</th>
-            <th>Course Name</th>
-            <th style="width: 25%;">Assigned Grade Letter</th>
-          `;
           const semesterSelect = document.getElementById('semester-select');
-          const semesterText = semesterSelect.options[semesterSelect.selectedIndex].text;
-          renderLocalAnalytics(semesterText, 'Semester Level Summary', enrollments);
+          renderLocalAnalytics(semesterSelect.options[semesterSelect.selectedIndex].text, 'Semester Level Summary', enrollments);
         } else if (type === 'student') {
           const studentId = document.getElementById('student-select').value;
           if (!studentId) { resetGridDisplay(); return; }
           enrollments = await API.getFacultyEnrollmentsByStudent(studentId);
-          headersHtml = `
-            <th><span class="modified-indicator"></span>Course Code</th>
-            <th>Course Name</th>
-            <th>Semester</th>
-            <th style="width: 25%;">Assigned Grade Letter</th>
-          `;
           const studentSelect = document.getElementById('student-select');
-          const studentText = studentSelect.options[studentSelect.selectedIndex].text;
-          renderLocalAnalytics(studentText, 'Student Level Summary', enrollments);
+          renderLocalAnalytics(studentSelect.options[studentSelect.selectedIndex].text, 'Student Level Summary', enrollments);
         }
+        
         originalEnrollments = enrollments;
         const tbody = document.getElementById('spreadsheet-tbody');
-        document.getElementById('spreadsheet-headers').innerHTML = headersHtml;
+        const thead = document.getElementById('spreadsheet-headers');
+
         if (enrollments.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--slate-light);">No enrollment files found matching filter.</td></tr>`;
+          thead.innerHTML = '<th>No Data</th>';
+          tbody.innerHTML = '<tr><td colspan="15" style="text-align: center; padding: 2rem; color: var(--slate-light);">No enrollment files found matching filter.</td></tr>';
         } else {
+          // Determine dominant course type if possible (especially for course filter)
+          const firstCourseType = enrollments[0].courseType || 'THEORY';
+          const isMixed = type !== 'course';
+          
+          let hHtml = '';
+          if (type === 'course') {
+              hHtml += '<th><span class="modified-indicator"></span>Student Name</th><th>Student Roll</th><th>Credits</th>';
+          } else if (type === 'semester') {
+              hHtml += '<th><span class="modified-indicator"></span>Student Name</th><th>Course Code</th><th>Course Name</th>';
+          } else {
+              hHtml += '<th><span class="modified-indicator"></span>Course Code</th><th>Course Name</th><th>Semester</th>';
+          }
+
+          if (isMixed || firstCourseType === 'THEORY' || firstCourseType === 'INTEGRATED') {
+              hHtml += '<th style="width: 7%;">Test 1</th><th style="width: 7%;">Test 2</th><th style="width: 7%;">Assign</th><th style="width: 7%;">OAA</th>';
+          }
+          if (isMixed || firstCourseType === 'LABORATORY' || firstCourseType === 'INTEGRATED') {
+              hHtml += '<th style="width: 7%;">Reg Lab</th><th style="width: 7%;">Lab Test</th><th style="width: 7%;">Lab Rec</th>';
+          }
+          hHtml += '<th style="width: 8%;">SEE</th><th style="width: 6%;">Grace</th><th style="width: 10%;">Grade</th>';
+          
+          thead.innerHTML = hHtml;
+
           tbody.innerHTML = enrollments.map(e => {
             let col1 = '', col2 = '', col3 = '';
             if (type === 'course') {
@@ -155,31 +175,36 @@ export function initFaculty() {
               col2 = e.courseName || e.course?.courseName || 'N/A';
               col3 = `Semester ${e.semesterNumber || e.course?.semester?.semesterNumber || 'N/A'}`;
             }
-            return `
-              <tr id="row-${e.id}">
-                <td>
-                  <div style="display: flex; align-items: center;">
-                    <span class="modified-indicator"></span>
-                    <strong>${col1}</strong>
-                  </div>
-                </td>
-                <td>${col2}</td>
-                <td>${col3}</td>
-                <td>
-                  <select class="spreadsheet-select-custom" onchange="trackGradeChange(${e.id}, this)">
-                    <option value="" ${!e.grade ? 'selected' : ''}>Not Graded</option>
-                    <option value="O" ${e.grade==='O' ? 'selected' : ''}>O (Outstanding)</option>
-                    <option value="A+" ${e.grade==='A+' ? 'selected' : ''}>A+ (Excellent)</option>
-                    <option value="A" ${e.grade==='A' ? 'selected' : ''}>A (Very Good)</option>
-                    <option value="B+" ${e.grade==='B+' ? 'selected' : ''}>B+ (Good)</option>
-                    <option value="B" ${e.grade==='B' ? 'selected' : ''}>B (Above Average)</option>
-                    <option value="C" ${e.grade==='C' ? 'selected' : ''}>C (Average)</option>
-                    <option value="P" ${e.grade==='P' ? 'selected' : ''}>P (Pass)</option>
-                    <option value="F" ${e.grade==='F' ? 'selected' : ''}>F (Fail)</option>
-                  </select>
-                </td>
-              </tr>
-            `;
+            
+            const cType = e.courseType || 'THEORY';
+            const hasTheory = cType === 'THEORY' || cType === 'INTEGRATED';
+            const hasLab = cType === 'LABORATORY' || cType === 'INTEGRATED';
+            
+            let rowHtml = `<tr id="row-${e.id}">`;
+            rowHtml += `<td><div style="display: flex; align-items: center;"><span class="modified-indicator"></span><strong>${col1}</strong></div></td><td>${col2}</td><td>${col3}</td>`;
+            
+            const renderInput = (field, val, max, enabled) => {
+                if (!enabled) return `<td><input type="number" class="spreadsheet-select-custom mark-input disabled-input" disabled title="N/A" value=""></td>`;
+                return `<td><input type="number" class="spreadsheet-select-custom mark-input" data-field="${field}" value="${val ?? ''}" min="0" max="${max}" oninput="trackGradeChange(${e.id})"></td>`;
+            };
+
+            if (isMixed || firstCourseType === 'THEORY' || firstCourseType === 'INTEGRATED') {
+                rowHtml += renderInput('test1Marks', e.test1Marks, 30, hasTheory);
+                rowHtml += renderInput('test2Marks', e.test2Marks, 30, hasTheory);
+                rowHtml += renderInput('assignmentMarks', e.assignmentMarks, 10, hasTheory);
+                rowHtml += renderInput('oaaMarks', e.oaaMarks, 10, hasTheory);
+            }
+            if (isMixed || firstCourseType === 'LABORATORY' || firstCourseType === 'INTEGRATED') {
+                rowHtml += renderInput('regularLabMarks', e.regularLabMarks, 20, hasLab);
+                rowHtml += renderInput('labTestMarks', e.labTestMarks, 20, hasLab);
+                rowHtml += renderInput('labRecordMarks', e.labRecordMarks, 10, hasLab);
+            }
+
+            rowHtml += renderInput('seeMarks', e.seeMarks, 50, true);
+            rowHtml += renderInput('graceMarks', e.graceMarks, 5, true);
+            rowHtml += `<td><span class="grade-badge ${e.grade || 'none'}">${e.grade || 'Pending'}</span></td></tr>`;
+            
+            return rowHtml;
           }).join('');
         }
         loading.style.display = 'none';
@@ -286,15 +311,34 @@ export function initFaculty() {
       document.getElementById('analytics-content').style.display = 'none';
     }
 
-    function trackGradeChange(enrollmentId, select) {
+    function trackGradeChange(enrollmentId) {
       const row = document.getElementById(`row-${enrollmentId}`);
-      const originalGrade = originalEnrollments.find(e => e.id === enrollmentId)?.grade || '';
-      const newGrade = select.value;
-      if (originalGrade === newGrade) {
+      if (!row) return;
+      
+      const inputs = row.querySelectorAll('.mark-input');
+      let changed = false;
+      const changes = {};
+      
+      const original = originalEnrollments.find(e => e.id === enrollmentId) || {};
+      
+      inputs.forEach(inp => {
+        if (!inp.disabled) {
+          const field = inp.dataset.field;
+          const val = inp.value === '' ? null : parseInt(inp.value);
+          const origVal = original[field] ?? null;
+          
+          if (val !== origVal) {
+            changed = true;
+          }
+          changes[field] = val;
+        }
+      });
+      
+      if (!changed) {
         delete pendingChanges[enrollmentId];
         row.classList.remove('spreadsheet-row-modified');
       } else {
-        pendingChanges[enrollmentId] = newGrade;
+        pendingChanges[enrollmentId] = changes;
         row.classList.add('spreadsheet-row-modified');
       }
       renderBulkFloatingBar();
@@ -317,8 +361,10 @@ export function initFaculty() {
       originalEnrollments.forEach(e => {
         const row = document.getElementById(`row-${e.id}`);
         if (row) {
-          const select = row.querySelector('.spreadsheet-select-custom');
-          if (select) select.value = e.grade || '';
+          row.querySelectorAll('.mark-input').forEach(inp => {
+            const field = inp.dataset.field;
+            inp.value = e[field] ?? '';
+          });
         }
       });
       renderBulkFloatingBar();
@@ -327,7 +373,10 @@ export function initFaculty() {
     async function saveBulkChanges() {
       const count = Object.keys(pendingChanges).length;
       if (count === 0) return;
-      const requests = Object.keys(pendingChanges).map(id => ({ enrollmentId: parseInt(id), grade: pendingChanges[id] || null }));
+      const requests = Object.keys(pendingChanges).map(id => ({ 
+        enrollmentId: parseInt(id), 
+        ...pendingChanges[id]
+      }));
       const bar = document.getElementById('bulk-bar');
       bar.classList.remove('active');
       try {

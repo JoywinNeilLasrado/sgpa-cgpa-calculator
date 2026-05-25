@@ -2,6 +2,7 @@ package com.gradecalculator.service;
 
 import com.gradecalculator.dto.EnrollmentRequest;
 import com.gradecalculator.dto.EnrollmentResponse;
+import com.gradecalculator.dto.GradeUpdateRequest;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
@@ -75,13 +76,13 @@ public class EnrollmentService {
             throw new IllegalArgumentException("This student is already enrolled in this course");
         }
 
-        String gradeStr = request.getGrade();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT") || a.getAuthority().equals("STUDENT"))) {
-            gradeStr = null;
-        }
-
-        Enrollment enrollment = new Enrollment(student, course, LetterGrade.fromGrade(gradeStr));
+        Enrollment enrollment = new Enrollment(student, course);
+        enrollment.setCieMarks(request.getCieMarks());
+        enrollment.setCieTheoryMarks(request.getCieTheoryMarks());
+        enrollment.setCieLabMarks(request.getCieLabMarks());
+        enrollment.setSeeMarks(request.getSeeMarks());
+        enrollment.setGraceMarks(request.getGraceMarks());
+        enrollment.calculateGrade();
         return toEnrollmentResponse(enrollmentRepository.save(enrollment));
     }
 
@@ -105,7 +106,12 @@ public class EnrollmentService {
 
         enrollment.setStudent(student);
         enrollment.setCourse(course);
-        enrollment.setGrade(LetterGrade.fromGrade(request.getGrade()));
+        enrollment.setCieMarks(request.getCieMarks());
+        enrollment.setCieTheoryMarks(request.getCieTheoryMarks());
+        enrollment.setCieLabMarks(request.getCieLabMarks());
+        enrollment.setSeeMarks(request.getSeeMarks());
+        enrollment.setGraceMarks(request.getGraceMarks());
+        enrollment.calculateGrade();
         return toEnrollmentResponse(enrollmentRepository.save(enrollment));
     }
 
@@ -127,11 +133,25 @@ public class EnrollmentService {
                 course.getCourseCode(),
                 course.getCourseName(),
                 course.getCredits(),
+                course.getCourseType() != null ? course.getCourseType().name() : "THEORY",
                 course.getSemester().getId(),
                 course.getSemester().getSemesterNumber(),
                 enrollment.getGrade() != null ? enrollment.getGrade().getGrade() : null,
                 enrollment.getGrade() != null ? enrollment.getGrade().getGradePoints() : 0,
-                enrollment.getCreditPoints()
+                enrollment.getCreditPoints(),
+                enrollment.getCieMarks(),
+                enrollment.getCieTheoryMarks(),
+                enrollment.getCieLabMarks(),
+                enrollment.getTest1Marks(),
+                enrollment.getTest2Marks(),
+                enrollment.getAssignmentMarks(),
+                enrollment.getOaaMarks(),
+                enrollment.getRegularLabMarks(),
+                enrollment.getLabTestMarks(),
+                enrollment.getLabRecordMarks(),
+                enrollment.getSeeMarks(),
+                enrollment.getGraceMarks(),
+                enrollment.getTotalMarks()
         );
     }
 
@@ -145,6 +165,31 @@ public class EnrollmentService {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         enrollment.setGrade(grade);
+        enrollment.setLastModifiedBy(username);
+        enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
+        return enrollmentRepository.save(enrollment);
+    }
+
+    @Transactional
+    public Enrollment updateMarks(GradeUpdateRequest request, String username) {
+        Enrollment enrollment = enrollmentRepository.findById(request.enrollmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        enrollment.setCieMarks(request.cieMarks());
+        enrollment.setCieTheoryMarks(request.cieTheoryMarks());
+        enrollment.setCieLabMarks(request.cieLabMarks());
+        
+        enrollment.setTest1Marks(request.test1Marks());
+        enrollment.setTest2Marks(request.test2Marks());
+        enrollment.setAssignmentMarks(request.assignmentMarks());
+        enrollment.setOaaMarks(request.oaaMarks());
+        
+        enrollment.setRegularLabMarks(request.regularLabMarks());
+        enrollment.setLabTestMarks(request.labTestMarks());
+        enrollment.setLabRecordMarks(request.labRecordMarks());
+        
+        enrollment.setSeeMarks(request.seeMarks());
+        enrollment.setGraceMarks(request.graceMarks());
+        enrollment.calculateGrade();
         enrollment.setLastModifiedBy(username);
         enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
         return enrollmentRepository.save(enrollment);

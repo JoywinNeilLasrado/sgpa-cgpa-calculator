@@ -45,6 +45,10 @@ public class CourseService {
     }
 
     public Course create(String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue) {
+        return create(courseCode, courseName, creditsValue, semesterIdValue, facultyIdValue, com.gradecalculator.model.CourseType.THEORY);
+    }
+
+    public Course create(String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue, com.gradecalculator.model.CourseType courseType) {
         Long semesterId = parseLong(semesterIdValue, "Semester is required");
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
@@ -66,12 +70,19 @@ public class CourseService {
         }
 
         Course course = new Course(courseCode, courseName, credits);
+        if (courseType != null) {
+            course.setCourseType(courseType);
+        }
         course.setSemester(semester);
         course.setFaculty(faculty);
         return courseRepository.save(course);
     }
 
     public Course update(Long id, String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue) {
+        return update(id, courseCode, courseName, creditsValue, semesterIdValue, facultyIdValue, com.gradecalculator.model.CourseType.THEORY);
+    }
+
+    public Course update(Long id, String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue, com.gradecalculator.model.CourseType courseType) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         Long semesterId = parseLong(semesterIdValue, "Semester is required");
@@ -98,6 +109,9 @@ public class CourseService {
         course.setCourseCode(courseCode);
         course.setCourseName(courseName);
         course.setCredits(parsePositiveInt(creditsValue, "Credits must be greater than zero"));
+        if (courseType != null) {
+            course.setCourseType(courseType);
+        }
         course.setSemester(semester);
         course.setFaculty(faculty);
         return courseRepository.save(course);
