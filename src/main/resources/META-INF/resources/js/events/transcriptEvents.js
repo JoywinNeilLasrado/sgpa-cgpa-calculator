@@ -65,6 +65,7 @@ export function initTranscript() {
         if (termSelectorCard) termSelectorCard.style.display = 'none';
         await populateStudentList();
       }
+      if (window.hidePageLoader) window.hidePageLoader();
     }
 
     // Populate Student dropdown for Admin/Faculty

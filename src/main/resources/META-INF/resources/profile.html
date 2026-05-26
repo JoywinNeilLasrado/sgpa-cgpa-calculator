@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/core.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | GradePoint</title>
@@ -98,6 +99,9 @@
             margin-bottom: 1.5rem;
         }
     </style>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
 
@@ -204,8 +208,7 @@
     <!-- Toast Notifications -->
     
 
-    <script src="/js/core.js"></script>
-    <script src="/js/api-v2.js"></script>
+        <script src="/js/api-v2.js"></script>
     <script>
         // Check if token exists
         if (!localStorage.getItem('token')) {
@@ -235,6 +238,7 @@
             // Fill token display
             document.getElementById('token-display').textContent = localStorage.getItem('token') || 'Token expired';
 
+            if (window.hidePageLoader) window.hidePageLoader();
         }
 
         document.getElementById('password-form').addEventListener('submit', async (e) => {

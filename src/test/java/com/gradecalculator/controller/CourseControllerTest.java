@@ -110,7 +110,7 @@ class CourseControllerTest {
         Course created = new Course("CS102", "Data Structures", 4);
         created.setId(20L);
 
-        when(courseService.create(eq("CS102"), eq("Data Structures"), eq(4), eq(10L), any())).thenReturn(created);
+        when(courseService.create(eq("CS102"), eq("Data Structures"), eq(4), eq(10L), any(), any())).thenReturn(created);
 
         mockMvc.perform(post("/api/courses")
                         .with(csrf())
@@ -149,7 +149,7 @@ class CourseControllerTest {
         Course updated = new Course("CS102", "Data Structures Edited", 4);
         updated.setId(20L);
 
-        when(courseService.update(eq(20L), eq("CS102"), eq("Data Structures Edited"), eq(4), eq(10L), any())).thenReturn(updated);
+        when(courseService.update(eq(20L), eq("CS102"), eq("Data Structures Edited"), eq(4), eq(10L), any(), any())).thenReturn(updated);
 
         mockMvc.perform(put("/api/courses/{id}", 20L)
                         .with(csrf())

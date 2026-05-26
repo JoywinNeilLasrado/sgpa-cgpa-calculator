@@ -79,6 +79,7 @@ async function init() {
     }
 
     await loadAllData();
+    if (window.hidePageLoader) window.hidePageLoader();
 }
 
 async function loadAllData() {

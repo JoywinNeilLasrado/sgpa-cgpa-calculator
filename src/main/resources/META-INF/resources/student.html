@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/core.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal | GradePoint</title>
@@ -221,6 +222,9 @@
             color: var(--gold-dark);
         }
     </style>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
 
@@ -406,8 +410,7 @@
     <!-- Toast Notification Wrapper -->
     
 
-    <script src="/js/core.js"></script>
-    <script src="/js/api-v2.js"></script>
+        <script src="/js/api-v2.js"></script>
     <script>
         let currentStudentId = null;
         let originalCGPA = 0;
@@ -459,6 +462,7 @@
             } catch (err) {
                 console.error("Failed to load registration semesters:", err);
             }
+            if (window.hidePageLoader) window.hidePageLoader();
         }
 
         async function fetchAndRenderDashboard() {
@@ -572,6 +576,7 @@
                                     <td>${rl}</td>
                                     <td>${lt}</td>
                                     <td>${lr}</td>
+                                    <td><strong>${c.cieMarks ?? '-'}</strong></td>
                                     <td><strong>${c.seeMarks ?? '-'}</strong></td>
                                     <td><span class="grade-badge ${c.grade || 'none'}">${c.grade || 'Pending'}</span></td>
                                     <td><strong>${c.gradePoints !== undefined ? c.gradePoints : '-'}</strong></td>
@@ -594,14 +599,15 @@
                                             <th>Course Code</th>
                                             <th>Course Name</th>
                                             <th>Credits</th>
-                                            <th title="Test 1">T1</th>
-                                            <th title="Test 2">T2</th>
-                                            <th title="Assignments">Asg</th>
-                                            <th title="Other Assessment">OAA</th>
-                                            <th title="Regular Lab">RegLab</th>
-                                            <th title="Lab Test">L.Test</th>
-                                            <th title="Lab Record">L.Rec</th>
-                                            <th>SEE</th>
+                                            <th title="Test 1">T1 (50)</th>
+                                            <th title="Test 2">T2 (50)</th>
+                                            <th title="Assignments">Asg (10)</th>
+                                            <th title="Other Assessment">OAA (10)</th>
+                                            <th title="Regular Lab">RegLab (20)</th>
+                                            <th title="Lab Test">L.Test (20)</th>
+                                            <th title="Lab Record">L.Rec (10)</th>
+                                            <th title="Continuous Internal Evaluation">CIE (50)</th>
+                                            <th>SEE (50)</th>
                                             <th>Grade</th>
                                             <th>GP</th>
                                         </tr>

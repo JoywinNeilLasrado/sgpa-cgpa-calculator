@@ -23,6 +23,7 @@ public class CourseResultResponse {
     private Integer seeMarks;
     private Integer graceMarks;
     private Integer totalMarks;
+    private Integer cieMarks;
 
     public CourseResultResponse() {}
 
@@ -36,6 +37,8 @@ public class CourseResultResponse {
     }
 
     // Getters and Setters
+    public Integer getCieMarks() { return cieMarks; }
+    public void setCieMarks(Integer cieMarks) { this.cieMarks = cieMarks; }
     public String getCourseCode() { return courseCode; }
     public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
 

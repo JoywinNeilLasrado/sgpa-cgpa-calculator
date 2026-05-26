@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/core.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Portal | GradePoint</title>
@@ -137,10 +138,9 @@
             color: var(--crimson);
         }
 
-        /* Spreadsheet highlight */
         .spreadsheet-select-custom {
             width: 100%;
-            padding: 0.45rem 0.75rem;
+            padding: 0.45rem 0.25rem;
             font-size: 0.875rem;
             font-weight: 500;
             border: 1px solid var(--mist-dark);
@@ -148,6 +148,17 @@
             background: var(--white);
             cursor: pointer;
             transition: all 0.25s ease;
+            text-align: center;
+        }
+
+        /* Hide number spin buttons to save space */
+        .spreadsheet-select-custom::-webkit-outer-spin-button,
+        .spreadsheet-select-custom::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .spreadsheet-select-custom[type=number] {
+            -moz-appearance: textfield;
         }
 
         .spreadsheet-select-custom:focus {
@@ -170,6 +181,9 @@
             opacity: 1;
         }
     </style>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
 
@@ -342,8 +356,7 @@
     
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-    <script src="/js/core.js"></script>
-    <script src="/js/api-v2.js"></script>
+        <script src="/js/api-v2.js"></script>
     <script type="module" src="/js/faculty.js"></script>
 </body>
 </html>

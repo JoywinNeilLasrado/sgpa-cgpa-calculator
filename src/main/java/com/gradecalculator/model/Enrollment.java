@@ -208,7 +208,7 @@ public class Enrollment {
         if (type == CourseType.THEORY) {
             int t1 = (test1Marks != null ? test1Marks : 0);
             int t2 = (test2Marks != null ? test2Marks : 0);
-            int avgTests = (int) Math.round((t1 + t2) / 2.0);
+            int avgTests = (int) Math.round((t1 + t2) * 0.3); // Average of Test 1 and Test 2 (out of 100) scaled to 30
             int assign = (assignmentMarks != null ? assignmentMarks : 0);
             int oaa = (oaaMarks != null ? oaaMarks : 0);
             finalCie = avgTests + assign + oaa;
@@ -224,20 +224,23 @@ public class Enrollment {
         } else if (type == CourseType.INTEGRATED) {
             int t1 = (test1Marks != null ? test1Marks : 0);
             int t2 = (test2Marks != null ? test2Marks : 0);
-            int avgTests = (int) Math.round((t1 + t2) / 2.0);
+            int avgTests = (int) Math.round((t1 + t2) * 0.3); // Average of Test 1 and Test 2 scaled to 30
             int assign = (assignmentMarks != null ? assignmentMarks : 0);
             int oaa = (oaaMarks != null ? oaaMarks : 0);
-            int theory = avgTests + assign + oaa;
+            double theoryTotal = avgTests + assign + oaa;
+            int theoryReduced = (int) Math.round(theoryTotal * 0.6); // Total theory out of 50 reduced to 30
             
             int reg = (regularLabMarks != null ? regularLabMarks : 0);
             int test = (labTestMarks != null ? labTestMarks : 0);
             int rec = (labRecordMarks != null ? labRecordMarks : 0);
-            int lab = reg + test + rec;
+            int labTotal = reg + test + rec;
+            int labReduced = (int) Math.round(labTotal * 0.4); // Total lab out of 50 reduced to 20
             
-            this.cieTheoryMarks = theory;
-            this.cieLabMarks = lab;
-            finalCie = theory + lab;
-            passesCie = theory >= 12 && lab >= 8;
+            this.cieTheoryMarks = theoryReduced;
+            this.cieLabMarks = labReduced;
+            finalCie = theoryReduced + labReduced; // Theory (30) + Lab (20) = 50
+            this.cieMarks = finalCie;
+            passesCie = theoryReduced >= 12 && labReduced >= 8;
         }
 
         this.totalMarks = finalCie + finalSee;

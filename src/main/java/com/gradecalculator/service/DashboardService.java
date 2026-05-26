@@ -110,6 +110,7 @@ public class DashboardService {
                     cr.setLabTestMarks(e.getLabTestMarks());
                     cr.setLabRecordMarks(e.getLabRecordMarks());
                     cr.setSeeMarks(e.getSeeMarks());
+                    cr.setCieMarks(e.getCieMarks());
                     cr.setGraceMarks(e.getGraceMarks());
                     cr.setTotalMarks(e.getTotalMarks());
                     courseResults.add(cr);
@@ -132,6 +133,7 @@ public class DashboardService {
                     cr.setLabTestMarks(e.getLabTestMarks());
                     cr.setLabRecordMarks(e.getLabRecordMarks());
                     cr.setSeeMarks(e.getSeeMarks());
+                    cr.setCieMarks(e.getCieMarks());
                     cr.setGraceMarks(e.getGraceMarks());
                     cr.setTotalMarks(e.getTotalMarks());
                     courseResults.add(cr);

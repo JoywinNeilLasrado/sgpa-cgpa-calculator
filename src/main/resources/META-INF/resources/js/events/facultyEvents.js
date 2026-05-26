@@ -18,6 +18,32 @@ export function initFaculty() {
   // Assuming apiService.js is an ES module exporting { apiService as API }
   // We'll import it here.
   import('../services/apiService.js').then(({ apiService: API }) => {
+    // Helper to calculate CIE dynamically
+    function calculateCie(cType, t1, t2, assign, oaa, reg, lt, lr) {
+      t1 = t1 ?? 0;
+      t2 = t2 ?? 0;
+      assign = assign ?? 0;
+      oaa = oaa ?? 0;
+      reg = reg ?? 0;
+      lt = lt ?? 0;
+      lr = lr ?? 0;
+
+      if (cType === 'THEORY') {
+        const avgTests = Math.round((t1 + t2) * 0.3);
+        return avgTests + assign + oaa;
+      } else if (cType === 'LABORATORY') {
+        return reg + lt + lr;
+      } else if (cType === 'INTEGRATED') {
+        const avgTests = Math.round((t1 + t2) * 0.3);
+        const theoryTotal = avgTests + assign + oaa;
+        const theoryReduced = Math.round(theoryTotal * 0.6);
+        const labTotal = reg + lt + lr;
+        const labReduced = Math.round(labTotal * 0.4);
+        return theoryReduced + labReduced;
+      }
+      return 0;
+    }
+
     // Utility: Toast notifications
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
@@ -64,6 +90,7 @@ export function initFaculty() {
         document.getElementById('hero-welcome').textContent = `Faculty Control: ${user.username}`;
       }
       await loadFilters();
+      if (window.hidePageLoader) window.hidePageLoader();
     }
 
     async function loadFilters() {
@@ -151,12 +178,12 @@ export function initFaculty() {
           }
 
           if (isMixed || firstCourseType === 'THEORY' || firstCourseType === 'INTEGRATED') {
-              hHtml += '<th style="width: 7%;">Test 1</th><th style="width: 7%;">Test 2</th><th style="width: 7%;">Assign</th><th style="width: 7%;">OAA</th>';
+              hHtml += '<th style="width: 7%;">Test 1 (50)</th><th style="width: 7%;">Test 2 (50)</th><th style="width: 7%;">Assign (10)</th><th style="width: 7%;">OAA (10)</th>';
           }
           if (isMixed || firstCourseType === 'LABORATORY' || firstCourseType === 'INTEGRATED') {
-              hHtml += '<th style="width: 7%;">Reg Lab</th><th style="width: 7%;">Lab Test</th><th style="width: 7%;">Lab Rec</th>';
+              hHtml += '<th style="width: 7%;">Reg Lab (20)</th><th style="width: 7%;">Lab Test (20)</th><th style="width: 7%;">Lab Rec (10)</th>';
           }
-          hHtml += '<th style="width: 8%;">SEE</th><th style="width: 6%;">Grace</th><th style="width: 10%;">Grade</th>';
+          hHtml += '<th style="width: 6%; text-align: center;">CIE (50)</th><th style="width: 8%;">SEE (50)</th><th style="width: 6%;">Grace (5)</th><th style="width: 10%;">Grade</th>';
           
           thead.innerHTML = hHtml;
 
@@ -189,8 +216,8 @@ export function initFaculty() {
             };
 
             if (isMixed || firstCourseType === 'THEORY' || firstCourseType === 'INTEGRATED') {
-                rowHtml += renderInput('test1Marks', e.test1Marks, 30, hasTheory);
-                rowHtml += renderInput('test2Marks', e.test2Marks, 30, hasTheory);
+                rowHtml += renderInput('test1Marks', e.test1Marks, 50, hasTheory);
+                rowHtml += renderInput('test2Marks', e.test2Marks, 50, hasTheory);
                 rowHtml += renderInput('assignmentMarks', e.assignmentMarks, 10, hasTheory);
                 rowHtml += renderInput('oaaMarks', e.oaaMarks, 10, hasTheory);
             }
@@ -200,6 +227,10 @@ export function initFaculty() {
                 rowHtml += renderInput('labRecordMarks', e.labRecordMarks, 10, hasLab);
             }
 
+            // Calculate dynamic CIE
+            const cie = calculateCie(cType, e.test1Marks, e.test2Marks, e.assignmentMarks, e.oaaMarks, e.regularLabMarks, e.labTestMarks, e.labRecordMarks);
+
+            rowHtml += `<td style="font-weight: bold; text-align: center; vertical-align: middle;"><span class="cie-cell" id="cie-${e.id}" data-type="${cType}">${cie}</span></td>`;
             rowHtml += renderInput('seeMarks', e.seeMarks, 50, true);
             rowHtml += renderInput('graceMarks', e.graceMarks, 5, true);
             rowHtml += `<td><span class="grade-badge ${e.grade || 'none'}">${e.grade || 'Pending'}</span></td></tr>`;
@@ -333,6 +364,28 @@ export function initFaculty() {
           changes[field] = val;
         }
       });
+
+      // Recalculate dynamic CIE inside the browser
+      const getVal = (field) => {
+        const el = row.querySelector(`[data-field="${field}"]`);
+        if (!el || el.value === '' || el.disabled) return 0;
+        return parseInt(el.value) || 0;
+      };
+
+      const cieCell = document.getElementById(`cie-${enrollmentId}`);
+      if (cieCell) {
+        const cType = cieCell.getAttribute('data-type') || 'THEORY';
+        const t1 = getVal('test1Marks');
+        const t2 = getVal('test2Marks');
+        const assign = getVal('assignmentMarks');
+        const oaa = getVal('oaaMarks');
+        const reg = getVal('regularLabMarks');
+        const lt = getVal('labTestMarks');
+        const lr = getVal('labRecordMarks');
+        
+        const newCie = calculateCie(cType, t1, t2, assign, oaa, reg, lt, lr);
+        cieCell.textContent = newCie;
+      }
       
       if (!changed) {
         delete pendingChanges[enrollmentId];
@@ -365,6 +418,14 @@ export function initFaculty() {
             const field = inp.dataset.field;
             inp.value = e[field] ?? '';
           });
+          
+          // Recalculate original CIE cell
+          const cieCell = document.getElementById(`cie-${e.id}`);
+          if (cieCell) {
+            const cType = cieCell.getAttribute('data-type') || 'THEORY';
+            const cie = calculateCie(cType, e.test1Marks, e.test2Marks, e.assignmentMarks, e.oaaMarks, e.regularLabMarks, e.labTestMarks, e.labRecordMarks);
+            cieCell.textContent = cie;
+          }
         }
       });
       renderBulkFloatingBar();

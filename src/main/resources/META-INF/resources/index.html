@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/core.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GradePoint | Academic Excellence Tracker</title>
@@ -238,6 +239,9 @@
             color: var(--crimson);
         }
     </style>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body class="login-body">
 
@@ -299,10 +303,59 @@
     <!-- Toast Container -->
     
 
-    <script src="/js/core.js"></script>
     <script src="/js/api-v2.js"></script>
     <script>
-        // Authentication is now handled automatically by core.js
+        function fillDemo(username, password) {
+            const uInput = document.getElementById('username');
+            const pInput = document.getElementById('password');
+            uInput.value = username;
+            pInput.value = password;
+            
+            // Dispatch input events so labels float
+            uInput.dispatchEvent(new Event('input', { bubbles: true }));
+            pInput.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            // Smoothly focus the submit button
+            uInput.classList.add('active');
+            pInput.classList.add('active');
+            
+            if (window.showToast) window.showToast('Demo account credentials prefilled.', 'success');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorAlert = document.getElementById('error-alert');
+            const loader = document.getElementById('loader');
+
+            errorAlert.classList.remove('show');
+            loader.style.display = 'flex';
+
+            try {
+                // Call standard unified api client login
+                const data = await API.login(username, password);
+                
+                // Store auth elements
+                localStorage.setItem('token', data.token);
+                // Directly store response object (id, username, role, token)
+                localStorage.setItem('user', JSON.stringify(data));
+                
+                if (window.showToast) window.showToast(`Welcome back, ${data.username}!`, 'success');
+                
+                setTimeout(() => {
+                    if (data.role === 'ADMIN') window.location.href = '/admin.html';
+                    else if (data.role === 'FACULTY') window.location.href = '/faculty-grades.html';
+                    else window.location.href = '/student.html';
+                }, 800);
+            } catch (err) {
+                console.error(err);
+                errorAlert.textContent = 'Invalid credentials or connection issue. Please check again.';
+                errorAlert.classList.add('show');
+                loader.style.display = 'none';
+                if (window.showToast) window.showToast('Authentication failed.', 'error');
+            }
+        });
     </script>
 </body>
 </html>
