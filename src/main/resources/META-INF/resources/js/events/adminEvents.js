@@ -31,20 +31,13 @@ function submitPasswordChange() {
     });
 }
 
-let cachedStudents = [];
-let cachedCourses = [];
-let cachedEnrollments = [];
-let cachedDepartments = [];
-let cachedSemesters = [];
-let cachedFaculty = [];
+
 
 // Check auth state
 Auth.requireRole('ADMIN');
 
-// Local showToast delegation to centralized Toast module
-function showToast(message, type = 'success') {
-    Toast.show(message, type);
-}
+
+
 
 function switchTab(tabId, btn) {
     // Hide all tabs
@@ -57,9 +50,8 @@ function switchTab(tabId, btn) {
 }
 
 async function init() {
-    const userJson = localStorage.getItem('user');
-    if (userJson) {
-        const user = JSON.parse(userJson);
+    const user = Auth.getUser();
+    if (user) {
         const navUsername = document.getElementById('nav-username');
         const navRole = document.getElementById('nav-role');
         if (navUsername) navUsername.textContent = user.username;
@@ -251,15 +243,15 @@ async function loadAllData() {
     await loadEnrollments();
 
     // Sync summary counters
-    document.getElementById('count-students').textContent = cachedStudents.length;
-    document.getElementById('count-courses').textContent = cachedCourses.length;
-    document.getElementById('count-enrollments').textContent = cachedEnrollments.length;
+    document.getElementById('count-students').textContent = (Store.get('students') || []).length;
+    document.getElementById('count-courses').textContent = (Store.get('courses') || []).length;
+    document.getElementById('count-enrollments').textContent = (Store.get('enrollments') || []).length;
 }
 
 async function loadStudents() {
     try {
         const students = await API.getStudents();
-        cachedStudents = students;
+        
         Store.set('students', students);
 
         const tbody = document.querySelector('#students-table tbody');
@@ -276,14 +268,13 @@ async function loadStudents() {
 
     } catch (err) {
         console.error(err);
-        showToast('Failed to pull student accounts.', 'error');
+        Toast.error('Failed to pull student accounts.');
     }
 }
 
 async function loadSemesters() {
     try {
         const semesters = await API.getSemesters();
-        cachedSemesters = semesters;
         Store.set('semesters', semesters);
         document.getElementById('count-semesters').textContent = semesters.length;
 
@@ -305,14 +296,14 @@ async function loadSemesters() {
 
     } catch (err) {
         console.error(err);
-        showToast('Failed to load semesters.', 'error');
+        Toast.error('Failed to load semesters.');
     }
 }
 
 async function loadCourses() {
     try {
         const courses = await API.getCourses();
-        cachedCourses = courses;
+        
         Store.set('courses', courses);
 
         const tbody = document.querySelector('#courses-table tbody');
@@ -344,14 +335,13 @@ async function loadCourses() {
 
     } catch (err) {
         console.error(err);
-        showToast('Failed to pull curriculum list.', 'error');
+        Toast.error('Failed to pull curriculum list.');
     }
 }
 
 async function loadFaculty() {
     try {
         const faculty = await API.getFacultyMembers();
-        cachedFaculty = faculty;
         Store.set('faculty', faculty);
         // Populate faculty dropdown for course assignment
         const select = document.getElementById('course-faculty');
@@ -381,14 +371,13 @@ async function loadFaculty() {
         document.getElementById('count-faculty-text').textContent = `${faculty.length} faculty members loaded`;
     } catch (err) {
         console.error(err);
-        showToast('Failed to load faculty list.', 'error');
+        Toast.error('Failed to load faculty list.');
     }
 }
 
 async function loadDepartments() {
     try {
         const departments = await API.getDepartments();
-        cachedDepartments = departments;
         Store.set('departments', departments);
 
         document.getElementById('count-departments-text').textContent = `${departments.length} departments loaded`;
@@ -418,14 +407,14 @@ async function loadDepartments() {
 
     } catch (err) {
         console.error(err);
-        showToast('Failed to pull departments.', 'error');
+        Toast.error('Failed to pull departments.');
     }
 }
 
 async function loadEnrollments() {
     try {
         const enrollments = await API.getEnrollments();
-        cachedEnrollments = enrollments;
+        
         Store.set('enrollments', enrollments);
 
         const tbody = document.querySelector('#enrollments-table tbody');
@@ -451,7 +440,7 @@ async function loadEnrollments() {
 
     } catch (err) {
         console.error(err);
-        showToast('Failed to load system registrations.', 'error');
+        Toast.error('Failed to load system registrations.');
     }
 }
 
@@ -497,17 +486,17 @@ async function addStudent() {
     const studentId = document.getElementById('student-id').value.trim();
     const branch = document.getElementById('student-branch').value;
     const dob = document.getElementById('student-dob').value;
-    if (!name || !studentId || !dob) { showToast('Complete all floating fields.', 'error'); return; }
+    if (!name || !studentId || !dob) { Toast.error('Complete all floating fields.'); return; }
     try {
         await API.createStudent(name, studentId, branch, dob);
         document.getElementById('student-name').value = '';
         document.getElementById('student-id').value = '';
         document.getElementById('student-dob').value = '2004-01-01';
         await loadStudents();
-        showToast(`Student profile '${name}' registered successfully!`, 'success');
+        Toast.success(`Student profile '${name}' registered successfully!`);
     } catch (err) {
         console.error(err);
-        showToast('Failed to register student record.', 'error');
+        Toast.error('Failed to register student record.');
     }
 }
 
@@ -516,51 +505,51 @@ async function addFaculty() {
     const username = document.getElementById('faculty-username').value.trim();
     const email = document.getElementById('faculty-email').value.trim();
     const department = document.getElementById('faculty-department').value.trim();
-    if (!name || !username || !email || !department) { showToast('Complete all faculty fields.', 'error'); return; }
+    if (!name || !username || !email || !department) { Toast.error('Complete all faculty fields.'); return; }
     try {
         const password = prompt('Enter a password for the new faculty member:', 'password123');
         if (password === null) return;
-        if (!password.trim()) { showToast('Password cannot be empty.', 'error'); return; }
+        if (!password.trim()) { Toast.error('Password cannot be empty.'); return; }
         await API.createFaculty(name, username, password.trim(), email, department);
         document.getElementById('faculty-name').value = '';
         document.getElementById('faculty-username').value = '';
         document.getElementById('faculty-email').value = '';
         document.getElementById('faculty-department').value = '';
         await loadFaculty();
-        showToast(`Faculty staff '${name}' onboarded successfully!`, 'success');
+        Toast.success(`Faculty staff '${name}' onboarded successfully!`);
     } catch (err) {
         console.error(err);
-        showToast('Failed to onboard faculty staff.', 'error');
+        Toast.error('Failed to onboard faculty staff.');
     }
 }
 
 async function addDepartment() {
     const name = document.getElementById('department-name').value.trim();
     const code = document.getElementById('department-code').value.trim();
-    if (!name || !code) { showToast('Complete all department fields.', 'error'); return; }
+    if (!name || !code) { Toast.error('Complete all department fields.'); return; }
     try {
         await API.createDepartment(name, code);
         document.getElementById('department-name').value = '';
         document.getElementById('department-code').value = '';
         await loadDepartments();
-        showToast(`Department '${name}' created successfully!`, 'success');
+        Toast.success(`Department '${name}' created successfully!`);
     } catch (err) {
         console.error(err);
-        showToast('Failed to create department. Duplicates?', 'error');
+        Toast.error('Failed to create department. Duplicates?');
     }
 }
 
 async function addSemester() {
     const num = document.getElementById('semester-number').value.trim();
-    if (!num) { showToast('Provide a semester number cycle.', 'error'); return; }
+    if (!num) { Toast.error('Provide a semester number cycle.'); return; }
     try {
         await API.createSemester(parseInt(num));
         document.getElementById('semester-number').value = '';
         await loadSemesters();
-        showToast(`Academic Semester Stage ${num} established!`, 'success');
+        Toast.success(`Academic Semester Stage ${num} established!`);
     } catch (err) {
         console.error(err);
-        showToast('Failed to establish semester stage.', 'error');
+        Toast.error('Failed to establish semester stage.');
     }
 }
 
@@ -571,31 +560,31 @@ async function addCourse() {
     const semesterId = document.getElementById('course-semester').value;
     const facultyId = document.getElementById('course-faculty').value;
     const courseType = document.getElementById('course-type').value;
-    if (!code || !name || !credits || !semesterId || !facultyId) { showToast('Complete all course fields.', 'error'); return; }
+    if (!code || !name || !credits || !semesterId || !facultyId) { Toast.error('Complete all course fields.'); return; }
     try {
         await API.createCourse(code, name, parseInt(credits), semesterId, facultyId, courseType);
         document.getElementById('course-code').value = '';
         document.getElementById('course-name').value = '';
         document.getElementById('course-credits').value = '';
         await loadCourses();
-        showToast(`Syllabus item '${code}: ${name}' created successfully.`, 'success');
+        Toast.success(`Syllabus item '${code}: ${name}' created successfully.`);
     } catch (err) {
         console.error(err);
-        showToast('Failed to create syllabus course item.', 'error');
+        Toast.error('Failed to create syllabus course item.');
     }
 }
 
 async function addEnrollment() {
     const studentId = document.getElementById('enrollment-student').value;
     const courseId = document.getElementById('enrollment-course').value;
-    if (!studentId || !courseId) { showToast('Choose student target and course mapping.', 'error'); return; }
+    if (!studentId || !courseId) { Toast.error('Choose student target and course mapping.'); return; }
     try {
         await API.createEnrollment(studentId, courseId);
         await loadEnrollments();
-        showToast('Course registration siphoned successfully.', 'success');
+        Toast.success('Course registration siphoned successfully.');
     } catch (err) {
         console.error(err);
-        showToast('Failed to map student registration. Duplicates?', 'error');
+        Toast.error('Failed to map student registration. Duplicates?');
     }
 }
 
@@ -605,9 +594,9 @@ async function deleteStudent(id) {
         try {
             await API.deleteStudent(id);
             await loadStudents();
-            showToast('Student file successfully purged.', 'success');
+            Toast.success('Student file successfully purged.');
         } catch (err) {
-            showToast('Purge rejected by data locks.', 'error');
+            Toast.error('Purge rejected by data locks.');
         }
     }
 }
@@ -617,10 +606,10 @@ async function deleteFaculty(id) {
         try {
             await API.deleteFaculty(id);
             await loadFaculty();
-            showToast('Faculty member successfully purged.', 'success');
+            Toast.success('Faculty member successfully purged.');
         } catch (err) {
             console.error(err);
-            showToast('Failed to delete faculty member.', 'error');
+            Toast.error('Failed to delete faculty member.');
         }
     }
 }
@@ -630,9 +619,9 @@ async function deleteDepartment(id) {
         try {
             await API.deleteDepartment(id);
             await loadDepartments();
-            showToast('Department successfully deleted.', 'success');
+            Toast.success('Department successfully deleted.');
         } catch (err) {
-            showToast('Failed to delete department.', 'error');
+            Toast.error('Failed to delete department.');
         }
     }
 }
@@ -642,9 +631,9 @@ async function deleteSemester(id) {
         try {
             await API.deleteSemester(id);
             await loadSemesters();
-            showToast('Semester sequence successfully deleted.', 'success');
+            Toast.success('Semester sequence successfully deleted.');
         } catch (err) {
-            showToast('Purge rejected: dependent courses exist.', 'error');
+            Toast.error('Purge rejected: dependent courses exist.');
         }
     }
 }
@@ -654,9 +643,9 @@ async function deleteCourse(id) {
         try {
             await API.deleteCourse(id);
             await loadCourses();
-            showToast('Syllabus course successfully deleted.', 'success');
+            Toast.success('Syllabus course successfully deleted.');
         } catch (err) {
-            showToast('Purge rejected: Active class student enrollments exist.', 'error');
+            Toast.error('Purge rejected: Active class student enrollments exist.');
         }
     }
 }
@@ -666,9 +655,9 @@ async function deleteEnrollment(id) {
         try {
             await API.deleteEnrollment(id);
             await loadEnrollments();
-            showToast('Class registration successfully revoked.', 'success');
+            Toast.success('Class registration successfully revoked.');
         } catch (err) {
-            showToast('Revoke action rejected.', 'error');
+            Toast.error('Revoke action rejected.');
         }
     }
 }
@@ -680,7 +669,7 @@ async function loadStudentGrades() {
     if (!studentId) { container.style.display = 'none'; return; }
     try {
         const cgpa = await API.getCGPA(studentId);
-        const student = cachedStudents.find(s => s.id == studentId);
+        const student = (Store.get('students') || []).find(s => s.id == studentId);
         const cgpaVal = cgpa.cgpa || 0;
         let status = 'Academic Warning';
         let bg = 'F';
@@ -711,7 +700,7 @@ async function loadStudentGrades() {
         `;
         container.style.display = 'block';
     } catch (err) {
-        showToast('Failed to pull student audit ledger.', 'error');
+        Toast.error('Failed to pull student audit ledger.');
         container.style.display = 'none';
     }
 }
@@ -728,7 +717,7 @@ function editStudent(id, name, roll, branch, dob) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Student Profile';
     
-    const validBranches = cachedDepartments.map(d => d.name);
+    const validBranches = (Store.get('departments') || []).map(d => d.name);
     const branchOptions = validBranches.map(b => `<option value="${b}" ${b === branch ? 'selected' : ''}>${b}</option>`).join('');
     
     document.getElementById('editModalBody').innerHTML = `
@@ -777,8 +766,8 @@ function editCourse(id, code, name, credits, semesterId, facultyId, courseType) 
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Syllabus Course';
     
-    const semOptions = cachedSemesters.map(s => `<option value="${s.id}" ${s.id == semesterId ? 'selected' : ''}>Semester Stage ${s.semesterNumber}</option>`).join('');
-    const facOptions = cachedFaculty.map(f => `<option value="${f.id}" ${f.id == facultyId ? 'selected' : ''}>${f.name}</option>`).join('');
+    const semOptions = (Store.get('semesters') || []).map(s => `<option value="${s.id}" ${s.id == semesterId ? 'selected' : ''}>Semester Stage ${s.semesterNumber}</option>`).join('');
+    const facOptions = (Store.get('faculty') || []).map(f => `<option value="${f.id}" ${f.id == facultyId ? 'selected' : ''}>${f.name}</option>`).join('');
     
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -824,7 +813,7 @@ function editFaculty(id, name, username, email, department) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Faculty Profile';
     
-    const validDepts = cachedDepartments.map(d => d.name);
+    const validDepts = (Store.get('departments') || []).map(d => d.name);
     const deptOptions = validDepts.map(d => `<option value="${d}" ${d === department ? 'selected' : ''}>${d}</option>`).join('');
     
     document.getElementById('editModalBody').innerHTML = `
@@ -877,10 +866,11 @@ function editEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLa
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Course Enrollment';
     
-    const studentOptions = cachedStudents.map(s => `<option value="${s.id}" ${s.id == studentId ? 'selected' : ''}>${s.name} (${s.studentId})</option>`).join('');
-    const courseOptions = cachedCourses.map(c => `<option value="${c.id}" ${c.id == courseId ? 'selected' : ''}>${c.code} - ${c.name}</option>`).join('');
+    const studentOptions = (Store.get('students') || []).map(s => `<option value="${s.id}" ${s.id == studentId ? 'selected' : ''}>${s.name} (${s.studentId})</option>`).join('');
+    const courses = Store.get('courses') || [];
+    const courseOptions = courses.map(c => `<option value="${c.id}" ${c.id == courseId ? 'selected' : ''}>${c.code} - ${c.name}</option>`).join('');
     
-    const course = cachedCourses.find(c => c.id == courseId);
+    const course = (Store.get('courses') || []).find(c => c.id == courseId);
     const courseType = course ? (course.courseType || 'THEORY') : 'THEORY';
 
     let marksHtml = '';
