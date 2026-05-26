@@ -31,15 +31,7 @@ public class GradeCalculationService {
         this.enrollmentRepository = enrollmentRepository;
     }
 
-    private static class GradeSummary {
-        final int totalCreditPoints;
-        final int totalCredits;
-
-        GradeSummary(int totalCreditPoints, int totalCredits) {
-            this.totalCreditPoints = totalCreditPoints;
-            this.totalCredits = totalCredits;
-        }
-    }
+    public record GradeSummary(int totalCreditPoints, int totalCredits) {}
 
     private GradeSummary summarizeGrades(List<Enrollment> enrollments, java.util.function.Predicate<Enrollment> filter) {
         int totalCreditPoints = 0;
@@ -64,6 +56,7 @@ public class GradeCalculationService {
      * SGPA = Sum(Credit Points) / Sum(Course Credits)
      * where Credit Points = Course Credits × Grade Points
      */
+    @Transactional(readOnly = true)
     public SgpaResponse calculateSGPA(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
@@ -91,6 +84,7 @@ public class GradeCalculationService {
      * CGPA = Sum(Credit Points for all courses excluding F grades) / 
      *        Sum(Course Credits excluding F grades)
      */
+    @Transactional(readOnly = true)
     public CgpaResponse calculateCGPA(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
@@ -138,6 +132,7 @@ public class GradeCalculationService {
     /**
      * Calculate CGPA for a student across all enrolled semesters.
      */
+    @Transactional(readOnly = true)
     public CgpaResponse calculateOverallCGPA(Long studentId) {
         studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
