@@ -2,32 +2,32 @@
 import { apiService as API } from '../services/apiService.js';
 import { renderStudentList } from '../ui/uiRenderer.js';
 import { UI } from '../ui.js';
+import { Toast } from '../components/toast.js';
+import { Auth } from '../auth/Auth.js';
+import { Store } from '../state/store.js';
+import { Modal } from '../components/modal.js';
+import { handleAPIError } from '../services/errorHandler.js';
 
 function openPasswordModal(username) {
-    const modal = document.getElementById('passwordModal');
-    modal.dataset.username = username;
-    modal.classList.add('active');
+    Modal.open('passwordModal', username);
 }
 
 function closePasswordModal() {
-    const modal = document.getElementById('passwordModal');
-    modal.classList.remove('active');
-    document.getElementById('newPasswordInput').value = '';
+    Modal.close('passwordModal');
 }
 
 function submitPasswordChange() {
     const username = document.getElementById('passwordModal').dataset.username;
     const newPass = document.getElementById('newPasswordInput').value.trim();
     if (!newPass) {
-        showToast('Password cannot be empty', 'error');
+        Toast.error('Password cannot be empty');
         return;
     }
     API.changeUserPassword(username, newPass).then(() => {
-        showToast('Password changed successfully');
+        Toast.success('Password changed successfully');
         closePasswordModal();
     }).catch(err => {
-        console.error(err);
-        showToast('Failed to change password', 'error');
+        handleAPIError(err, 'change password');
     });
 }
 
@@ -38,24 +38,12 @@ let cachedDepartments = [];
 let cachedSemesters = [];
 let cachedFaculty = [];
 
-// Check if token exists
-if (!localStorage.getItem('token')) {
-    window.location.href = '/';
-}
+// Check auth state
+Auth.requireRole('ADMIN');
 
+// Local showToast delegation to centralized Toast module
 function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type} show`;
-    toast.innerHTML = `
-        <span>${type === 'success' ? '✨' : '⚠️'}</span>
-        <span>${message}</span>
-    `;
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-    }, 3000);
+    Toast.show(message, type);
 }
 
 function switchTab(tabId, btn) {
@@ -272,6 +260,7 @@ async function loadStudents() {
     try {
         const students = await API.getStudents();
         cachedStudents = students;
+        Store.set('students', students);
 
         const tbody = document.querySelector('#students-table tbody');
         document.getElementById('count-students-text').textContent = `${students.length} profile files siphoned`;
@@ -295,6 +284,7 @@ async function loadSemesters() {
     try {
         const semesters = await API.getSemesters();
         cachedSemesters = semesters;
+        Store.set('semesters', semesters);
         document.getElementById('count-semesters').textContent = semesters.length;
 
         const tbody = document.querySelector('#semesters-table tbody');
@@ -323,6 +313,7 @@ async function loadCourses() {
     try {
         const courses = await API.getCourses();
         cachedCourses = courses;
+        Store.set('courses', courses);
 
         const tbody = document.querySelector('#courses-table tbody');
         tbody.innerHTML = courses.length ? courses.map(c => `
@@ -361,6 +352,7 @@ async function loadFaculty() {
     try {
         const faculty = await API.getFacultyMembers();
         cachedFaculty = faculty;
+        Store.set('faculty', faculty);
         // Populate faculty dropdown for course assignment
         const select = document.getElementById('course-faculty');
         select.innerHTML = '<option value="">Select faculty...</option>' + faculty.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
@@ -397,6 +389,7 @@ async function loadDepartments() {
     try {
         const departments = await API.getDepartments();
         cachedDepartments = departments;
+        Store.set('departments', departments);
 
         document.getElementById('count-departments-text').textContent = `${departments.length} departments loaded`;
 
@@ -433,6 +426,7 @@ async function loadEnrollments() {
     try {
         const enrollments = await API.getEnrollments();
         cachedEnrollments = enrollments;
+        Store.set('enrollments', enrollments);
 
         const tbody = document.querySelector('#enrollments-table tbody');
         tbody.innerHTML = enrollments.length ? enrollments.map(e => `
@@ -723,14 +717,11 @@ async function loadStudentGrades() {
 }
 
 function logout() {
-    localStorage.clear();
-    window.location.href = '/';
+    Auth.logout();
 }
 
 function closeEditModal() {
-    const modal = document.getElementById('editModal');
-    modal.classList.remove('active');
-    document.getElementById('editModalBody').innerHTML = '';
+    Modal.close('editModal');
 }
 
 function editStudent(id, name, roll, branch, dob) {

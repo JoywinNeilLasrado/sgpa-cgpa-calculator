@@ -1,4 +1,9 @@
 // transcriptEvents.js - encapsulate transcript page logic
+import { Toast } from '../components/toast.js';
+import { Auth } from '../auth/Auth.js';
+import { Store } from '../state/store.js';
+import { handleAPIError } from '../services/errorHandler.js';
+
 export function initTranscript() {
   let allStudents = [];
   let loggedInUser = null;
@@ -6,36 +11,21 @@ export function initTranscript() {
 
   // Dynamically import API service
   import('../services/apiService.js').then(({ apiService: API }) => {
-    // Toast Notification utility
+    // Local showToast delegation to centralized Toast module
     function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type} show`;
-      toast.innerHTML = `
-        <span>${type === 'success' ? '✨' : '⚠️'}</span>
-        <span>${message}</span>
-      `;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-      }, 3000);
+      Toast.show(message, type);
     }
 
     // Logout Helper
     function logout() {
-      localStorage.clear();
-      window.location.href = '/';
+      Auth.logout();
     }
 
     // Initialize Page
     async function init() {
       console.log('Initializing official transcript...');
-      const token = localStorage.getItem('token');
-      const userJson = localStorage.getItem('user');
-      if (!token || !userJson) {
-        window.location.href = '/';
+      if (!Auth.isAuthenticated()) {
+        Auth.logout();
         return;
       }
       loggedInUser = JSON.parse(userJson);

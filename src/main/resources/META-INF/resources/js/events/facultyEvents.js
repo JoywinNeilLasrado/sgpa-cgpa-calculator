@@ -2,15 +2,19 @@
 // This module encapsulates all faculty page logic previously in faculty.js
 // Export a single init function to be called by the thin bootstrap script.
 
+import { Toast } from '../components/toast.js';
+import { Auth } from '../auth/Auth.js';
+import { Store } from '../state/store.js';
+import { handleAPIError } from '../services/errorHandler.js';
+
 export function initFaculty() {
   let pendingChanges = {}; // Maps enrollmentId -> new marks object
   let originalEnrollments = [];
   let cachedCourses = [];
   let activeFilterType = 'course'; // course, semester, student
 
-  // Check if token exists
-  if (!localStorage.getItem('token')) {
-    window.location.href = '/';
+  // Check auth state
+  if (!Auth.requireRole('FACULTY')) {
     return;
   }
 
@@ -44,20 +48,9 @@ export function initFaculty() {
       return 0;
     }
 
-    // Utility: Toast notifications
+    // Local showToast delegation to centralized Toast module
     function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type} show`;
-      toast.innerHTML = `
-        <span>${type === 'success' ? '✨' : '⚠️'}</span>
-        <span>${message}</span>
-      `;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-      }, 3000);
+      Toast.show(message, type);
     }
 
     function switchFilterTab(type, btn) {
@@ -148,14 +141,17 @@ export function initFaculty() {
     async function loadFilters() {
       try {
         cachedCourses = await API.getFacultyCourses();
+        Store.set('courses', cachedCourses);
         const courseSelect = document.getElementById('course-select');
         courseSelect.innerHTML = `<option value="">Choose an active course...</option>` +
           cachedCourses.map(c => `<option value="${c.id}">${c.courseCode} - ${c.courseName}</option>`).join('');
         const semesters = await API.getSemesters();
+        Store.set('semesters', semesters);
         const semesterSelect = document.getElementById('semester-select');
         semesterSelect.innerHTML = `<option value="">Choose a semester...</option>` +
           semesters.map(s => `<option value="${s.id}">Semester ${s.semesterNumber}</option>`).join('');
         const students = await API.getStudents();
+        Store.set('students', students);
         const studentSelect = document.getElementById('student-select');
         studentSelect.innerHTML = `<option value="">Choose a student file...</option>` +
           students.map(s => `<option value="${s.id}">${s.name} (${s.studentId})</option>`).join('');
@@ -505,8 +501,7 @@ export function initFaculty() {
     }
 
     function logout() {
-      localStorage.clear();
-      window.location.href = '/';
+      Auth.logout();
     }
 
     // Kick off init after module load
