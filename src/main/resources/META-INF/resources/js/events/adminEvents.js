@@ -251,7 +251,7 @@ async function loadAllData() {
 async function loadStudents() {
     try {
         const students = await API.getStudents();
-        
+
         Store.set('students', students);
 
         const tbody = document.querySelector('#students-table tbody');
@@ -295,7 +295,7 @@ async function loadSemesters() {
         select.innerHTML = semesters.map(s => `<option value="${s.id}">Semester Stage ${s.semesterNumber}</option>`).join('');
 
     } catch (err) {
-        handleAPIError(err, 'load semesters') 'load semesters'
+        handleAPIError(err, 'load semesters');
         Toast.error('Failed to load semesters.');
     }
 }
@@ -303,7 +303,7 @@ async function loadSemesters() {
 async function loadCourses() {
     try {
         const courses = await API.getCourses();
-        
+
         Store.set('courses', courses);
 
         const tbody = document.querySelector('#courses-table tbody');
@@ -334,7 +334,7 @@ async function loadCourses() {
             courses.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
 
     } catch (err) {
-        handleAPIError(err, 'load courses') 'pull curriculum list'
+        handleAPIError(err, 'load courses');
         Toast.error('Failed to pull curriculum list.');
     }
 }
@@ -370,7 +370,7 @@ async function loadFaculty() {
         `).join('') : '<tr><td colspan="7" class="empty-state">No faculty accounts registered.</td></tr>';
         document.getElementById('count-faculty-text').textContent = `${faculty.length} faculty members loaded`;
     } catch (err) {
-        handleAPIError(err, 'load faculty list'
+        handleAPIError(err, 'load faculty list');
         Toast.error('Failed to load faculty list.');
     }
 }
@@ -406,7 +406,7 @@ async function loadDepartments() {
         facultyDeptSelect.innerHTML = optionsHtml;
 
     } catch (err) {
-        handleAPIError(err, 'pull departments'
+        handleAPIError(err, 'pull departments');
         Toast.error('Failed to pull departments.');
     }
 }
@@ -414,7 +414,7 @@ async function loadDepartments() {
 async function loadEnrollments() {
     try {
         const enrollments = await API.getEnrollments();
-        
+
         Store.set('enrollments', enrollments);
 
         const tbody = document.querySelector('#enrollments-table tbody');
@@ -439,7 +439,7 @@ async function loadEnrollments() {
         `).join('') : '<tr><td colspan="4" class="empty-state">No course registrations active.</td></tr>';
 
     } catch (err) {
-        handleAPIError(err, 'load system registrations'
+        handleAPIError(err, 'load system registrations');
         Toast.error('Failed to load system registrations.');
     }
 }
@@ -495,7 +495,7 @@ async function addStudent() {
         await loadStudents();
         Toast.success(`Student profile '${name}' registered successfully!`);
     } catch (err) {
-        handleAPIError(err, 'failed record'
+        handleAPIError(err, 'failed record');
         Toast.error('Failed to register student record.');
     }
 }
@@ -518,7 +518,7 @@ async function addFaculty() {
         await loadFaculty();
         Toast.success(`Faculty staff '${name}' onboarded successfully!`);
     } catch (err) {
-        handleAPIError(err, 'failed staff'
+        handleAPIError(err, 'failed staff');
         Toast.error('Failed to onboard faculty staff.');
     }
 }
@@ -534,7 +534,7 @@ async function addDepartment() {
         await loadDepartments();
         Toast.success(`Department '${name}' created successfully!`);
     } catch (err) {
-        handleAPIError(err, 'failed Duplicates?'
+        handleAPIError(err, 'failed Duplicates?');
         Toast.error('Failed to create department. Duplicates?');
     }
 }
@@ -548,7 +548,7 @@ async function addSemester() {
         await loadSemesters();
         Toast.success(`Academic Semester Stage ${num} established!`);
     } catch (err) {
-        handleAPIError(err, 'failed stage'
+        handleAPIError(err, 'failed stage');
         Toast.error('Failed to establish semester stage.');
     }
 }
@@ -569,7 +569,7 @@ async function addCourse() {
         await loadCourses();
         Toast.success(`Syllabus item '${code}: ${name}' created successfully.`);
     } catch (err) {
-        handleAPIError(err, 'failed item'
+        handleAPIError(err, 'failed item');
         Toast.error('Failed to create syllabus course item.');
     }
 }
@@ -583,7 +583,7 @@ async function addEnrollment() {
         await loadEnrollments();
         Toast.success('Course registration siphoned successfully.');
     } catch (err) {
-        handleAPIError(err, 'failed Duplicates?'
+        handleAPIError(err, 'failed Duplicates?');
         Toast.error('Failed to map student registration. Duplicates?');
     }
 }
@@ -608,7 +608,7 @@ async function deleteFaculty(id) {
             await loadFaculty();
             Toast.success('Faculty member successfully purged.');
         } catch (err) {
-            handleAPIError(err, 'delete faculty member'
+            handleAPIError(err, 'delete faculty member');
             Toast.error('Failed to delete faculty member.');
         }
     }
@@ -716,10 +716,10 @@ function closeEditModal() {
 function editStudent(id, name, roll, branch, dob) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Student Profile';
-    
+
     const validBranches = (Store.get('departments') || []).map(d => d.name);
     const branchOptions = validBranches.map(b => `<option value="${b}" ${b === branch ? 'selected' : ''}>${b}</option>`).join('');
-    
+
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Full Name</label>
@@ -740,7 +740,7 @@ function editStudent(id, name, roll, branch, dob) {
             <input type="date" class="form-input" id="edit-student-dob" value="${dob}">
         </div>
     `;
-    
+
     modal.dataset.type = 'student';
     modal.dataset.id = id;
     modal.classList.add('active');
@@ -749,14 +749,14 @@ function editStudent(id, name, roll, branch, dob) {
 function editSemester(id, semesterNumber) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Semester Stage';
-    
+
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Semester Number Sequence</label>
             <input type="number" class="form-input" id="edit-semester-number" value="${semesterNumber}" min="1" max="10">
         </div>
     `;
-    
+
     modal.dataset.type = 'semester';
     modal.dataset.id = id;
     modal.classList.add('active');
@@ -765,10 +765,10 @@ function editSemester(id, semesterNumber) {
 function editCourse(id, code, name, credits, semesterId, facultyId, courseType) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Syllabus Course';
-    
+
     const semOptions = (Store.get('semesters') || []).map(s => `<option value="${s.id}" ${s.id == semesterId ? 'selected' : ''}>Semester Stage ${s.semesterNumber}</option>`).join('');
     const facOptions = (Store.get('faculty') || []).map(f => `<option value="${f.id}" ${f.id == facultyId ? 'selected' : ''}>${f.name}</option>`).join('');
-    
+
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Course Code</label>
@@ -797,13 +797,13 @@ function editCourse(id, code, name, credits, semesterId, facultyId, courseType) 
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Course Type</label>
             <select class="form-select" id="edit-course-type">
-                <option value="THEORY" ${courseType==='THEORY'?'selected':''}>Theory</option>
-                <option value="LABORATORY" ${courseType==='LABORATORY'?'selected':''}>Laboratory</option>
-                <option value="INTEGRATED" ${courseType==='INTEGRATED'?'selected':''}>Integrated (Theory + Lab)</option>
+                <option value="THEORY" ${courseType === 'THEORY' ? 'selected' : ''}>Theory</option>
+                <option value="LABORATORY" ${courseType === 'LABORATORY' ? 'selected' : ''}>Laboratory</option>
+                <option value="INTEGRATED" ${courseType === 'INTEGRATED' ? 'selected' : ''}>Integrated (Theory + Lab)</option>
             </select>
         </div>
     `;
-    
+
     modal.dataset.type = 'course';
     modal.dataset.id = id;
     modal.classList.add('active');
@@ -812,10 +812,10 @@ function editCourse(id, code, name, credits, semesterId, facultyId, courseType) 
 function editFaculty(id, name, username, email, department) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Faculty Profile';
-    
+
     const validDepts = (Store.get('departments') || []).map(d => d.name);
     const deptOptions = validDepts.map(d => `<option value="${d}" ${d === department ? 'selected' : ''}>${d}</option>`).join('');
-    
+
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Faculty Name</label>
@@ -836,7 +836,7 @@ function editFaculty(id, name, username, email, department) {
             </select>
         </div>
     `;
-    
+
     modal.dataset.type = 'faculty';
     modal.dataset.id = id;
     modal.classList.add('active');
@@ -845,7 +845,7 @@ function editFaculty(id, name, username, email, department) {
 function editDepartment(id, name, code) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Department';
-    
+
     document.getElementById('editModalBody').innerHTML = `
         <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-label">Department Name</label>
@@ -856,7 +856,7 @@ function editDepartment(id, name, code) {
             <input type="text" class="form-input" id="edit-department-code" value="${UI.escapeHTML(code)}">
         </div>
     `;
-    
+
     modal.dataset.type = 'department';
     modal.dataset.id = id;
     modal.classList.add('active');
@@ -865,11 +865,11 @@ function editDepartment(id, name, code) {
 function editEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLabMarks, seeMarks, graceMarks) {
     const modal = document.getElementById('editModal');
     document.getElementById('editModalTitle').textContent = 'Edit Course Enrollment';
-    
+
     const studentOptions = (Store.get('students') || []).map(s => `<option value="${s.id}" ${s.id == studentId ? 'selected' : ''}>${s.name} (${s.studentId})</option>`).join('');
     const courses = Store.get('courses') || [];
     const courseOptions = courses.map(c => `<option value="${c.id}" ${c.id == courseId ? 'selected' : ''}>${c.code} - ${c.name}</option>`).join('');
-    
+
     const course = (Store.get('courses') || []).find(c => c.id == courseId);
     const courseType = course ? (course.courseType || 'THEORY') : 'THEORY';
 
@@ -920,7 +920,7 @@ function editEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLa
         </div>
         ${marksHtml}
     `;
-    
+
     modal.dataset.type = 'enrollment';
     modal.dataset.id = id;
     modal.dataset.courseType = courseType;
@@ -931,18 +931,18 @@ async function submitEdit() {
     const modal = document.getElementById('editModal');
     const type = modal.dataset.type;
     const id = modal.dataset.id;
-    
+
     if (type === 'student') {
         const name = document.getElementById('edit-student-name').value.trim();
         const roll = document.getElementById('edit-student-roll').value.trim();
         const branch = document.getElementById('edit-student-branch').value;
         const dob = document.getElementById('edit-student-dob').value;
-        
+
         if (!name || !roll || !branch || !dob) {
             Toast.error('All student fields are required.');
             return;
         }
-        
+
         try {
             await API.updateStudent(id, name, roll, branch, dob);
             await loadStudents();
@@ -965,7 +965,6 @@ async function submitEdit() {
             Toast.success(`Semester successfully updated to Stage ${num}!`);
             closeEditModal();
         } catch (err) {
-            handleAPIError(err, 
             handleAPIError(err, 'edit semester');
             Toast.error('Failed to modify semester sequence.');
         }
@@ -976,25 +975,24 @@ async function submitEdit() {
         const semId = parseInt(document.getElementById('edit-course-semester').value);
         const facId = parseInt(document.getElementById('edit-course-faculty').value);
         const courseType = document.getElementById('edit-course-type').value;
-        
+
         const credits = parseInt(creditsStr);
         if (isNaN(credits) || credits < 1 || credits > 6) {
             Toast.error('Credits must be an integer between 1 and 6.');
             return;
         }
-        
+
         if (!code || !name || isNaN(semId) || isNaN(facId)) {
             Toast.error('All course fields are required.');
             return;
         }
-        
+
         try {
             await API.updateCourse(id, code, name, credits, semId, facId, courseType);
             await loadCourses();
             Toast.success(`Syllabus course '${code}' modified successfully!`);
             closeEditModal();
         } catch (err) {
-            handleAPIError(err, 
             handleAPIError(err, 'edit course');
             Toast.error('Failed to update syllabus course item.');
         }
@@ -1003,52 +1001,50 @@ async function submitEdit() {
         const username = document.getElementById('edit-faculty-username').value.trim();
         const email = document.getElementById('edit-faculty-email').value.trim();
         const department = document.getElementById('edit-faculty-department').value;
-        
+
         if (!name || !username || !email || !department) {
             Toast.error('All faculty fields are required.');
             return;
         }
-        
+
         try {
             await API.updateFaculty(id, name, username, email, department);
             await loadFaculty();
             Toast.success(`Faculty profile '${username}' modified successfully!`);
             closeEditModal();
         } catch (err) {
-            handleAPIError(err, 
             handleAPIError(err, 'edit faculty');
             Toast.error('Failed to modify faculty record.');
         }
     } else if (type === 'department') {
         const name = document.getElementById('edit-department-name').value.trim();
         const code = document.getElementById('edit-department-code').value.trim();
-        
+
         if (!name || !code) {
             Toast.error('Department name and code cannot be empty.');
             return;
         }
-        
+
         try {
             await API.updateDepartment(id, name, code.toUpperCase());
             await loadDepartments();
             Toast.success(`Department successfully modified to '${name}'!`);
             closeEditModal();
         } catch (err) {
-            handleAPIError(err, 
             handleAPIError(err, 'edit department');
             Toast.error('Failed to update department record.');
         }
     } else if (type === 'enrollment') {
         const studentId = parseInt(document.getElementById('edit-enrollment-student').value);
         const courseId = parseInt(document.getElementById('edit-enrollment-course').value);
-        
+
         if (isNaN(studentId) || isNaN(courseId)) {
             Toast.error('Student and Course selections are required.');
             return;
         }
-        
+
         const courseType = modal.dataset.courseType;
-        
+
         let cieMarks = 0, cieTheoryMarks = 0, cieLabMarks = 0;
         if (courseType === 'INTEGRATED') {
             cieTheoryMarks = parseInt(document.getElementById('edit-enrollment-cie-theory').value) || 0;
@@ -1056,17 +1052,16 @@ async function submitEdit() {
         } else {
             cieMarks = parseInt(document.getElementById('edit-enrollment-cie').value) || 0;
         }
-        
+
         const seeMarks = parseInt(document.getElementById('edit-enrollment-see').value) || 0;
         const graceMarks = parseInt(document.getElementById('edit-enrollment-grace').value) || 0;
-        
+
         try {
             await API.updateEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLabMarks, seeMarks, graceMarks);
             await loadEnrollments();
             Toast.success('Course enrollment successfully updated!');
             closeEditModal();
         } catch (err) {
-            handleAPIError(err, 
             handleAPIError(err, 'edit enrollment');
             Toast.error('Failed to update course enrollment marks.');
         }
