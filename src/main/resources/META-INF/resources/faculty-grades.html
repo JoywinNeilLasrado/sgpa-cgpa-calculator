@@ -216,50 +216,50 @@
                     </div>
 
                     <div class="tabs" style="margin-bottom: 1.5rem;">
-                        <button class="tab-btn active" onclick="switchFilterTab('course', this)">By Course</button>
-                        <button class="tab-btn" onclick="switchFilterTab('semester', this)">By Semester</button>
-                        <button class="tab-btn" onclick="switchFilterTab('student', this)">By Student</button>
+                        <button class="tab-btn active" data-tab="course">By Course</button>
+                        <button class="tab-btn" data-tab="semester">By Semester</button>
+                        <button class="tab-btn" data-tab="student">By Student</button>
                     </div>
-
+ 
                     <!-- Filter Control Groups -->
                     <div id="filter-course-group" class="form-grid" style="margin-bottom: 2rem;">
                         <div class="form-group">
                             <label class="form-label">Select Active Course</label>
-                            <select class="form-select" id="course-select" onchange="loadSpreadsheet('course')">
+                            <select class="form-select" id="course-select">
                                 <option value="">Loading courses...</option>
                             </select>
                         </div>
                     </div>
-
+ 
                     <div id="filter-semester-group" class="form-grid" style="margin-bottom: 2rem; display: none;">
                         <div class="form-group">
                             <label class="form-label">Select Semester</label>
-                            <select class="form-select" id="semester-select" onchange="loadSpreadsheet('semester')">
+                            <select class="form-select" id="semester-select">
                                 <option value="">Loading semesters...</option>
                             </select>
                         </div>
                     </div>
-
+ 
                     <div id="filter-student-group" class="form-grid" style="margin-bottom: 2rem; display: none;">
                         <div class="form-group">
                             <label class="form-label">Select Student File</label>
-                            <select class="form-select" id="student-select" onchange="loadSpreadsheet('student')">
+                            <select class="form-select" id="student-select">
                                 <option value="">Loading students...</option>
                             </select>
                         </div>
                     </div>
-
+ 
                     <!-- Main Grid Container -->
                     <div id="spreadsheet-loading" style="display: none; text-align: center; padding: 3rem;">
                         <div class="spinner" style="margin: 0 auto 1rem;"></div>
                         <p>Syncing class records...</p>
                     </div>
-
+ 
                     <div id="spreadsheet-empty" style="text-align: center; padding: 4rem 2rem; color: var(--slate-light);">
                         <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🗂️</span>
                         <p>Select a category filter above to populate the interactive grade spreadsheet.</p>
                     </div>
-
+ 
                     <div id="spreadsheet-wrap" class="table-wrap" style="display: none;">
                         <table class="table">
                             <thead>
@@ -272,37 +272,30 @@
                             </tbody>
                         </table>
                     </div>
-
+ 
                 </div>
             </div>
-
+ 
             <!-- Right Side: Course Analytics & Distribution Charts -->
             <div class="sticky-sidebar">
-                <div class="card" style="min-height: 400px;">
-                    <div class="card-header">
-                        <div>
-                            <h3 class="card-title">Real-Time Performance Analytics</h3>
-                            <p class="card-subtitle" id="analytics-subtitle">Select a course to load analytical distributions.</p>
-                        </div>
+                <div class="card" id="course-analytics" style="padding: 1.5rem;">
+                    
+                    <div id="analytics-empty" style="text-align: center; padding: 3rem 1rem; color: var(--slate-light);">
+                        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">📊</span>
+                        <h4 style="font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--slate); margin-bottom: 0.5rem;" id="analytics-subtitle">Select a course to load analytical distributions.</h4>
+                        <p style="font-size: 0.75rem; line-height: 1.45;">Real-time statistical averages, passed ratios, and grade bell curves populate once a course is active.</p>
                     </div>
-
-                    <!-- Empty state -->
-                    <div id="analytics-empty" class="analytics-empty-state">
-                        <span style="font-size: 3.5rem; display: block; margin-bottom: 1rem;">📈</span>
-                        <p>Real-time statistical averages, passed ratios, and grade bell curves populate once a course is active.</p>
-                    </div>
-
-                    <!-- Real Content -->
+ 
                     <div id="analytics-content" style="display: none;">
                         
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                            <div class="course-badge-icon">📊</div>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+                            <span style="font-size: 2rem;">📈</span>
                             <div>
                                 <h4 style="font-size: 1.3rem; color: var(--crimson); font-weight: 700;" id="anal-course-title">CS-101 Introduction to CS</h4>
                                 <p style="font-size: 0.8rem; text-transform: uppercase; color: var(--slate-light); letter-spacing: 0.05em;" id="anal-course-code">Course Details</p>
                             </div>
                         </div>
-
+ 
                         <!-- Statistics Grid -->
                         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                             <div class="stat-box" style="padding: 1.25rem; border-left-width: 3px;">
@@ -314,24 +307,24 @@
                                 <div class="stat-label" style="font-size: 0.65rem;">Pass Ratio</div>
                             </div>
                         </div>
-
+ 
                         <div style="margin-bottom: 1rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate);">
                             Grade Frequency Distribution
                         </div>
-
+ 
                         <!-- CSS distribution charts -->
                         <div class="chart-bar-list" id="grade-distribution-bars">
                             <!-- Rendered dynamically -->
                         </div>
-
+ 
                     </div>
                 </div>
             </div>
-
+ 
         </div>
-
+ 
     </div>
-
+ 
     <!-- Bulk Action Floating Bar -->
     <div class="bulk-floating-bar" id="bulk-bar">
         <div>
@@ -343,10 +336,10 @@
             </div>
         </div>
         <div style="display: flex; gap: 0.75rem;">
-            <button class="btn btn-secondary btn-sm" onclick="discardSpreadsheetChanges()" style="background: rgba(255,255,255,0.05); color: var(--white); border: 1px solid rgba(255,255,255,0.1);">
+            <button class="btn btn-secondary btn-sm discard-btn" style="background: rgba(255,255,255,0.05); color: var(--white); border: 1px solid rgba(255,255,255,0.1);">
                 Discard
             </button>
-            <button class="btn btn-gold btn-sm" onclick="saveBulkChanges()">
+            <button class="btn btn-gold btn-sm save-btn">
                 Save All Changes
             </button>
         </div>
@@ -356,7 +349,7 @@
     
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-        <script src="/js/api-v2.js"></script>
+        <script type="module" src="/js/api-v2.js"></script>
     <script type="module" src="/js/faculty.js"></script>
 </body>
 </html>

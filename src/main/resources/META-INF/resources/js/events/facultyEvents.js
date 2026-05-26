@@ -89,8 +89,60 @@ export function initFaculty() {
         if (navUsername) navUsername.textContent = user.username;
         document.getElementById('hero-welcome').textContent = `Faculty Control: ${user.username}`;
       }
+      setupEventListeners();
       await loadFilters();
       if (window.hidePageLoader) window.hidePageLoader();
+    }
+
+    function setupEventListeners() {
+      // Tab switching
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.tab;
+          if (type) {
+            switchFilterTab(type, btn);
+          }
+        });
+      });
+
+      // Dropdown changes
+      const courseSelect = document.getElementById('course-select');
+      if (courseSelect) {
+        courseSelect.addEventListener('change', () => loadSpreadsheet('course'));
+      }
+
+      const semesterSelect = document.getElementById('semester-select');
+      if (semesterSelect) {
+        semesterSelect.addEventListener('change', () => loadSpreadsheet('semester'));
+      }
+
+      const studentSelect = document.getElementById('student-select');
+      if (studentSelect) {
+        studentSelect.addEventListener('change', () => loadSpreadsheet('student'));
+      }
+
+      // Spreadsheet inputs delegation (bubbling)
+      const tbody = document.getElementById('spreadsheet-tbody');
+      if (tbody) {
+        tbody.addEventListener('input', (e) => {
+          const markInput = e.target.closest('.mark-input');
+          if (markInput) {
+            const enrollmentId = parseInt(markInput.dataset.enrollmentId);
+            trackGradeChange(enrollmentId);
+          }
+        });
+      }
+
+      // Bulk actions
+      const discardBtn = document.querySelector('#bulk-bar .discard-btn');
+      if (discardBtn) {
+        discardBtn.addEventListener('click', discardSpreadsheetChanges);
+      }
+
+      const saveBtn = document.querySelector('#bulk-bar .save-btn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', saveBulkChanges);
+      }
     }
 
     async function loadFilters() {
@@ -212,7 +264,7 @@ export function initFaculty() {
             
             const renderInput = (field, val, max, enabled) => {
                 if (!enabled) return `<td><input type="number" class="spreadsheet-select-custom mark-input disabled-input" disabled title="N/A" value=""></td>`;
-                return `<td><input type="number" class="spreadsheet-select-custom mark-input" data-field="${field}" value="${val ?? ''}" min="0" max="${max}" oninput="trackGradeChange(${e.id})"></td>`;
+                return `<td><input type="number" class="spreadsheet-select-custom mark-input" data-field="${field}" data-enrollment-id="${e.id}" value="${val ?? ''}" min="0" max="${max}"></td>`;
             };
 
             if (isMixed || firstCourseType === 'THEORY' || firstCourseType === 'INTEGRATED') {
@@ -456,14 +508,6 @@ export function initFaculty() {
       localStorage.clear();
       window.location.href = '/';
     }
-
-    // Expose necessary functions to global scope for inline handlers
-    window.switchFilterTab = switchFilterTab;
-    window.loadSpreadsheet = loadSpreadsheet;
-    window.trackGradeChange = trackGradeChange;
-    window.discardSpreadsheetChanges = discardSpreadsheetChanges;
-    window.saveBulkChanges = saveBulkChanges;
-    window.logout = logout;
 
     // Kick off init after module load
     init();

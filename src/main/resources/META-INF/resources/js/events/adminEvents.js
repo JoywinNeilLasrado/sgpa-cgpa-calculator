@@ -78,8 +78,180 @@ async function init() {
         if (navRole) navRole.textContent = user.role;
     }
 
+    setupEventListeners();
+
     await loadAllData();
     if (window.hidePageLoader) window.hidePageLoader();
+}
+
+function setupEventListeners() {
+    // Tab switching
+    document.querySelectorAll('.sidebar-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.dataset.tab;
+            if (tabId) {
+                switchTab(tabId, btn);
+            }
+        });
+    });
+
+    // Create forms
+    const btnCreateStudent = document.getElementById('btn-create-student');
+    if (btnCreateStudent) btnCreateStudent.addEventListener('click', addStudent);
+
+    const btnCreateSemester = document.getElementById('btn-create-semester');
+    if (btnCreateSemester) btnCreateSemester.addEventListener('click', addSemester);
+
+    const btnCreateCourse = document.getElementById('btn-create-course');
+    if (btnCreateCourse) btnCreateCourse.addEventListener('click', addCourse);
+
+    const btnCreateEnrollment = document.getElementById('btn-create-enrollment');
+    if (btnCreateEnrollment) btnCreateEnrollment.addEventListener('click', addEnrollment);
+
+    const btnCreateFaculty = document.getElementById('btn-create-faculty');
+    if (btnCreateFaculty) btnCreateFaculty.addEventListener('click', addFaculty);
+
+    const btnCreateDept = document.getElementById('btn-create-department');
+    if (btnCreateDept) btnCreateDept.addEventListener('click', addDepartment);
+
+    // Search input filters
+    ['students', 'courses', 'enrollments', 'faculty', 'departments'].forEach(type => {
+        const input = document.getElementById(`search-${type}`);
+        if (input) {
+            input.addEventListener('input', () => filterTable(type));
+        }
+    });
+
+    // Student grades auditor select
+    const gradesSelect = document.getElementById('grades-student');
+    if (gradesSelect) gradesSelect.addEventListener('change', loadStudentGrades);
+
+    // Modal close/cancel/submit buttons
+    document.querySelectorAll('.close-password-modal-btn, .cancel-password-modal-btn').forEach(btn => {
+        btn.addEventListener('click', closePasswordModal);
+    });
+    const submitPassBtn = document.querySelector('.submit-password-modal-btn');
+    if (submitPassBtn) submitPassBtn.addEventListener('click', submitPasswordChange);
+
+    document.querySelectorAll('.close-edit-modal-btn, .cancel-edit-modal-btn').forEach(btn => {
+        btn.addEventListener('click', closeEditModal);
+    });
+    const submitEditBtn = document.querySelector('.submit-edit-modal-btn');
+    if (submitEditBtn) submitEditBtn.addEventListener('click', submitEdit);
+
+    // Event Delegation for Tables
+    const studentsTbody = document.querySelector('#students-table tbody');
+    if (studentsTbody) {
+        studentsTbody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-student-btn');
+            const deleteBtn = e.target.closest('.delete-student-btn');
+            const passBtn = e.target.closest('.change-pass-student-btn');
+            if (editBtn) {
+                editStudent(
+                    editBtn.dataset.id,
+                    editBtn.dataset.name,
+                    editBtn.dataset.roll,
+                    editBtn.dataset.branch,
+                    editBtn.dataset.dob
+                );
+            } else if (deleteBtn) {
+                deleteStudent(deleteBtn.dataset.id);
+            } else if (passBtn) {
+                openPasswordModal(passBtn.dataset.username);
+            }
+        });
+    }
+
+    const semestersTbody = document.querySelector('#semesters-table tbody');
+    if (semestersTbody) {
+        semestersTbody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-semester-btn');
+            const deleteBtn = e.target.closest('.delete-semester-btn');
+            if (editBtn) {
+                editSemester(editBtn.dataset.id, editBtn.dataset.number);
+            } else if (deleteBtn) {
+                deleteSemester(deleteBtn.dataset.id);
+            }
+        });
+    }
+
+    const coursesTbody = document.querySelector('#courses-table tbody');
+    if (coursesTbody) {
+        coursesTbody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-course-btn');
+            const deleteBtn = e.target.closest('.delete-course-btn');
+            if (editBtn) {
+                editCourse(
+                    editBtn.dataset.id,
+                    editBtn.dataset.code,
+                    editBtn.dataset.name,
+                    editBtn.dataset.credits,
+                    editBtn.dataset.semesterId,
+                    editBtn.dataset.facultyId,
+                    editBtn.dataset.type
+                );
+            } else if (deleteBtn) {
+                deleteCourse(deleteBtn.dataset.id);
+            }
+        });
+    }
+
+    const enrollmentsTbody = document.querySelector('#enrollments-table tbody');
+    if (enrollmentsTbody) {
+        enrollmentsTbody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-enrollment-btn');
+            const deleteBtn = e.target.closest('.delete-enrollment-btn');
+            if (editBtn) {
+                editEnrollment(
+                    editBtn.dataset.id,
+                    editBtn.dataset.studentId,
+                    editBtn.dataset.courseId,
+                    editBtn.dataset.cieMarks,
+                    editBtn.dataset.cieTheoryMarks,
+                    editBtn.dataset.cieLabMarks,
+                    editBtn.dataset.seeMarks,
+                    editBtn.dataset.graceMarks
+                );
+            } else if (deleteBtn) {
+                deleteEnrollment(deleteBtn.dataset.id);
+            }
+        });
+    }
+
+    const facultyTbody = document.querySelector('#faculty-table tbody');
+    if (facultyTbody) {
+        facultyTbody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-faculty-btn');
+            const deleteBtn = e.target.closest('.delete-faculty-btn');
+            const passBtn = e.target.closest('.change-pass-faculty-btn');
+            if (editBtn) {
+                editFaculty(
+                    editBtn.dataset.id,
+                    editBtn.dataset.name,
+                    editBtn.dataset.username,
+                    editBtn.dataset.email,
+                    editBtn.dataset.department
+                );
+            } else if (deleteBtn) {
+                deleteFaculty(deleteBtn.dataset.id);
+            } else if (passBtn) {
+                openPasswordModal(passBtn.dataset.username);
+            }
+        });
+    }
+
+    const deptsTbody = document.querySelector('#departments-table tbody');
+    if (deptsTbody) {
+        deptsTbody.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-department-btn');
+            const deleteBtn = e.target.closest('.delete-department-btn');
+            if (editBtn) {
+                editDepartment(editBtn.dataset.id, editBtn.dataset.name, editBtn.dataset.code);
+            } else if (deleteBtn) {
+                deleteDepartment(deleteBtn.dataset.id);
+            }
+        });
+    }
 }
 
 async function loadAllData() {
@@ -131,8 +303,8 @@ async function loadSemesters() {
                 <td><strong>${s.id}</strong></td>
                 <td>Semester Stage ${s.semesterNumber}</td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editSemester(${s.id}, ${s.semesterNumber})">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteSemester(${s.id})">Delete</button>
+                    <button class="btn btn-secondary btn-sm edit-semester-btn" style="margin-right: 0.5rem;" data-id="${s.id}" data-number="${s.semesterNumber}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-semester-btn" data-id="${s.id}">Delete</button>
                 </td>
             </tr>
         `).join('') : '<tr><td colspan="3" class="empty-state">No semester cycles defined.</td></tr>';
@@ -161,8 +333,15 @@ async function loadCourses() {
                 <td><span class="grade-badge O">Sem ${c.semester?.semesterNumber || '-'}</span></td>
                 <td>${c.faculty?.name || '-'}</td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editCourse(${c.id}, '${c.code}', '${c.name.replace(/'/g, "\\'")}', ${c.credits}, ${c.semester?.id || 0}, ${c.faculty?.id || 0}, '${c.courseType || 'THEORY'}')">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.id})">Delete</button>
+                    <button class="btn btn-secondary btn-sm edit-course-btn" style="margin-right: 0.5rem;" 
+                        data-id="${c.id}" 
+                        data-code="${UI.escapeHTML(c.code)}" 
+                        data-name="${UI.escapeHTML(c.name)}" 
+                        data-credits="${c.credits}" 
+                        data-semester-id="${c.semester?.id || 0}" 
+                        data-faculty-id="${c.faculty?.id || 0}" 
+                        data-type="${c.courseType || 'THEORY'}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-course-btn" data-id="${c.id}">Delete</button>
                 </td>
             </tr>
         `).join('') : '<tr><td colspan="6" class="empty-state">Curriculum inventory is empty.</td></tr>';
@@ -196,9 +375,14 @@ async function loadFaculty() {
                 <td>${f.email || '-'}</td>
                 <td>${f.department || '-'}</td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editFaculty(${f.id}, '${f.name}', '${f.username}', '${f.email || ''}', '${f.department || ''}')">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFaculty(${f.id})">Delete</button>
-                    <button class="btn btn-warning btn-sm" onclick="openPasswordModal('${f.username}')">Change Password</button>
+                    <button class="btn btn-secondary btn-sm edit-faculty-btn" style="margin-right: 0.5rem;" 
+                        data-id="${f.id}" 
+                        data-name="${UI.escapeHTML(f.name)}" 
+                        data-username="${UI.escapeHTML(f.username)}" 
+                        data-email="${UI.escapeHTML(f.email || '')}" 
+                        data-department="${UI.escapeHTML(f.department || '')}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-faculty-btn" style="margin-right: 0.5rem;" data-id="${f.id}">Delete</button>
+                    <button class="btn btn-warning btn-sm change-pass-faculty-btn" data-username="${UI.escapeHTML(f.username)}">Change Password</button>
                 </td>
             </tr>
         `).join('') : '<tr><td colspan="7" class="empty-state">No faculty accounts registered.</td></tr>';
@@ -223,8 +407,11 @@ async function loadDepartments() {
                 <td>${d.name}</td>
                 <td><span class="grade-badge A">${d.code}</span></td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editDepartment(${d.id}, '${d.name}', '${d.code}')">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteDepartment(${d.id})">Delete</button>
+                    <button class="btn btn-secondary btn-sm edit-department-btn" style="margin-right: 0.5rem;" 
+                        data-id="${d.id}" 
+                        data-name="${UI.escapeHTML(d.name)}" 
+                        data-code="${UI.escapeHTML(d.code)}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-department-btn" data-id="${d.id}">Delete</button>
                 </td>
             </tr>
         `).join('') : '<tr><td colspan="4" class="empty-state">No departments registered.</td></tr>';
@@ -254,8 +441,16 @@ async function loadEnrollments() {
                 <td>${e.courseCode || 'N/A'} - ${e.courseName || 'N/A'}</td>
                 <td><span class="grade-badge ${e.grade || 'none'}">${e.grade || 'Pending'}</span></td>
                 <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editEnrollment(${e.id}, ${e.studentId || 0}, ${e.courseId || 0}, ${e.cieMarks || 0}, ${e.cieTheoryMarks || 0}, ${e.cieLabMarks || 0}, ${e.seeMarks || 0}, ${e.graceMarks || 0})">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteEnrollment(${e.id})">Delete</button>
+                    <button class="btn btn-secondary btn-sm edit-enrollment-btn" style="margin-right: 0.5rem;" 
+                        data-id="${e.id}" 
+                        data-student-id="${e.studentId || 0}" 
+                        data-course-id="${e.courseId || 0}" 
+                        data-cie-marks="${e.cieMarks || 0}" 
+                        data-cie-theory-marks="${e.cieTheoryMarks || 0}" 
+                        data-cie-lab-marks="${e.cieLabMarks || 0}" 
+                        data-see-marks="${e.seeMarks || 0}" 
+                        data-grace-marks="${e.graceMarks || 0}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-enrollment-btn" data-id="${e.id}">Delete</button>
                 </td>
             </tr>
         `).join('') : '<tr><td colspan="4" class="empty-state">No course registrations active.</td></tr>';
@@ -891,35 +1086,6 @@ async function submitEdit() {
         }
     }
 }
-
-// Expose functions globally for inline event handlers
-window.openPasswordModal = openPasswordModal;
-window.closePasswordModal = closePasswordModal;
-window.submitPasswordChange = submitPasswordChange;
-window.switchTab = switchTab;
-window.addStudent = addStudent;
-window.addFaculty = addFaculty;
-window.addDepartment = addDepartment;
-window.addSemester = addSemester;
-window.addCourse = addCourse;
-window.addEnrollment = addEnrollment;
-window.deleteStudent = deleteStudent;
-window.deleteFaculty = deleteFaculty;
-window.deleteDepartment = deleteDepartment;
-window.deleteSemester = deleteSemester;
-window.deleteCourse = deleteCourse;
-window.deleteEnrollment = deleteEnrollment;
-window.loadStudentGrades = loadStudentGrades;
-window.editStudent = editStudent;
-window.editSemester = editSemester;
-window.editCourse = editCourse;
-window.editFaculty = editFaculty;
-window.editDepartment = editDepartment;
-window.editEnrollment = editEnrollment;
-window.closeEditModal = closeEditModal;
-window.submitEdit = submitEdit;
-window.logout = logout;
-window.filterTable = filterTable;
 
 // Initialize page data
 init();

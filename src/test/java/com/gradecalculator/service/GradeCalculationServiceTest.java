@@ -39,9 +39,7 @@ class GradeCalculationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new GradeCalculationService();
-        ReflectionTestUtils.setField(service, "studentRepository", studentRepository);
-        ReflectionTestUtils.setField(service, "enrollmentRepository", enrollmentRepository);
+        service = new GradeCalculationService(studentRepository, enrollmentRepository);
 
         student = new Student("John Doe", "CS2024001");
         student.setId(1L);

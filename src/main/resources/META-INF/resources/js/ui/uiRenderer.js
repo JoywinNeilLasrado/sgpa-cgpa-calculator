@@ -22,9 +22,9 @@ export function renderStudentList(tbody, students) {
   }
   students.forEach((s) => {
     const actions = `
-      <button class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;" onclick="editStudent(${s.id}, '${s.name}', '${s.studentId}', '${s.branch}', '${s.dateOfBirth || ''}')">Edit</button>
-      <button class="btn btn-danger btn-sm" style="margin-right: 0.5rem;" onclick="deleteStudent(${s.id})">Delete</button>
-      <button class="btn btn-warning btn-sm" onclick="openPasswordModal('${s.username}')">Change Password</button>
+      <button class="btn btn-secondary btn-sm edit-student-btn" style="margin-right: 0.5rem;" data-id="${s.id}" data-name="${s.name}" data-roll="${s.studentId}" data-branch="${s.branch}" data-dob="${s.dateOfBirth || ''}">Edit</button>
+      <button class="btn btn-danger btn-sm delete-student-btn" style="margin-right: 0.5rem;" data-id="${s.id}">Delete</button>
+      <button class="btn btn-warning btn-sm change-pass-student-btn" data-username="${s.username}">Change Password</button>
     `;
     const row = UI.createTableRow([
       s.id,

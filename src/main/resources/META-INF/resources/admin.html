@@ -158,25 +158,25 @@
             <div class="admin-sidebar">
                 <div class="sidebar-title">Manage Registers</div>
                 <div class="sidebar-menu">
-                    <button class="sidebar-item active" onclick="switchTab('students', this)">
+                    <button class="sidebar-item active" data-tab="students">
                         <span>👥</span> Students Registry
                     </button>
-                    <button class="sidebar-item" onclick="switchTab('semesters', this)">
+                    <button class="sidebar-item" data-tab="semesters">
                         <span>📅</span> Semesters Config
                     </button>
-                    <button class="sidebar-item" onclick="switchTab('courses', this)">
+                    <button class="sidebar-item" data-tab="courses">
                         <span>📚</span> Course Syllabus
                     </button>
-                    <button class="sidebar-item" onclick="switchTab('enrollments', this)">
+                    <button class="sidebar-item" data-tab="enrollments">
                         <span>✍️</span> Course Enrollments
                     </button>
-                    <button class="sidebar-item" onclick="switchTab('grades', this)">
+                    <button class="sidebar-item" data-tab="grades">
                         <span>📊</span> Overall Grade Files
                     </button>
-                    <button class="sidebar-item" onclick="switchTab('faculty', this)">
+                    <button class="sidebar-item" data-tab="faculty">
                         <span>👨‍🏫</span> Faculty Registry
                     </button>
-                    <button class="sidebar-item" onclick="switchTab('departments', this)">
+                    <button class="sidebar-item" data-tab="departments">
                         <span>🏢</span> Department Registry
                     </button>
                 </div>
@@ -222,7 +222,7 @@
                                     <input class="form-input" type="date" id="student-dob" value="2004-01-01">
                                 </div>
                                 <div class="form-group" style="justify-content: flex-end;">
-                                    <button class="btn btn-primary" onclick="addStudent()" style="width: 100%;">Create Record</button>
+                                    <button class="btn btn-primary" id="btn-create-student" style="width: 100%;">Create Record</button>
                                 </div>
                             </div>
                         </div>
@@ -231,7 +231,7 @@
                         <div class="action-flex">
                             <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
                                 <span class="search-icon">🔍</span>
-                                <input type="text" class="search-input" id="search-students" placeholder="Search registry by name or roll..." oninput="filterTable('students')">
+                                <input type="text" class="search-input" id="search-students" placeholder="Search registry by name or roll...">
                             </div>
                             <span style="font-size: 0.8rem; color: var(--slate-light);" id="count-students-text">0 files loaded</span>
                         </div>
@@ -278,7 +278,7 @@
                                     <input class="form-input" type="number" id="semester-number" placeholder="1" min="1">
                                 </div>
                                 <div class="form-group" style="justify-content: flex-end;">
-                                    <button class="btn btn-primary" onclick="addSemester()" style="width: 100%;">Create Semester</button>
+                                    <button class="btn btn-primary" id="btn-create-semester" style="width: 100%;">Create Semester</button>
                                 </div>
                             </div>
                         </div>
@@ -348,13 +348,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn btn-primary" onclick="addCourse()" style="width: 100%;">Create Syllabus Course</button>
+                            <button class="btn btn-primary" id="btn-create-course" style="width: 100%;">Create Syllabus Course</button>
                         </div>
 
                         <div class="action-flex">
                             <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
                                 <span class="search-icon">🔍</span>
-                                <input type="text" class="search-input" id="search-courses" placeholder="Search syllabus by name or code..." oninput="filterTable('courses')">
+                                <input type="text" class="search-input" id="search-courses" placeholder="Search syllabus by name or code...">
                             </div>
                         </div>
 
@@ -406,7 +406,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group" style="justify-content: flex-end;">
-                                    <button class="btn btn-primary" onclick="addEnrollment()" style="width: 100%;">Enroll Record</button>
+                                    <button class="btn btn-primary" id="btn-create-enrollment" style="width: 100%;">Enroll Record</button>
                                 </div>
                             </div>
                         </div>
@@ -414,7 +414,7 @@
                         <div class="action-flex">
                             <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
                                 <span class="search-icon">🔍</span>
-                                <input type="text" class="search-input" id="search-enrollments" placeholder="Search enrollments by name or code..." oninput="filterTable('enrollments')">
+                                <input type="text" class="search-input" id="search-enrollments" placeholder="Search enrollments by name or code...">
                             </div>
                         </div>
 
@@ -449,7 +449,7 @@
                         <div class="form-grid" style="margin-bottom: 2rem;">
                             <div class="form-group">
                                 <label class="form-label">Select Student File</label>
-                                <select class="form-select" id="grades-student" onchange="loadStudentGrades()">
+                                <select class="form-select" id="grades-student">
                                     <!-- Dynamic -->
                                 </select>
                             </div>
@@ -495,7 +495,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group" style="justify-content: flex-end;">
-                                    <button class="btn btn-primary" onclick="addFaculty()" style="width: 100%;">Onboard Faculty</button>
+                                    <button class="btn btn-primary" id="btn-create-faculty" style="width: 100%;">Onboard Faculty</button>
                                 </div>
                             </div>
                         </div>
@@ -503,7 +503,7 @@
                         <div class="action-flex">
                             <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
                                 <span class="search-icon">🔍</span>
-                                <input type="text" class="search-input" id="search-faculty" placeholder="Search by name or username..." oninput="filterTable('faculty')">
+                                <input type="text" class="search-input" id="search-faculty" placeholder="Search by name or username...">
                             </div>
                             <span style="font-size: 0.8rem; color: var(--slate-light);" id="count-faculty-text">0 faculty members loaded</span>
                         </div>
@@ -553,7 +553,7 @@
                                     <input class="form-input" id="department-code" placeholder="CS">
                                 </div>
                                 <div class="form-group" style="justify-content: flex-end;">
-                                    <button class="btn btn-primary" onclick="addDepartment()" style="width: 100%;">Create Department</button>
+                                    <button class="btn btn-primary" id="btn-create-department" style="width: 100%;">Create Department</button>
                                 </div>
                             </div>
                         </div>
@@ -561,7 +561,7 @@
                         <div class="action-flex">
                             <div class="search-wrap" style="flex: 1; max-width: 360px; margin-bottom: 0;">
                                 <span class="search-icon">🔍</span>
-                                <input type="text" class="search-input" id="search-departments" placeholder="Search departments by name or code..." oninput="filterTable('departments')">
+                                <input type="text" class="search-input" id="search-departments" placeholder="Search departments by name or code...">
                             </div>
                             <span style="font-size: 0.8rem; color: var(--slate-light);" id="count-departments-text">0 departments loaded</span>
                         </div>
@@ -595,15 +595,15 @@
         <div class="modal-window">
             <div class="modal-header">
                 <h3 class="card-title">Change Password</h3>
-                <button class="btn btn-secondary btn-sm" onclick="closePasswordModal()" style="padding: 0.25rem 0.5rem; border: none; background: none; font-size: 1.25rem; line-height: 1; color: var(--slate);">✕</button>
+                <button class="btn btn-secondary btn-sm close-password-modal-btn" style="padding: 0.25rem 0.5rem; border: none; background: none; font-size: 1.25rem; line-height: 1; color: var(--slate);">✕</button>
             </div>
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label class="form-label" for="newPasswordInput">New Password</label>
                 <input type="password" class="form-input" id="newPasswordInput" placeholder="Enter new password">
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="submitPasswordChange()">Update Password</button>
+                <button class="btn btn-secondary cancel-password-modal-btn">Cancel</button>
+                <button class="btn btn-primary submit-password-modal-btn">Update Password</button>
             </div>
         </div>
     </div>
@@ -613,14 +613,14 @@
         <div class="modal-window">
             <div class="modal-header">
                 <h3 class="card-title" id="editModalTitle">Edit Record</h3>
-                <button class="btn btn-secondary btn-sm" onclick="closeEditModal()" style="padding: 0.25rem 0.5rem; border: none; background: none; font-size: 1.25rem; line-height: 1; color: var(--slate);">✕</button>
+                <button class="btn btn-secondary btn-sm close-edit-modal-btn" style="padding: 0.25rem 0.5rem; border: none; background: none; font-size: 1.25rem; line-height: 1; color: var(--slate);">✕</button>
             </div>
             <div id="editModalBody">
                 <!-- Dynamically populated fields -->
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
-                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="submitEdit()">Update Record</button>
+                <button class="btn btn-secondary cancel-edit-modal-btn">Cancel</button>
+                <button class="btn btn-primary submit-edit-modal-btn">Update Record</button>
             </div>
         </div>
     </div>
@@ -628,7 +628,7 @@
     <!-- Toast Notifications -->
     
 
-        <script src="/js/api-v2.js"></script>
+        <script type="module" src="/js/api-v2.js"></script>
     <script type="module" src="/js/admin.js"></script>
 </body>
 </html>

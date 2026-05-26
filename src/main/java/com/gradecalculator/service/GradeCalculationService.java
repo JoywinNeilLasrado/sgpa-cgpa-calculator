@@ -7,7 +7,6 @@ import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,15 +23,40 @@ import java.util.Set;
 @Transactional
 public class GradeCalculationService {
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
+    public GradeCalculationService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository) {
+        this.studentRepository = studentRepository;
+        this.enrollmentRepository = enrollmentRepository;
+    }
 
+    private static class GradeSummary {
+        final int totalCreditPoints;
+        final int totalCredits;
 
+        GradeSummary(int totalCreditPoints, int totalCredits) {
+            this.totalCreditPoints = totalCreditPoints;
+            this.totalCredits = totalCredits;
+        }
+    }
 
+    private GradeSummary summarizeGrades(List<Enrollment> enrollments, java.util.function.Predicate<Enrollment> filter) {
+        int totalCreditPoints = 0;
+        int totalCredits = 0;
 
+        for (Enrollment enrollment : enrollments) {
+            Course course = enrollment.getCourse();
+            LetterGrade grade = enrollment.getGrade();
+
+            if (course != null && course.getCredits() != null && grade != null && filter.test(enrollment)) {
+                int creditPoints = course.getCredits() * grade.getGradePoints();
+                totalCreditPoints += creditPoints;
+                totalCredits += course.getCredits();
+            }
+        }
+        return new GradeSummary(totalCreditPoints, totalCredits);
+    }
 
     /**
      * Calculate SGPA for a student in a specific semester.
@@ -50,27 +74,15 @@ public class GradeCalculationService {
             throw new IllegalArgumentException("No enrollments found for this student in the specified semester");
         }
 
-        int totalCreditPoints = 0;
-        int totalCredits = 0;
+        GradeSummary summary = summarizeGrades(enrollments, e -> true);
 
-        for (Enrollment enrollment : enrollments) {
-            Course course = enrollment.getCourse();
-            LetterGrade grade = enrollment.getGrade();
-
-            if (course != null && course.getCredits() != null && grade != null) {
-                int creditPoints = course.getCredits() * grade.getGradePoints();
-                totalCreditPoints += creditPoints;
-                totalCredits += course.getCredits();
-            }
-        }
-
-        if (totalCredits == 0) {
+        if (summary.totalCredits == 0) {
             return new SgpaResponse(studentId, semesterId, 0.0, 0, 0);
         }
 
-        double sgpa = roundToTwoDecimals((double) totalCreditPoints / totalCredits);
+        double sgpa = roundToTwoDecimals((double) summary.totalCreditPoints / summary.totalCredits);
 
-        return new SgpaResponse(studentId, semesterId, sgpa, totalCredits, totalCreditPoints);
+        return new SgpaResponse(studentId, semesterId, sgpa, summary.totalCredits, summary.totalCreditPoints);
     }
 
     /**
@@ -83,54 +95,44 @@ public class GradeCalculationService {
         studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
-        // Get all enrollments up to the specified semester, excluding F grades
+        // Get all enrollments, excluding F grades
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
 
-        int totalValidCreditPoints = 0;
-        int totalValidCredits = 0;
-        int semestersCompleted = 0;
         Set<Long> countedSemesters = new java.util.HashSet<>();
-
-        for (Enrollment enrollment : allEnrollments) {
-            Course course = enrollment.getCourse();
-            LetterGrade grade = enrollment.getGrade();
+        
+        GradeSummary summary = summarizeGrades(allEnrollments, e -> {
+            Course course = e.getCourse();
+            LetterGrade grade = e.getGrade();
 
             if (course == null || course.getSemester() == null) {
-                continue;
+                return false;
             }
 
             Long enrollSemesterId = course.getSemester().getId();
             
             // Only count enrollments up to the specified semester
             if (enrollSemesterId > semesterId) {
-                continue;
+                return false;
             }
 
             // Exclude F grades from both numerator and denominator
             if (grade == LetterGrade.F) {
-                continue;
+                return false;
             }
 
-            if (course.getCredits() != null && grade != null) {
-                int creditPoints = course.getCredits() * grade.getGradePoints();
-                totalValidCreditPoints += creditPoints;
-                totalValidCredits += course.getCredits();
+            countedSemesters.add(enrollSemesterId);
+            return true;
+        });
 
-                if (!countedSemesters.contains(enrollSemesterId)) {
-                    countedSemesters.add(enrollSemesterId);
-                }
-            }
-        }
+        int semestersCompleted = countedSemesters.size();
 
-        semestersCompleted = countedSemesters.size();
-
-        if (totalValidCredits == 0) {
+        if (summary.totalCredits == 0) {
             return new CgpaResponse(studentId, 0.0, 0, 0, semestersCompleted);
         }
 
-        double cgpa = roundToTwoDecimals((double) totalValidCreditPoints / totalValidCredits);
+        double cgpa = roundToTwoDecimals((double) summary.totalCreditPoints / summary.totalCredits);
 
-        return new CgpaResponse(studentId, cgpa, totalValidCredits, totalValidCreditPoints, semestersCompleted);
+        return new CgpaResponse(studentId, cgpa, summary.totalCredits, summary.totalCreditPoints, semestersCompleted);
     }
 
     /**
@@ -142,41 +144,34 @@ public class GradeCalculationService {
 
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
 
-        int totalValidCreditPoints = 0;
-        int totalValidCredits = 0;
         Set<Long> semestersCompleted = new java.util.HashSet<>();
 
-        for (Enrollment enrollment : allEnrollments) {
-            Course course = enrollment.getCourse();
-            LetterGrade grade = enrollment.getGrade();
+        GradeSummary summary = summarizeGrades(allEnrollments, e -> {
+            Course course = e.getCourse();
+            LetterGrade grade = e.getGrade();
 
             if (course == null) {
-                continue;
+                return false;
             }
 
             // Exclude F grades
             if (grade == LetterGrade.F) {
-                continue;
+                return false;
             }
 
-            if (course.getCredits() != null && grade != null) {
-                int creditPoints = course.getCredits() * grade.getGradePoints();
-                totalValidCreditPoints += creditPoints;
-                totalValidCredits += course.getCredits();
-
-                if (course.getSemester() != null) {
-                    semestersCompleted.add(course.getSemester().getId());
-                }
+            if (course.getSemester() != null) {
+                semestersCompleted.add(course.getSemester().getId());
             }
-        }
+            return true;
+        });
 
-        if (totalValidCredits == 0) {
+        if (summary.totalCredits == 0) {
             return new CgpaResponse(studentId, 0.0, 0, 0, semestersCompleted.size());
         }
 
-        double cgpa = roundToTwoDecimals((double) totalValidCreditPoints / totalValidCredits);
+        double cgpa = roundToTwoDecimals((double) summary.totalCreditPoints / summary.totalCredits);
 
-        return new CgpaResponse(studentId, cgpa, totalValidCredits, totalValidCreditPoints, semestersCompleted.size());
+        return new CgpaResponse(studentId, cgpa, summary.totalCredits, summary.totalCreditPoints, semestersCompleted.size());
     }
 
     /**
