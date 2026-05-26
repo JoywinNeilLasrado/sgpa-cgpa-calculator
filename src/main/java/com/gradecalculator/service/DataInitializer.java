@@ -16,13 +16,29 @@ import java.util.List;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired private StudentRepository studentRepository;
-    @Autowired private SemesterRepository semesterRepository;
-    @Autowired private CourseRepository courseRepository;
-    @Autowired private EnrollmentRepository enrollmentRepository;
-    @Autowired private AppUserRepository userRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private DepartmentRepository departmentRepository;
+    private final StudentRepository studentRepository;
+    private final SemesterRepository semesterRepository;
+    private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final AppUserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final DepartmentRepository departmentRepository;
+
+    public DataInitializer(StudentRepository studentRepository,
+                           SemesterRepository semesterRepository,
+                           CourseRepository courseRepository,
+                           EnrollmentRepository enrollmentRepository,
+                           AppUserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           DepartmentRepository departmentRepository) {
+        this.studentRepository = studentRepository;
+        this.semesterRepository = semesterRepository;
+        this.courseRepository = courseRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.departmentRepository = departmentRepository;
+    }
 
     @org.springframework.beans.factory.annotation.Value("${app.demo.seed:true}")
     private boolean demoSeed;
