@@ -14,6 +14,7 @@ public class LoginRateLimiterService {
     private static final long BLOCK_DURATION_MS = TimeUnit.MINUTES.toMillis(15); // Block for 15 minutes
 
     private final ConcurrentHashMap<String, AttemptTracker> trackers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, AttemptTracker> accountTrackers = new ConcurrentHashMap<>();
 
     /**
      * Check if the specified client IP is currently blocked.
@@ -32,6 +33,28 @@ public class LoginRateLimiterService {
         // If blocking period has expired, automatically clean up tracker
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) {
             trackers.remove(ip);
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the specified username is currently locked.
+     */
+    public boolean isAccountLocked(String username) {
+        if (username == null) {
+            return false;
+        }
+        AttemptTracker tracker = accountTrackers.get(username);
+        if (tracker == null) {
+            return false;
+        }
+        if (tracker.isBlocked(BLOCK_DURATION_MS)) {
+            return true;
+        }
+        // If blocking period has expired, automatically clean up tracker
+        if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) {
+            accountTrackers.remove(username);
             return false;
         }
         return false;
@@ -57,11 +80,39 @@ public class LoginRateLimiterService {
     }
 
     /**
+     * Record a failed login attempt for the username.
+     */
+    public void accountLoginFailed(String username) {
+        if (username == null) {
+            return;
+        }
+        accountTrackers.compute(username, (key, value) -> {
+            long now = System.currentTimeMillis();
+            if (value == null) {
+                return new AttemptTracker(1, now);
+            }
+            if (now - value.lastAttemptTime > BLOCK_DURATION_MS) {
+                return new AttemptTracker(1, now); // Reset if block duration has elapsed
+            }
+            return new AttemptTracker(value.attempts + 1, now);
+        });
+    }
+
+    /**
      * Clear failed attempts upon successful login.
      */
     public void loginSucceeded(String ip) {
         if (ip != null) {
             trackers.remove(ip);
+        }
+    }
+
+    /**
+     * Clear failed attempts upon successful login for the username.
+     */
+    public void accountLoginSucceeded(String username) {
+        if (username != null) {
+            accountTrackers.remove(username);
         }
     }
 

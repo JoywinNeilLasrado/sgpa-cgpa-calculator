@@ -19,7 +19,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/enrollments")
-@CrossOrigin(origins = "*")
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
@@ -58,7 +57,7 @@ public class EnrollmentController {
     }
 
     @PutMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or (hasRole('FACULTY') and @sec.isAuthorizedToModifyEnrollment(principal, #id))")
     public ResponseEntity<EnrollmentResponse> updateEnrollment(
             @PathVariable Long id,
             @Valid @RequestBody EnrollmentRequest request) {

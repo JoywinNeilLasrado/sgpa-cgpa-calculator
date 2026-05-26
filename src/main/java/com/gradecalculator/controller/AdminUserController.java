@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/users")
-@CrossOrigin(origins = "*")
 public class AdminUserController {
     private final UserService userService;
 
@@ -17,7 +16,7 @@ public class AdminUserController {
 
     @PutMapping("/password")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> changePassword(@RequestBody PasswordChangeRequest request) {
+    public ResponseEntity<String> changePassword(@jakarta.validation.Valid @RequestBody PasswordChangeRequest request) {
         if (request.username() != null && !request.username().trim().isEmpty()) {
             userService.adminChangePasswordByUsername(request.username(), request.newPassword());
         } else {

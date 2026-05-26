@@ -64,6 +64,7 @@ class AuthControllerTest {
         AppUser user = new AppUser(1L, "admin", "encodedPassword", AppUser.Role.ADMIN, "Admin User", "admin@example.com", "CS");
 
         when(rateLimiter.isBlocked(anyString())).thenReturn(false);
+        when(rateLimiter.isAccountLocked("admin")).thenReturn(false);
         when(userService.authenticate("admin", "Password123!")).thenReturn("mock-jwt-token");
         when(userService.findByUsername("admin")).thenReturn(Optional.of(user));
 
@@ -78,6 +79,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("mock-jwt-token"));
 
         verify(rateLimiter).loginSucceeded(anyString());
+        verify(rateLimiter).accountLoginSucceeded("admin");
     }
 
     @Test
@@ -93,6 +95,22 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests()); // RateLimitException mapping checks
+    }
+
+    @Test
+    void loginBlockedByAccountLockout() throws Exception {
+        LoginRequest request = new LoginRequest();
+        request.setUsername("admin");
+        request.setPassword("Password123!");
+
+        when(rateLimiter.isBlocked(anyString())).thenReturn(false);
+        when(rateLimiter.isAccountLocked("admin")).thenReturn(true);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isTooManyRequests());
     }
 
     @Test

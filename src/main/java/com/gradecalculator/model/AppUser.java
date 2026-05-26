@@ -31,6 +31,9 @@ public class AppUser {
     private String email;
     private String department;
 
+    @Column(nullable = false)
+    private boolean mustChangePassword = false;
+
     public AppUser() {}
 
     public AppUser(Long id, String username, String password, Role role, String name, String email, String department) {
@@ -97,6 +100,14 @@ public class AppUser {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void setMustChangePassword(boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
     }
 
     /**

@@ -10,6 +10,7 @@ public class LoginResponse {
     private String role;
     private String token;
     private String tokenType = "Bearer";
+    private boolean mustChangePassword;
 
     public LoginResponse() {}
 
@@ -18,6 +19,15 @@ public class LoginResponse {
         this.username = username;
         this.role = role;
         this.token = token;
+        this.mustChangePassword = false;
+    }
+
+    public LoginResponse(Long userId, String username, String role, String token, boolean mustChangePassword) {
+        this.userId = userId;
+        this.username = username;
+        this.role = role;
+        this.token = token;
+        this.mustChangePassword = mustChangePassword;
     }
 
     public Long getUserId() { return userId; }
@@ -31,4 +41,6 @@ public class LoginResponse {
     public void setToken(String token) { this.token = token; }
     public String getTokenType() { return tokenType; }
     public void setTokenType(String tokenType) { this.tokenType = tokenType; }
+    public boolean isMustChangePassword() { return mustChangePassword; }
+    public void setMustChangePassword(boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }
 }

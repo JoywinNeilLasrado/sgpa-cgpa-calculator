@@ -23,6 +23,8 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserService.class);
+
     public UserService(AppUserRepository userRepository, PasswordEncoder passwordEncoder,
             AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
@@ -46,6 +48,7 @@ public class UserService {
         user.setName(request.getName() != null && !request.getName().trim().isEmpty() ? request.getName() : request.getUsername());
         user.setEmail(request.getEmail());
         user.setDepartment(request.getDepartment());
+        user.setMustChangePassword(true);
 
         return userRepository.save(user);
     }
@@ -79,6 +82,7 @@ public class UserService {
      * Change user password
      */
     public void changePassword(Long userId, String oldPassword, String newPassword) {
+        validatePassword(newPassword);
         AppUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
@@ -87,22 +91,36 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(false);
         userRepository.save(user);
+        logger.info("Security Event: User ID: '{}' changed their password successfully", userId);
     }
 
     // Admin can set password directly without old password verification
     public void adminChangePassword(Long userId, String newPassword) {
+        validatePassword(newPassword);
         AppUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(true);
         userRepository.save(user);
+        logger.warn("Security Event: Admin changed/reset password for user ID: '{}'", userId);
     }
 
     // Admin can set password directly without old password verification using username
     public void adminChangePasswordByUsername(String username, String newPassword) {
+        validatePassword(newPassword);
         AppUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(true);
         userRepository.save(user);
+        logger.warn("Security Event: Admin changed/reset password for username: '{}'", username);
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.trim().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
     }
 }

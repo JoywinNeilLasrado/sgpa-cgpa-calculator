@@ -102,6 +102,7 @@ public class StudentService {
 
         String oldUsername = student.getUsername();
         String newUsername = rollNumber.trim().toUpperCase();
+        String oldDob = student.getDateOfBirth();
 
         student.setName(name);
         student.setStudentId(rollNumber);
@@ -115,8 +116,11 @@ public class StudentService {
                 user.setUsername(newUsername);
                 user.setName(newUsername);
                 user.setDepartment(branch);
-                // Password is DOB
-                user.setPassword(passwordEncoder.encode(dateOfBirth.trim()));
+                // Only update/reset password if the DOB actually changed
+                if (oldDob == null || !oldDob.equals(dateOfBirth.trim())) {
+                    user.setPassword(passwordEncoder.encode(dateOfBirth.trim()));
+                    user.setMustChangePassword(true);
+                }
                 userRepository.save(user);
             });
         }

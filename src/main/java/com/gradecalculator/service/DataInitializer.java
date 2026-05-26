@@ -47,20 +47,29 @@ public class DataInitializer implements CommandLineRunner {
 
         if (studentRepository.count() > 0) return;
 
-        if ("password123".equals(demoPassword)) {
-            logger.warn("⚠️ SECURITY WARNING: Demo database is seeded with a weak default password 'password123'. Change 'app.demo.password' in application.properties for production.");
+        String effectiveDemoPassword = demoPassword;
+        boolean isRandom = false;
+        if (effectiveDemoPassword == null || effectiveDemoPassword.trim().isEmpty() || "password123".equals(effectiveDemoPassword)) {
+            effectiveDemoPassword = java.util.UUID.randomUUID().toString().substring(0, 12);
+            isRandom = true;
         }
 
-        createUserIfNotExists("admin", "admin", AppUser.Role.ADMIN);
-        AppUser defaultFaculty = createUserIfNotExists("faculty", "faculty", AppUser.Role.FACULTY);
-        AppUser profJones = createUserIfNotExists("prof.jones", demoPassword, AppUser.Role.FACULTY);
-        AppUser profSmith = createUserIfNotExists("prof.smith", demoPassword, AppUser.Role.FACULTY);
-        AppUser profDavis = createUserIfNotExists("prof.davis", demoPassword, AppUser.Role.FACULTY);
+        if (isRandom) {
+            logger.info("🔐 SECURITY POLICY: Dynamically generated a secure random password for all demo credentials.");
+        } else {
+            logger.info("ℹ️ Using configured custom password for demo credentials.");
+        }
+
+        createUserIfNotExists("admin", effectiveDemoPassword, AppUser.Role.ADMIN);
+        AppUser defaultFaculty = createUserIfNotExists("faculty", effectiveDemoPassword, AppUser.Role.FACULTY);
+        AppUser profJones = createUserIfNotExists("prof.jones", effectiveDemoPassword, AppUser.Role.FACULTY);
+        AppUser profSmith = createUserIfNotExists("prof.smith", effectiveDemoPassword, AppUser.Role.FACULTY);
+        AppUser profDavis = createUserIfNotExists("prof.davis", effectiveDemoPassword, AppUser.Role.FACULTY);
         
         // Additional faculty members (generated like students)
         String[] extraFacultyUsernames = {"prof.williams", "prof.brown", "prof.taylor"};
         for (String fu : extraFacultyUsernames) {
-            createUserIfNotExists(fu, demoPassword, AppUser.Role.FACULTY);
+            createUserIfNotExists(fu, effectiveDemoPassword, AppUser.Role.FACULTY);
         }
 
         List<Semester> semesters = new ArrayList<>();
@@ -108,7 +117,7 @@ public class DataInitializer implements CommandLineRunner {
             allCourses.add(semCourses);
         }
 
-        String studentPasswordHash = passwordEncoder.encode(demoPassword);
+        String studentPasswordHash = passwordEncoder.encode(effectiveDemoPassword);
 
         // 12 students divided into different branches with different grades
         createStudent("CS2024001", "Alice Johnson", "alice", "Computer Science", allCourses, LetterGrade.O, LetterGrade.A_PLUS, studentPasswordHash);
@@ -123,6 +132,21 @@ public class DataInitializer implements CommandLineRunner {
         createStudent("CS2024010", "Julia Roberts", "julia", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.B_PLUS, studentPasswordHash);
         createStudent("CS2024011", "Kevin Perry", "kevin", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.C, studentPasswordHash);
         createStudent("CS2024012", "Laura Palmer", "laura", "Electronics & Communication", allCourses, LetterGrade.C, LetterGrade.P, studentPasswordHash);
+
+        // Print secure credentials banner for local developers
+        System.out.println("\n");
+        System.out.println("==========================================================================");
+        System.out.println("🔐     DEMO DATABASE INITIALIZED WITH SECURE INITIAL CREDENTIALS         🔐");
+        System.out.println("==========================================================================");
+        System.out.println("  Role      | Username                   | Password                       ");
+        System.out.println("  ----------|----------------------------|--------------------------------");
+        System.out.println(String.format("  ADMIN     | admin                      | %s", effectiveDemoPassword));
+        System.out.println(String.format("  FACULTY   | faculty                    | %s", effectiveDemoPassword));
+        System.out.println(String.format("  FACULTY   | prof.jones                 | %s", effectiveDemoPassword));
+        System.out.println(String.format("  STUDENT   | CS2024001 (Alice)          | %s", effectiveDemoPassword));
+        System.out.println("==========================================================================");
+        System.out.println("ℹ️ Note: Students must change their password upon their first login.");
+        System.out.println("==========================================================================\n");
     }
 
     private void createStudent(String roll, String name, String username, String branch, List<List<Course>> courses, LetterGrade best, LetterGrade avg, String passwordHash) {
@@ -138,8 +162,9 @@ public class DataInitializer implements CommandLineRunner {
         AppUser u = new AppUser();
         u.setUsername(upperRoll);
         u.setName(upperRoll);
-        u.setPassword(passwordEncoder.encode(dob)); // Password is date of birth!
+        u.setPassword(passwordHash); // Use the pre-encoded passwordHash instead of DOB!
         u.setRole(AppUser.Role.STUDENT);
+        u.setMustChangePassword(true);
         try { userRepository.save(u); } catch (Exception e) {}
 
         // Enroll in first 4 semesters (20 courses)

@@ -83,13 +83,28 @@ public class EnrollmentService {
         enrollment.setSeeMarks(request.getSeeMarks());
         enrollment.setGraceMarks(request.getGraceMarks());
         enrollment.calculateGrade();
-        return toEnrollmentResponse(enrollmentRepository.save(enrollment));
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        // Log auditing
+        com.gradecalculator.security.AuditLogger.logChangeEvent(
+            "Enrollment", 
+            saved.getId() != null ? saved.getId().toString() : "NEW", 
+            "CREATE", 
+            "None", 
+            getEnrollmentStateString(saved)
+        );
+
+        return toEnrollmentResponse(saved);
     }
 
     @Transactional
     public EnrollmentResponse update(Long id, EnrollmentRequest request) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        
+        // Capture previous state
+        String previousState = getEnrollmentStateString(enrollment);
+
         Student student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
         Course course = courseRepository.findById(request.getCourseId())
@@ -112,13 +127,37 @@ public class EnrollmentService {
         enrollment.setSeeMarks(request.getSeeMarks());
         enrollment.setGraceMarks(request.getGraceMarks());
         enrollment.calculateGrade();
-        return toEnrollmentResponse(enrollmentRepository.save(enrollment));
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        // Log auditing
+        com.gradecalculator.security.AuditLogger.logChangeEvent(
+            "Enrollment", 
+            saved.getId().toString(), 
+            "UPDATE", 
+            previousState, 
+            getEnrollmentStateString(saved)
+        );
+
+        return toEnrollmentResponse(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        
+        String previousState = getEnrollmentStateString(enrollment);
+
         enrollmentRepository.delete(enrollment);
+
+        // Log auditing
+        com.gradecalculator.security.AuditLogger.logChangeEvent(
+            "Enrollment", 
+            id.toString(), 
+            "DELETE", 
+            previousState, 
+            "DELETED"
+        );
     }
 
     public EnrollmentResponse toEnrollmentResponse(Enrollment enrollment) {
@@ -164,16 +203,33 @@ public class EnrollmentService {
     public Enrollment updateGrade(Long enrollmentId, LetterGrade grade, String username) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        
+        String previousState = getEnrollmentStateString(enrollment);
+
         enrollment.setGrade(grade);
         enrollment.setLastModifiedBy(username);
         enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
-        return enrollmentRepository.save(enrollment);
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        // Log auditing
+        com.gradecalculator.security.AuditLogger.logChangeEvent(
+            "Enrollment", 
+            saved.getId().toString(), 
+            "UPDATE_GRADE", 
+            previousState, 
+            getEnrollmentStateString(saved)
+        );
+
+        return saved;
     }
 
     @Transactional
     public Enrollment updateMarks(GradeUpdateRequest request, String username) {
         Enrollment enrollment = enrollmentRepository.findById(request.enrollmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        
+        String previousState = getEnrollmentStateString(enrollment);
+
         enrollment.setCieMarks(request.cieMarks());
         enrollment.setCieTheoryMarks(request.cieTheoryMarks());
         enrollment.setCieLabMarks(request.cieLabMarks());
@@ -192,7 +248,31 @@ public class EnrollmentService {
         enrollment.calculateGrade();
         enrollment.setLastModifiedBy(username);
         enrollment.setLastModifiedAt(java.time.LocalDateTime.now());
-        return enrollmentRepository.save(enrollment);
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        // Log auditing
+        com.gradecalculator.security.AuditLogger.logChangeEvent(
+            "Enrollment", 
+            saved.getId().toString(), 
+            "UPDATE_MARKS", 
+            previousState, 
+            getEnrollmentStateString(saved)
+        );
+
+        return saved;
+    }
+
+    private String getEnrollmentStateString(Enrollment e) {
+        if (e == null) {
+            return "null";
+        }
+        return String.format("studentId=%d, courseId=%d, cieMarks=%s, seeMarks=%s, grade=%s, totalMarks=%s",
+                e.getStudent() != null ? e.getStudent().getId() : null,
+                e.getCourse() != null ? e.getCourse().getId() : null,
+                e.getCieMarks(),
+                e.getSeeMarks(),
+                e.getGrade() != null ? e.getGrade().name() : "null",
+                e.getTotalMarks());
     }
 }
 

@@ -1,7 +1,9 @@
 package com.gradecalculator.security;
 
 import com.gradecalculator.model.Student;
+import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.repository.StudentRepository;
+import com.gradecalculator.repository.EnrollmentRepository;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
 
@@ -12,9 +14,11 @@ import java.util.Optional;
 public class SecurityExpressionEvaluator {
 
     private final StudentRepository studentRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
-    public SecurityExpressionEvaluator(StudentRepository studentRepository) {
+    public SecurityExpressionEvaluator(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository) {
         this.studentRepository = studentRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     /**
@@ -44,5 +48,29 @@ public class SecurityExpressionEvaluator {
             return false;
         }
         return principal.getUsername().equalsIgnoreCase(username);
+    }
+
+    /**
+     * Check if the authenticated user is authorized to modify a specific enrollment.
+     * Allowed if the user is an ADMIN, or if they are a FACULTY member assigned to the course.
+     */
+    public boolean isAuthorizedToModifyEnrollment(UserPrincipal principal, Long enrollmentId) {
+        if (principal == null || enrollmentId == null) {
+            return false;
+        }
+        String role = principal.getRole();
+        if ("ADMIN".equals(role)) {
+            return true;
+        }
+        if ("FACULTY".equals(role)) {
+            Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
+            return enrollmentOpt.map(enrollment -> 
+                enrollment.getCourse() != null && 
+                enrollment.getCourse().getFaculty() != null && 
+                enrollment.getCourse().getFaculty().getUsername() != null && 
+                enrollment.getCourse().getFaculty().getUsername().equals(principal.getUsername())
+            ).orElse(false);
+        }
+        return false;
     }
 }

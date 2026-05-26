@@ -18,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/semesters")
-@CrossOrigin(origins = "*")
 public class SemesterController {
 
     private final SemesterService semesterService;

@@ -56,4 +56,48 @@ class LoginRateLimiterServiceTest {
         limiter.loginFailed(null);
         limiter.loginSucceeded(null);
     }
+
+    @Test
+    void newAccountIsNotBlocked() {
+        assertThat(limiter.isAccountLocked("user1")).isFalse();
+    }
+
+    @Test
+    void isAccountBlockedAfterMaxAttempts() {
+        String username = "attacker";
+        
+        // 4 failed attempts should not lock account
+        for (int i = 0; i < 4; i++) {
+            limiter.accountLoginFailed(username);
+            assertThat(limiter.isAccountLocked(username)).isFalse();
+        }
+
+        // 5th failed attempt should lock account
+        limiter.accountLoginFailed(username);
+        assertThat(limiter.isAccountLocked(username)).isTrue();
+    }
+
+    @Test
+    void accountSuccessClearsAttempts() {
+        String username = "student1";
+        
+        for (int i = 0; i < 4; i++) {
+            limiter.accountLoginFailed(username);
+        }
+        
+        // Successful login should clear counter
+        limiter.accountLoginSucceeded(username);
+        assertThat(limiter.isAccountLocked(username)).isFalse();
+        
+        // Failure counter resets to 0, so another failure doesn't lock
+        limiter.accountLoginFailed(username);
+        assertThat(limiter.isAccountLocked(username)).isFalse();
+    }
+
+    @Test
+    void nullAccountSafelyIgnored() {
+        assertThat(limiter.isAccountLocked(null)).isFalse();
+        limiter.accountLoginFailed(null);
+        limiter.accountLoginSucceeded(null);
+    }
 }

@@ -229,6 +229,45 @@ class EnrollmentControllerTest {
     }
 
     @Test
+    void updateEnrollmentPermittedForAssignedFaculty() throws Exception {
+        EnrollmentRequest request = new EnrollmentRequest();
+        request.setStudentId(3L);
+        request.setCourseId(20L);
+        request.setCieMarks(42);
+        request.setSeeMarks(43);
+
+        EnrollmentResponse r1 = new EnrollmentResponse(100L, 3L, "Student Name", "CS2024", 20L, "CS101", "Intro CS", 4, "THEORY", 10L, 1, "A+", 9, 36, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 85);
+        when(enrollmentService.update(eq(100L), any(EnrollmentRequest.class))).thenReturn(r1);
+        when(securityExpressionEvaluator.isAuthorizedToModifyEnrollment(any(), eq(100L))).thenReturn(true);
+
+        mockMvc.perform(put("/api/enrollments/{id}", 100L)
+                        .with(csrf())
+                        .with(user(facultyPrincipal))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.grade").value("A+"));
+    }
+
+    @Test
+    void updateEnrollmentForbiddenForUnassignedFaculty() throws Exception {
+        EnrollmentRequest request = new EnrollmentRequest();
+        request.setStudentId(3L);
+        request.setCourseId(20L);
+        request.setCieMarks(42);
+        request.setSeeMarks(43);
+
+        when(securityExpressionEvaluator.isAuthorizedToModifyEnrollment(any(), eq(100L))).thenReturn(false);
+
+        mockMvc.perform(put("/api/enrollments/{id}", 100L)
+                        .with(csrf())
+                        .with(user(facultyPrincipal))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void deleteEnrollmentOnlyPermittedForAdmin() throws Exception {
         doNothing().when(enrollmentService).delete(100L);
 

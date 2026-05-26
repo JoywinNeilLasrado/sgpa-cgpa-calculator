@@ -40,15 +40,23 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request,
             jakarta.servlet.http.HttpServletRequest httpRequest) {
-        String ip = httpRequest.getRemoteAddr();
+        String ip = getClientIp(httpRequest);
+        String username = request.getUsername();
+
         if (rateLimiter.isBlocked(ip)) {
             logger.warn("Security Event: Blocked login attempt from IP: '{}' due to rate limiting", ip);
             throw new com.gradecalculator.exception.RateLimitException("Too many failed login attempts. Please try again after 15 minutes.");
         }
 
+        if (rateLimiter.isAccountLocked(username)) {
+            logger.warn("Security Event: Blocked login attempt for locked account: '{}' from IP: '{}'", maskUsername(username), ip);
+            throw new com.gradecalculator.exception.RateLimitException("This account has been temporarily locked due to multiple failed login attempts. Please try again after 15 minutes.");
+        }
+
         try {
             String token = userService.authenticate(request.getUsername(), request.getPassword());
             rateLimiter.loginSucceeded(ip);
+            rateLimiter.accountLoginSucceeded(username);
             
             AppUser user = userService.findByUsername(request.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
@@ -60,17 +68,19 @@ public class AuthController {
                         .orElse(user.getId());
             }
 
-            logger.info("Security Event: Successful login for username: '{}' from IP: '{}'", request.getUsername(), ip);
+            logger.info("Security Event: Successful login for username: '{}' from IP: '{}'", maskUsername(request.getUsername()), ip);
 
             return ResponseEntity.ok(new LoginResponse(
                     userId,
                     user.getUsername(),
                     user.getRole().name(),
-                    token
+                    token,
+                    user.isMustChangePassword()
             ));
         } catch (org.springframework.security.core.AuthenticationException e) {
-            logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", request.getUsername(), ip);
+            logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", maskUsername(request.getUsername()), ip);
             rateLimiter.loginFailed(ip);
+            rateLimiter.accountLoginFailed(username);
             throw e;
         }
     }
@@ -104,7 +114,8 @@ public class AuthController {
                 userId,
                 user.getUsername(),
                 user.getRole().name(),
-                null  // Don't return token for /me
+                null,  // Don't return token for /me
+                user.isMustChangePassword()
         ));
     }
 
@@ -118,6 +129,36 @@ public class AuthController {
         
         userService.changePassword(principal.getId(), request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Change password - PUT /api/auth/change-password (Standard PUT support for frontend UI)
+     */
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePasswordPut(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        
+        userService.changePassword(principal.getId(), request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    private String getClientIp(jakarta.servlet.http.HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.trim().isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
+    private String maskUsername(String username) {
+        if (username == null) {
+            return "null";
+        }
+        if (username.length() <= 2) {
+            return "*".repeat(username.length());
+        }
+        return username.charAt(0) + "*".repeat(username.length() - 2) + username.charAt(username.length() - 1);
     }
 
     /**

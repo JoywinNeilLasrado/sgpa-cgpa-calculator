@@ -139,7 +139,7 @@ class UserServiceTest {
     void changePasswordThrowsWhenUserNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.changePassword(1L, "old", "new"))
+        assertThatThrownBy(() -> service.changePassword(1L, "old", "newPassword"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("AppUser not found");
     }
@@ -151,7 +151,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrongOld", "correctOldEncoded")).thenReturn(false);
 
-        assertThatThrownBy(() -> service.changePassword(1L, "wrongOld", "new"))
+        assertThatThrownBy(() -> service.changePassword(1L, "wrongOld", "newPassword"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Invalid old password");
     }
@@ -162,9 +162,9 @@ class UserServiceTest {
         user.setPassword("oldEncoded");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("old", "oldEncoded")).thenReturn(true);
-        when(passwordEncoder.encode("new")).thenReturn("newEncoded");
+        when(passwordEncoder.encode("newPassword")).thenReturn("newEncoded");
 
-        service.changePassword(1L, "old", "new");
+        service.changePassword(1L, "old", "newPassword");
 
         assertThat(user.getPassword()).isEqualTo("newEncoded");
         verify(userRepository).save(user);
@@ -175,9 +175,9 @@ class UserServiceTest {
         AppUser user = new AppUser();
         user.setPassword("oldEncoded");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode("new")).thenReturn("newEncoded");
+        when(passwordEncoder.encode("newPassword")).thenReturn("newEncoded");
 
-        service.adminChangePassword(1L, "new");
+        service.adminChangePassword(1L, "newPassword");
 
         assertThat(user.getPassword()).isEqualTo("newEncoded");
         verify(userRepository).save(user);
@@ -188,9 +188,9 @@ class UserServiceTest {
         AppUser user = new AppUser();
         user.setPassword("oldEncoded");
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode("new")).thenReturn("newEncoded");
+        when(passwordEncoder.encode("newPassword")).thenReturn("newEncoded");
 
-        service.adminChangePasswordByUsername("user1", "new");
+        service.adminChangePasswordByUsername("user1", "newPassword");
 
         assertThat(user.getPassword()).isEqualTo("newEncoded");
         verify(userRepository).save(user);
