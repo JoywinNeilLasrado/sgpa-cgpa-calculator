@@ -48,10 +48,7 @@ export function initFaculty() {
       return 0;
     }
 
-    // Local showToast delegation to centralized Toast module
-    function showToast(message, type = 'success') {
-      Toast.show(message, type);
-    }
+    // Local showToast delegation to centralized Toast module - REMOVED, using Toast.* directly
 
     function switchFilterTab(type, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -75,9 +72,8 @@ export function initFaculty() {
     }
 
     async function init() {
-      const userJson = localStorage.getItem('user');
-      if (userJson) {
-        const user = JSON.parse(userJson);
+      const user = Auth.getUser();
+      if (user) {
         const navUsername = document.getElementById('nav-username');
         if (navUsername) navUsername.textContent = user.username;
         document.getElementById('hero-welcome').textContent = `Faculty Control: ${user.username}`;
@@ -169,8 +165,7 @@ export function initFaculty() {
             new TomSelect(studentSelect, tsConfig);
         }
       } catch (err) {
-        console.error(err);
-        showToast('Failed to pull portal filters from backend.', 'error');
+        handleAPIError(err, 'load portal filters');
       }
     }
 
@@ -289,8 +284,7 @@ export function initFaculty() {
         loading.style.display = 'none';
         wrap.style.display = 'block';
       } catch (err) {
-        console.error(err);
-        showToast('Failed to pull classroom spreadsheets.', 'error');
+        handleAPIError(err, 'load classroom spreadsheets');
         resetGridDisplay();
       }
     }
@@ -335,7 +329,7 @@ export function initFaculty() {
         document.getElementById('analytics-empty').style.display = 'none';
         document.getElementById('analytics-content').style.display = 'block';
       } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'load course analytics');
         hideCourseAnalytics();
       }
     }
@@ -490,12 +484,11 @@ export function initFaculty() {
       bar.classList.remove('active');
       try {
         await API.updateGradesBulk(requests);
-        showToast(`Successfully sync'd ${count} grade entries to university ledger.`, 'success');
+        Toast.success(`Successfully sync'd ${count} grade entries to university ledger.`);
         pendingChanges = {};
         setTimeout(() => { loadSpreadsheet(activeFilterType); }, 500);
       } catch (err) {
-        console.error(err);
-        showToast('Failed to save bulk changes. Check roles or connectivity.', 'error');
+        handleAPIError(err, 'save bulk changes');
         bar.classList.add('active');
       }
     }

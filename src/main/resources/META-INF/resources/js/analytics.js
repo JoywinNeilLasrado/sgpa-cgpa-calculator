@@ -2,6 +2,8 @@
  * GradePoint Analytics Page
  * Performance visualization and stats
  */
+import { handleAPIError } from './services/errorHandler.js';
+import { Toast } from './components/toast.js';
 
 (function() {
     'use strict';
@@ -27,8 +29,8 @@
             select.addEventListener('change', handleStudentChange);
             
         } catch (err) {
-            console.error('Error:', err);
-            UI.showError('Failed to load students');
+            handleAPIError(err, 'load students');
+            Toast.error('Failed to load students');
         }
     }
 
@@ -45,8 +47,8 @@
             updateQuickStats();
             
         } catch (err) {
-            console.error('Error:', err);
-            UI.showError('Failed to load dashboard');
+            handleAPIError(err, 'load dashboard');
+            Toast.error('Failed to load dashboard');
         }
     }
 

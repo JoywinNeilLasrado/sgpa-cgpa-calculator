@@ -267,7 +267,7 @@ async function loadStudents() {
         gradesSelect.innerHTML = '<option value="">Select student file...</option>' + options;
 
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'load students'); 'pull student accounts'
         Toast.error('Failed to pull student accounts.');
     }
 }
@@ -295,7 +295,7 @@ async function loadSemesters() {
         select.innerHTML = semesters.map(s => `<option value="${s.id}">Semester Stage ${s.semesterNumber}</option>`).join('');
 
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'load semesters') 'load semesters'
         Toast.error('Failed to load semesters.');
     }
 }
@@ -334,7 +334,7 @@ async function loadCourses() {
             courses.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
 
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'load courses') 'pull curriculum list'
         Toast.error('Failed to pull curriculum list.');
     }
 }
@@ -370,7 +370,7 @@ async function loadFaculty() {
         `).join('') : '<tr><td colspan="7" class="empty-state">No faculty accounts registered.</td></tr>';
         document.getElementById('count-faculty-text').textContent = `${faculty.length} faculty members loaded`;
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'load faculty list'
         Toast.error('Failed to load faculty list.');
     }
 }
@@ -406,7 +406,7 @@ async function loadDepartments() {
         facultyDeptSelect.innerHTML = optionsHtml;
 
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'pull departments'
         Toast.error('Failed to pull departments.');
     }
 }
@@ -439,7 +439,7 @@ async function loadEnrollments() {
         `).join('') : '<tr><td colspan="4" class="empty-state">No course registrations active.</td></tr>';
 
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'load system registrations'
         Toast.error('Failed to load system registrations.');
     }
 }
@@ -495,7 +495,7 @@ async function addStudent() {
         await loadStudents();
         Toast.success(`Student profile '${name}' registered successfully!`);
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'failed record'
         Toast.error('Failed to register student record.');
     }
 }
@@ -518,7 +518,7 @@ async function addFaculty() {
         await loadFaculty();
         Toast.success(`Faculty staff '${name}' onboarded successfully!`);
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'failed staff'
         Toast.error('Failed to onboard faculty staff.');
     }
 }
@@ -534,7 +534,7 @@ async function addDepartment() {
         await loadDepartments();
         Toast.success(`Department '${name}' created successfully!`);
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'failed Duplicates?'
         Toast.error('Failed to create department. Duplicates?');
     }
 }
@@ -548,7 +548,7 @@ async function addSemester() {
         await loadSemesters();
         Toast.success(`Academic Semester Stage ${num} established!`);
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'failed stage'
         Toast.error('Failed to establish semester stage.');
     }
 }
@@ -569,7 +569,7 @@ async function addCourse() {
         await loadCourses();
         Toast.success(`Syllabus item '${code}: ${name}' created successfully.`);
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'failed item'
         Toast.error('Failed to create syllabus course item.');
     }
 }
@@ -583,7 +583,7 @@ async function addEnrollment() {
         await loadEnrollments();
         Toast.success('Course registration siphoned successfully.');
     } catch (err) {
-        console.error(err);
+        handleAPIError(err, 'failed Duplicates?'
         Toast.error('Failed to map student registration. Duplicates?');
     }
 }
@@ -608,7 +608,7 @@ async function deleteFaculty(id) {
             await loadFaculty();
             Toast.success('Faculty member successfully purged.');
         } catch (err) {
-            console.error(err);
+            handleAPIError(err, 'delete faculty member'
             Toast.error('Failed to delete faculty member.');
         }
     }
@@ -939,34 +939,35 @@ async function submitEdit() {
         const dob = document.getElementById('edit-student-dob').value;
         
         if (!name || !roll || !branch || !dob) {
-            showToast('All student fields are required.', 'error');
+            Toast.error('All student fields are required.');
             return;
         }
         
         try {
             await API.updateStudent(id, name, roll, branch, dob);
             await loadStudents();
-            showToast('Student file successfully modified.', 'success');
+            Toast.success('Student file successfully modified.');
             closeEditModal();
         } catch (e) {
-            console.error(e);
-            showToast('Failed to edit student profile.', 'error');
+            handleAPIError(e, 'edit student');
+            Toast.error('Failed to edit student profile.');
         }
     } else if (type === 'semester') {
         const numStr = document.getElementById('edit-semester-number').value.trim();
         const num = parseInt(numStr);
         if (isNaN(num) || num < 1 || num > 10) {
-            showToast('Semester number must be an integer between 1 and 10.', 'error');
+            Toast.error('Semester number must be an integer between 1 and 10.');
             return;
         }
         try {
             await API.updateSemester(id, num);
             await loadSemesters();
-            showToast(`Semester successfully updated to Stage ${num}!`, 'success');
+            Toast.success(`Semester successfully updated to Stage ${num}!`);
             closeEditModal();
         } catch (err) {
-            console.error(err);
-            showToast('Failed to modify semester sequence.', 'error');
+            handleAPIError(err, 
+            handleAPIError(err, 'edit semester');
+            Toast.error('Failed to modify semester sequence.');
         }
     } else if (type === 'course') {
         const code = document.getElementById('edit-course-code').value.trim();
@@ -978,23 +979,24 @@ async function submitEdit() {
         
         const credits = parseInt(creditsStr);
         if (isNaN(credits) || credits < 1 || credits > 6) {
-            showToast('Credits must be an integer between 1 and 6.', 'error');
+            Toast.error('Credits must be an integer between 1 and 6.');
             return;
         }
         
         if (!code || !name || isNaN(semId) || isNaN(facId)) {
-            showToast('All course fields are required.', 'error');
+            Toast.error('All course fields are required.');
             return;
         }
         
         try {
             await API.updateCourse(id, code, name, credits, semId, facId, courseType);
             await loadCourses();
-            showToast(`Syllabus course '${code}' modified successfully!`, 'success');
+            Toast.success(`Syllabus course '${code}' modified successfully!`);
             closeEditModal();
         } catch (err) {
-            console.error(err);
-            showToast('Failed to update syllabus course item.', 'error');
+            handleAPIError(err, 
+            handleAPIError(err, 'edit course');
+            Toast.error('Failed to update syllabus course item.');
         }
     } else if (type === 'faculty') {
         const name = document.getElementById('edit-faculty-name').value.trim();
@@ -1003,43 +1005,45 @@ async function submitEdit() {
         const department = document.getElementById('edit-faculty-department').value;
         
         if (!name || !username || !email || !department) {
-            showToast('All faculty fields are required.', 'error');
+            Toast.error('All faculty fields are required.');
             return;
         }
         
         try {
             await API.updateFaculty(id, name, username, email, department);
             await loadFaculty();
-            showToast(`Faculty profile '${username}' modified successfully!`, 'success');
+            Toast.success(`Faculty profile '${username}' modified successfully!`);
             closeEditModal();
         } catch (err) {
-            console.error(err);
-            showToast('Failed to modify faculty record.', 'error');
+            handleAPIError(err, 
+            handleAPIError(err, 'edit faculty');
+            Toast.error('Failed to modify faculty record.');
         }
     } else if (type === 'department') {
         const name = document.getElementById('edit-department-name').value.trim();
         const code = document.getElementById('edit-department-code').value.trim();
         
         if (!name || !code) {
-            showToast('Department name and code cannot be empty.', 'error');
+            Toast.error('Department name and code cannot be empty.');
             return;
         }
         
         try {
             await API.updateDepartment(id, name, code.toUpperCase());
             await loadDepartments();
-            showToast(`Department successfully modified to '${name}'!`, 'success');
+            Toast.success(`Department successfully modified to '${name}'!`);
             closeEditModal();
         } catch (err) {
-            console.error(err);
-            showToast('Failed to update department record.', 'error');
+            handleAPIError(err, 
+            handleAPIError(err, 'edit department');
+            Toast.error('Failed to update department record.');
         }
     } else if (type === 'enrollment') {
         const studentId = parseInt(document.getElementById('edit-enrollment-student').value);
         const courseId = parseInt(document.getElementById('edit-enrollment-course').value);
         
         if (isNaN(studentId) || isNaN(courseId)) {
-            showToast('Student and Course selections are required.', 'error');
+            Toast.error('Student and Course selections are required.');
             return;
         }
         
@@ -1059,11 +1063,12 @@ async function submitEdit() {
         try {
             await API.updateEnrollment(id, studentId, courseId, cieMarks, cieTheoryMarks, cieLabMarks, seeMarks, graceMarks);
             await loadEnrollments();
-            showToast('Course enrollment successfully updated!', 'success');
+            Toast.success('Course enrollment successfully updated!');
             closeEditModal();
         } catch (err) {
-            console.error(err);
-            showToast('Failed to update course enrollment marks.', 'error');
+            handleAPIError(err, 
+            handleAPIError(err, 'edit enrollment');
+            Toast.error('Failed to update course enrollment marks.');
         }
     }
 }

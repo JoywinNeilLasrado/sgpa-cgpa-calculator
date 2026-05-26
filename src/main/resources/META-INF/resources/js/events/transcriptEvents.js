@@ -11,11 +11,6 @@ export function initTranscript() {
 
   // Dynamically import API service
   import('../services/apiService.js').then(({ apiService: API }) => {
-    // Local showToast delegation to centralized Toast module
-    function showToast(message, type = 'success') {
-      Toast.show(message, type);
-    }
-
     // Logout Helper
     function logout() {
       Auth.logout();
@@ -28,7 +23,7 @@ export function initTranscript() {
         Auth.logout();
         return;
       }
-      loggedInUser = JSON.parse(userJson);
+      loggedInUser = Auth.getUser();
 
       // Set static date and verification code
       const today = new Date();
@@ -72,8 +67,7 @@ export function initTranscript() {
         });
         select.addEventListener('change', handleStudentSelectChange);
       } catch (err) {
-        console.error('Error loading registry list:', err);
-        showToast('Failed to load students from registry.', 'error');
+        handleAPIError(err, 'load students registry');
       }
     }
 
@@ -122,7 +116,7 @@ export function initTranscript() {
           document.getElementById('actions-bar').style.display = 'none';
           const termSelectorCard = document.getElementById('term-selector-card');
           if (termSelectorCard) termSelectorCard.style.display = 'none';
-          showToast('This student has no active enrollment records.', 'error');
+          Toast.error('This student has no active enrollment records.');
           return;
         }
         cachedDashboardData = dashboardData;
@@ -168,10 +162,9 @@ export function initTranscript() {
         document.getElementById('actions-bar').style.display = 'flex';
         const termSelectorCard = document.getElementById('term-selector-card');
         if (termSelectorCard) termSelectorCard.style.display = 'flex';
-        showToast('Official transcript generated successfully!', 'success');
+        Toast.success('Official transcript generated successfully!');
       } catch (err) {
-        console.error('Error fetching academic transcript:', err);
-        showToast('Failed to compile transcript from ledger.', 'error');
+        handleAPIError(err, 'compile transcript');
         document.getElementById('transcript-placeholder').style.display = 'block';
         document.getElementById('placeholder-text').textContent = 'Compilation failed. Please try again.';
         document.getElementById('transcript-card').style.display = 'none';
