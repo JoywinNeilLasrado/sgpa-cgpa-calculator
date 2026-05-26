@@ -88,7 +88,7 @@ public class SecurityConfig {
                 csrf
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                    .ignoringRequestMatchers("/api/**");
+                    .ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html");
                 if (h2ConsoleEnabled) {
                     csrf.ignoringRequestMatchers("/h2-console/**");
                 }
@@ -98,7 +98,7 @@ public class SecurityConfig {
                 auth
                     .requestMatchers("/", "/index.html", "/admin.html", "/student.html", "/home.html", "/login.html", "/analytics.html", "/transcript.html", "/faculty-grades.html", "/profile.html", "/student-dashboard.html", "/favicon.ico").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                    .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/grade-scale", "/api/grades/from-marks").permitAll();
                 
                 if (h2ConsoleEnabled) {
