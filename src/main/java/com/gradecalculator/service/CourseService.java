@@ -10,6 +10,9 @@ import com.gradecalculator.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gradecalculator.util.ValidationUtil;
+import lombok.NonNull;
+import com.gradecalculator.exception.NotFoundException;
+import com.gradecalculator.exception.ValidationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,21 +98,21 @@ public class CourseService {
     public Course create(String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue, com.gradecalculator.model.CourseType courseType) {
         Long semesterId = parseLong(semesterIdValue, "Semester is required");
         Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
+                .orElseThrow(() -> new NotFoundException("Semester not found"));
         validateCourse(courseCode, courseName);
         Integer credits = parsePositiveInt(creditsValue, "Credits must be greater than zero");
         courseRepository.findByCourseCodeAndSemesterId(courseCode, semesterId)
                 .ifPresent(course -> {
-                    throw new IllegalArgumentException("A course with this code already exists in the semester");
+                    throw new ValidationException("A course with this code already exists in the semester");
                 });
 
         AppUser faculty = null;
         if (facultyIdValue != null && !facultyIdValue.toString().trim().isEmpty() && !facultyIdValue.toString().equalsIgnoreCase("none") && !facultyIdValue.toString().equals("0")) {
             Long facultyId = parseLong(facultyIdValue, "Invalid faculty ID");
             faculty = userRepository.findById(facultyId)
-                    .orElseThrow(() -> new IllegalArgumentException("Faculty user not found"));
+                    .orElseThrow(() -> new NotFoundException("Faculty user not found"));
             if (faculty.getRole() != AppUser.Role.FACULTY) {
-                throw new IllegalArgumentException("Assigned user must be a faculty member");
+                throw new ValidationException("Assigned user must be a faculty member");
             }
         }
 
@@ -150,29 +153,26 @@ public class CourseService {
      * @return the updated Course entity
      */
     public Course update(Long id, String courseCode, String courseName, Object creditsValue, Object semesterIdValue, Object facultyIdValue, com.gradecalculator.model.CourseType courseType) {
-        if (id == null) {
-            throw new IllegalArgumentException("Course ID cannot be null");
-        }
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+                .orElseThrow(() -> new NotFoundException("Course not found"));
         Long semesterId = parseLong(semesterIdValue, "Semester is required");
         Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
+                .orElseThrow(() -> new NotFoundException("Semester not found"));
         validateCourse(courseCode, courseName);
 
         courseRepository.findByCourseCodeAndSemesterId(courseCode, semesterId)
                 .filter(existing -> !existing.getId().equals(id))
                 .ifPresent(existing -> {
-                    throw new IllegalArgumentException("A course with this code already exists in the semester");
+                    throw new ValidationException("A course with this code already exists in the semester");
                 });
 
         AppUser faculty = null;
         if (facultyIdValue != null && !facultyIdValue.toString().trim().isEmpty() && !facultyIdValue.toString().equalsIgnoreCase("none") && !facultyIdValue.toString().equals("0")) {
             Long facultyId = parseLong(facultyIdValue, "Invalid faculty ID");
             faculty = userRepository.findById(facultyId)
-                    .orElseThrow(() -> new IllegalArgumentException("Faculty user not found"));
+                    .orElseThrow(() -> new NotFoundException("Faculty user not found"));
             if (faculty.getRole() != AppUser.Role.FACULTY) {
-                throw new IllegalArgumentException("Assigned user must be a faculty member");
+                throw new ValidationException("Assigned user must be a faculty member");
             }
         }
 
@@ -195,10 +195,10 @@ public class CourseService {
     @Transactional
     public void delete(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Course ID cannot be null");
+            throw new ValidationException("Course ID cannot be null");
         }
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+                .orElseThrow(() -> new NotFoundException("Course not found"));
         enrollmentRepository.deleteAll(enrollmentRepository.findByCourseId(id));
         courseRepository.delete(course);
     }
@@ -209,32 +209,34 @@ public class CourseService {
     }
 
     private void validateText(String value, String message) {
-        ValidationUtil.requireNonBlank(value, message);
+        if (value == null || value.trim().isEmpty()) {
+            throw new ValidationException(message);
+        }
     }
 
     private Long parseLong(Object value, String message) {
         if (value == null) {
-            throw new IllegalArgumentException(message);
+            throw new ValidationException(message);
         }
         try {
             return Long.parseLong(value.toString());
         } catch (RuntimeException e) {
-            throw new IllegalArgumentException(message);
+            throw new ValidationException(message);
         }
     }
 
     private Integer parsePositiveInt(Object value, String message) {
         if (value == null) {
-            throw new IllegalArgumentException(message);
+            throw new ValidationException(message);
         }
         try {
             int parsed = Integer.parseInt(value.toString());
             if (parsed < 1) {
-                throw new IllegalArgumentException(message);
+                throw new ValidationException(message);
             }
             return parsed;
         } catch (RuntimeException e) {
-            throw new IllegalArgumentException(message);
+            throw new ValidationException(message);
         }
     }
 

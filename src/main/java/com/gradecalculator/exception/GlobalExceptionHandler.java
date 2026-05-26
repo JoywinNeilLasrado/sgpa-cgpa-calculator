@@ -42,4 +42,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS)
                 .body(Map.of("message", e.getMessage()));
     }
+
+    @ExceptionHandler(com.gradecalculator.exception.NotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNotFound(com.gradecalculator.exception.NotFoundException e) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND)
+                .body(Map.of("message", e.getMessage()));
+    }
+
+    @ExceptionHandler(com.gradecalculator.exception.ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidation(com.gradecalculator.exception.ValidationException e) {
+        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+    }
 }

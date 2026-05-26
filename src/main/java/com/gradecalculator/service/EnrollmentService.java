@@ -1,5 +1,8 @@
 package com.gradecalculator.service;
 import com.gradecalculator.util.ValidationUtil;
+import lombok.NonNull;
+import com.gradecalculator.exception.NotFoundException;
+import com.gradecalculator.exception.ValidationException;
 
 import com.gradecalculator.dto.EnrollmentRequest;
 import com.gradecalculator.dto.EnrollmentResponse;
@@ -113,16 +116,18 @@ public class EnrollmentService {
      */
     @Transactional
     public EnrollmentResponse create(EnrollmentRequest request) {
-        ValidationUtil.requireNonNull(request, "Enrollment request cannot be null");
+        if (request == null) {
+            throw new ValidationException("Enrollment request cannot be null");
+        }
         ValidationUtil.requireNonNull(request.getStudentId(), "Student ID cannot be null");
         ValidationUtil.requireNonNull(request.getCourseId(), "Course ID cannot be null");
 
         Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+                .orElseThrow(() -> new NotFoundException("Course not found"));
         if (enrollmentRepository.existsByStudentIdAndCourseId(student.getId(), course.getId())) {
-            throw new IllegalArgumentException("This student is already enrolled in this course");
+            throw new ValidationException("This student is already enrolled in this course");
         }
 
         Enrollment enrollment = new Enrollment(student, course);

@@ -6,6 +6,44 @@
 const UI = (function() {
     'use strict';
 
+    // 🛡️ DOMPurify auto-loader for advanced XSS input sanitization
+    (function initDOMPurify() {
+        if (typeof window !== 'undefined' && typeof window.DOMPurify === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js';
+            script.crossOrigin = 'anonymous';
+            script.referrerPolicy = 'no-referrer';
+            document.head.appendChild(script);
+        }
+    })();
+
+    // ⌨️ Keyboard accessibility & focus outline helpers
+    (function initAccessibility() {
+        if (typeof window === 'undefined') return;
+
+        // Escape key modal closer
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active, [id*="modal"].active, [id*="Modal"].active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Outline styles for accessible tabbing (focus-visible)
+        const style = document.createElement('style');
+        style.id = 'accessibility-focus-style';
+        style.textContent = `
+            /* Focus visible accessibility states */
+            button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+                outline: 3px solid #8b1538 !important;
+                outline-offset: 2px !important;
+                box-shadow: 0 0 0 4px rgba(139, 21, 56, 0.25) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    })();
+
     // Show error toast
     function showError(message) {
         showToast(message, 'error');
@@ -130,6 +168,9 @@ const UI = (function() {
 
     function escapeHTML(str) {
         if (str == null) return '';
+        if (typeof window !== 'undefined' && window.DOMPurify) {
+            return window.DOMPurify.sanitize(String(str));
+        }
         return String(str)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')

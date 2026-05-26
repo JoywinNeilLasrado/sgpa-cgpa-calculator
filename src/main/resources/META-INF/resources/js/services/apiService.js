@@ -16,7 +16,89 @@ function getHeaders() {
     };
 }
 
+const interceptors = {
+    request: [],
+    response: []
+};
+
+let activeRequests = 0;
+
+function showGlobalSpinner() {
+    activeRequests++;
+    let overlay = document.getElementById('global-ajax-loader');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'global-ajax-loader';
+        overlay.className = 'global-ajax-loader';
+        overlay.innerHTML = `
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Processing request...</div>
+        `;
+        document.body.appendChild(overlay);
+
+        if (!document.getElementById('global-loader-style')) {
+            const style = document.createElement('style');
+            style.id = 'global-loader-style';
+            style.textContent = `
+                .global-ajax-loader {
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(15, 23, 42, 0.55);
+                    backdrop-filter: blur(3px);
+                    display: flex; flex-direction: column;
+                    align-items: center; justify-content: center;
+                    z-index: 999999;
+                    opacity: 0; pointer-events: all;
+                    transition: opacity 0.2s ease;
+                }
+                .global-ajax-loader.show {
+                    opacity: 1;
+                }
+                .loader-spinner {
+                    width: 48px; height: 48px;
+                    border: 4.5px solid rgba(255, 255, 255, 0.15);
+                    border-left-color: #8b1538;
+                    border-radius: 50%;
+                    animation: global-spin 0.75s linear infinite;
+                }
+                .loader-text {
+                    margin-top: 16px;
+                    color: #f8fafc;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    letter-spacing: 0.05em;
+                }
+                @keyframes global-spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    setTimeout(() => overlay.classList.add('show'), 5);
+}
+
+function hideGlobalSpinner() {
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) {
+        const overlay = document.getElementById('global-ajax-loader');
+        if (overlay) {
+            overlay.classList.remove('show');
+            setTimeout(() => {
+                if (activeRequests === 0 && overlay.parentNode) {
+                    overlay.remove();
+                }
+            }, 200);
+        }
+    }
+}
+
 async function request(endpoint, options = {}) {
+    // 1. Run request interceptors
+    for (const interceptor of interceptors.request) {
+        options = (await interceptor(endpoint, options)) || options;
+    }
+
     const url = `${BASE_URL}${endpoint}`;
     const headers = getHeaders();
     
@@ -34,27 +116,44 @@ async function request(endpoint, options = {}) {
         ...options
     };
 
-    const res = await fetch(url, config);
-    if (res.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/';
-        return;
-    }
-    if (!res.ok) {
-        let errorMsg = `API Error: ${res.statusText}`;
-        try {
-            const errData = JSON.parse(await res.text());
-            if (errData && errData.message) {
-                errorMsg = errData.message;
-            }
-        } catch (e) {
-            // Fallback to standard error msg
+    // 2. Trigger loading spinner overlay
+    showGlobalSpinner();
+
+    try {
+        const res = await fetch(url, config);
+        
+        // 3. Hide loading spinner overlay
+        hideGlobalSpinner();
+
+        // 4. Run response interceptors
+        for (const interceptor of interceptors.response) {
+            await interceptor(res);
         }
-        throw new Error(errorMsg);
+
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+            return;
+        }
+        if (!res.ok) {
+            let errorMsg = `API Error: ${res.statusText}`;
+            try {
+                const errData = JSON.parse(await res.text());
+                if (errData && errData.message) {
+                    errorMsg = errData.message;
+                }
+            } catch (e) {
+                // Fallback to standard error msg
+            }
+            throw new Error(errorMsg);
+        }
+        const text = await res.text();
+        return text ? JSON.parse(text) : {};
+    } catch (error) {
+        hideGlobalSpinner();
+        throw error;
     }
-    const text = await res.text();
-    return text ? JSON.parse(text) : {};
 }
 
 export const apiService = {
@@ -198,7 +297,11 @@ export const apiService = {
     getCourseAnalytics: (courseId) => 
         request(`/analytics/course/${courseId}`, { method: 'GET' }),
     getClassStatistics: () => 
-        request(`/analytics/class`, { method: 'GET' })
+        request(`/analytics/class`, { method: 'GET' }),
+
+    // Interceptors
+    addRequestInterceptor: (fn) => interceptors.request.push(fn),
+    addResponseInterceptor: (fn) => interceptors.response.push(fn)
 };
 
 // Expose globally for backward compatibility with inline scripts

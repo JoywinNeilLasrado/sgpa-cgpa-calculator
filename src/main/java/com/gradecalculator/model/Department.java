@@ -27,7 +27,7 @@ public class Department {
     // Constructors
     public Department() {}
 
-    public Department(String name, String code) {
+    public Department(@lombok.NonNull String name, @lombok.NonNull String code) {
         this.name = name;
         this.code = code;
     }

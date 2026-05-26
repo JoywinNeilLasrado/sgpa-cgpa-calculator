@@ -46,13 +46,13 @@ public class Student {
     // Constructors
     public Student() {}
 
-    public Student(String name, String studentId) {
+    public Student(@lombok.NonNull String name, @lombok.NonNull String studentId) {
         this.name = name;
         this.studentId = studentId;
         this.branch = "Computer Science";
     }
 
-    public Student(String name, String studentId, String branch) {
+    public Student(@lombok.NonNull String name, @lombok.NonNull String studentId, String branch) {
         this.name = name;
         this.studentId = studentId;
         this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";

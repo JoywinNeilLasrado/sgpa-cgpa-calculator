@@ -6,6 +6,9 @@ import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.NonNull;
+import com.gradecalculator.exception.NotFoundException;
+import com.gradecalculator.exception.ValidationException;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +94,7 @@ public class StudentService {
         ValidationUtil.requireNonBlank(dateOfBirth, "Date of birth is required");
         studentRepository.findByStudentId(rollNumber)
                 .ifPresent(student -> {
-                    throw new IllegalArgumentException("A student with this roll number already exists");
+                    throw new ValidationException("A student with this roll number already exists");
                 });
 
         // Username is exactly the roll number in UPPER CASE!
@@ -154,13 +157,13 @@ public class StudentService {
     public Student update(Long id, String name, String rollNumber, String branch, String dateOfBirth) {
         ValidationUtil.requireNonNull(id, "Student ID cannot be null");
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
         validateStudent(name, rollNumber);
         ValidationUtil.requireNonBlank(dateOfBirth, "Date of birth is required");
         studentRepository.findByStudentId(rollNumber)
                 .filter(existing -> !existing.getId().equals(id))
                 .ifPresent(existing -> {
-                    throw new IllegalArgumentException("A student with this roll number already exists");
+                    throw new ValidationException("A student with this roll number already exists");
                 });
 
         String oldUsername = student.getUsername();
@@ -199,10 +202,10 @@ public class StudentService {
     @Transactional
     public void delete(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Student ID cannot be null");
+            throw new ValidationException("Student ID cannot be null");
         }
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
         if (student.getUsername() != null) {
             userRepository.findByUsername(student.getUsername())
                     .ifPresent(userRepository::delete);
@@ -217,7 +220,9 @@ public class StudentService {
     }
 
     private void validateText(String value, String message) {
-        ValidationUtil.requireNonBlank(value, message);
+        if (value == null || value.trim().isEmpty()) {
+            throw new ValidationException(message);
+        }
     }
 
     /**
@@ -227,7 +232,9 @@ public class StudentService {
      * @return Optional containing the student if found
      */
     public Optional<Student> findByUsername(String username) {
-        ValidationUtil.requireNonBlank(username, "Username cannot be null or empty");
+        if (username == null || username.trim().isEmpty()) {
+            throw new ValidationException("Username cannot be empty");
+        }
         return studentRepository.findByUsername(username);
     }
 }

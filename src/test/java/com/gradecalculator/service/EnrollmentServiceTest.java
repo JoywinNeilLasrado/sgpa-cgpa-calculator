@@ -16,6 +16,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.gradecalculator.util.CoveredBy;
+
 import java.util.Collections;
 import java.util.Optional;
 
@@ -24,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@CoveredBy(EnrollmentService.class)
 @ExtendWith(MockitoExtension.class)
 class EnrollmentServiceTest {
 
