@@ -238,6 +238,69 @@
             font-weight: 600;
             color: var(--crimson);
         }
+
+        /* Attempt counter badge */
+        .attempt-tracker {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #92400e;
+            gap: 0.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .attempt-tracker.show { display: flex; }
+        .attempt-dots {
+            display: flex;
+            gap: 5px;
+        }
+        .attempt-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--mist-dark);
+            transition: background 0.3s ease;
+        }
+        .attempt-dot.used { background: #f59e0b; }
+        .attempt-dot.last { background: var(--crimson); }
+
+        /* Lockout banner */
+        .lockout-banner {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(139, 21, 56, 0.06);
+            border: 1px solid rgba(139, 21, 56, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .lockout-banner.show { display: flex; }
+        .lockout-icon { font-size: 1.8rem; }
+        .lockout-title {
+            font-weight: 700;
+            color: var(--crimson);
+            font-size: 0.9rem;
+        }
+        .lockout-timer {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--crimson);
+            letter-spacing: 0.05em;
+        }
+        .lockout-subtitle {
+            font-size: 0.78rem;
+            color: var(--slate-light);
+        }
     </style>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
@@ -262,6 +325,20 @@
 
             <!-- Error Alerts -->
             <div id="error-alert" class="alert alert-error"></div>
+
+            <!-- Attempt tracker -->
+            <div id="attempt-tracker" class="attempt-tracker">
+                <div id="attempt-text" style="font-weight:600;"></div>
+                <div class="attempt-dots" id="attempt-dots"></div>
+            </div>
+
+            <!-- Lockout countdown banner -->
+            <div id="lockout-banner" class="lockout-banner">
+                <div class="lockout-icon">🔒</div>
+                <div class="lockout-title">Account Temporarily Locked</div>
+                <div class="lockout-timer" id="lockout-timer">0:60</div>
+                <div class="lockout-subtitle">Please wait before trying again</div>
+            </div>
 
             <form id="login-form" autocomplete="off">
                 <div class="form-floating-group">
@@ -310,50 +387,141 @@
             const pInput = document.getElementById('password');
             uInput.value = username;
             pInput.value = password;
-            
-            // Dispatch input events so labels float
             uInput.dispatchEvent(new Event('input', { bubbles: true }));
             pInput.dispatchEvent(new Event('input', { bubbles: true }));
-            
-            // Smoothly focus the submit button
             uInput.classList.add('active');
             pInput.classList.add('active');
-            
             if (window.showToast) window.showToast('Demo account credentials prefilled.', 'success');
         }
 
+        // ── Rate limit UI state ──────────────────────────────────────────
+        const MAX_ATTEMPTS = 5;
+        let lockoutInterval = null;
+
+        function renderAttemptDots(made) {
+            const container = document.getElementById('attempt-dots');
+            container.innerHTML = '';
+            for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'attempt-dot';
+                if (i < made) dot.classList.add(i === made - 1 && made === MAX_ATTEMPTS - 1 ? 'last' : 'used');
+                container.appendChild(dot);
+            }
+        }
+
+        function showAttemptTracker(made, remaining) {
+            const tracker = document.getElementById('attempt-tracker');
+            const text = document.getElementById('attempt-text');
+            tracker.classList.add('show');
+            if (remaining === 0) {
+                text.textContent = `Last attempt used — locking now`;
+            } else {
+                text.textContent = `${made} of ${MAX_ATTEMPTS} attempts · ${remaining} remaining`;
+            }
+            renderAttemptDots(made);
+        }
+
+        function startLockoutTimer(remainingMs) {
+            const form     = document.getElementById('login-form');
+            const banner   = document.getElementById('lockout-banner');
+            const display  = document.getElementById('lockout-timer');
+            const tracker  = document.getElementById('attempt-tracker');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            tracker.classList.remove('show');
+            banner.classList.add('show');
+            submitBtn.disabled = true;
+
+            if (lockoutInterval) clearInterval(lockoutInterval);
+
+            const end = Date.now() + remainingMs;
+            function tick() {
+                const left = Math.max(0, end - Date.now());
+                const secs = Math.ceil(left / 1000);
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                display.textContent = `${m}:${String(s).padStart(2, '0')}`;
+                if (left <= 0) {
+                    clearInterval(lockoutInterval);
+                    lockoutInterval = null;
+                    banner.classList.remove('show');
+                    submitBtn.disabled = false;
+                    if (window.showToast) window.showToast('Account unlocked. You may try again.', 'info');
+                }
+            }
+            tick();
+            lockoutInterval = setInterval(tick, 500);
+        }
+
+        function clearRateLimitUI() {
+            document.getElementById('attempt-tracker').classList.remove('show');
+            document.getElementById('lockout-banner').classList.remove('show');
+            if (lockoutInterval) { clearInterval(lockoutInterval); lockoutInterval = null; }
+            document.querySelector('#login-form button[type="submit"]').disabled = false;
+        }
+
+        // ── Login form submit ────────────────────────────────────────────
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const errorAlert = document.getElementById('error-alert');
-            const loader = document.getElementById('loader');
+            const username    = document.getElementById('username').value.trim();
+            const password    = document.getElementById('password').value;
+            const errorAlert  = document.getElementById('error-alert');
+            const loader      = document.getElementById('loader');
 
             errorAlert.classList.remove('show');
             loader.style.display = 'flex';
 
             try {
-                // Call standard unified api client login
-                const data = await API.login(username, password);
-                
-                // Store auth elements
-                localStorage.setItem('token', data.token);
-                // Directly store response object (id, username, role, token)
-                localStorage.setItem('user', JSON.stringify(data));
-                
-                if (window.showToast) window.showToast(`Welcome back, ${data.username}!`, 'success');
-                
-                setTimeout(() => {
-                    if (data.role === 'ADMIN') window.location.href = '/admin.html';
-                    else if (data.role === 'FACULTY') window.location.href = '/faculty-grades.html';
-                    else window.location.href = '/student.html';
-                }, 800);
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await resp.json();
+                loader.style.display = 'none';
+
+                if (resp.ok) {
+                    // ✅ Success
+                    clearRateLimitUI();
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data));
+                    if (window.showToast) window.showToast(`Welcome back, ${data.username}!`, 'success');
+                    setTimeout(() => {
+                        if (data.role === 'ADMIN') window.location.href = '/admin.html';
+                        else if (data.role === 'FACULTY') window.location.href = '/faculty-grades.html';
+                        else window.location.href = '/student.html';
+                    }, 800);
+
+                } else if (resp.status === 429) {
+                    // 🔒 Locked out
+                    errorAlert.textContent = data.message || 'Account locked.';
+                    errorAlert.classList.add('show');
+                    startLockoutTimer(data.lockoutRemainingMs || 60000);
+                    if (window.showToast) window.showToast('Account locked. Wait for timer.', 'error');
+
+                } else {
+                    // ❌ Wrong credentials
+                    const made      = data.attemptsMade      ?? 1;
+                    const remaining = data.attemptsRemaining ?? (MAX_ATTEMPTS - made);
+                    const lockMs    = data.lockoutRemainingMs ?? 0;
+
+                    errorAlert.textContent = data.message || 'Invalid credentials.';
+                    errorAlert.classList.add('show');
+
+                    if (lockMs > 0) {
+                        startLockoutTimer(lockMs);
+                    } else {
+                        showAttemptTracker(made, remaining);
+                    }
+                    if (window.showToast) window.showToast('Authentication failed.', 'error');
+                }
             } catch (err) {
                 console.error(err);
-                errorAlert.textContent = 'Invalid credentials or connection issue. Please check again.';
-                errorAlert.classList.add('show');
                 loader.style.display = 'none';
-                if (window.showToast) window.showToast('Authentication failed.', 'error');
+                errorAlert.textContent = 'Connection error. Please try again.';
+                errorAlert.classList.add('show');
+                if (window.showToast) window.showToast('Connection error.', 'error');
             }
         });
     </script>

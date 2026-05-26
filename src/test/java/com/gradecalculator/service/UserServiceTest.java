@@ -40,6 +40,7 @@ class UserServiceTest {
     void registerThrowsWhenUsernameExists() {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("user1");
+        request.setPassword("Password123!");
         
         when(userRepository.existsByUsername("user1")).thenReturn(true);
 

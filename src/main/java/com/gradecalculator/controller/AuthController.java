@@ -35,29 +35,32 @@ public class AuthController {
 
     /**
      * Login - POST /api/auth/login
+     * Returns structured JSON including attempt count and lockout info for UI feedback.
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
+    public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest request,
             jakarta.servlet.http.HttpServletRequest httpRequest) {
         String ip = getClientIp(httpRequest);
         String username = request.getUsername();
 
-        if (rateLimiter.isBlocked(ip)) {
-            logger.warn("Security Event: Blocked login attempt from IP: '{}' due to rate limiting", ip);
-            throw new com.gradecalculator.exception.RateLimitException("Too many failed login attempts. Please try again after 15 minutes.");
-        }
-
-        if (rateLimiter.isAccountLocked(username)) {
-            logger.warn("Security Event: Blocked login attempt for locked account: '{}' from IP: '{}'", maskUsername(username), ip);
-            throw new com.gradecalculator.exception.RateLimitException("This account has been temporarily locked due to multiple failed login attempts. Please try again after 15 minutes.");
+        // Check if IP or account is locked — return remaining lockout time
+        if (rateLimiter.isBlocked(ip) || rateLimiter.isAccountLocked(username)) {
+            long remainingMs = rateLimiter.getAccountLockoutRemainingMs(username);
+            logger.warn("Security Event: Blocked login attempt for '{}' from IP: '{}'", username, ip);
+            return ResponseEntity.status(429).body(new LoginErrorResponse(
+                    "Account locked due to too many failed attempts.",
+                    com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
+                    com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
+                    remainingMs
+            ));
         }
 
         try {
             String token = userService.authenticate(request.getUsername(), request.getPassword());
             rateLimiter.loginSucceeded(ip);
             rateLimiter.accountLoginSucceeded(username);
-            
+
             AppUser user = userService.findByUsername(request.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
 
@@ -68,7 +71,7 @@ public class AuthController {
                         .orElse(user.getId());
             }
 
-            logger.info("Security Event: Successful login for username: '{}' from IP: '{}'", maskUsername(request.getUsername()), ip);
+            logger.info("Security Event: Successful login for username: '{}' from IP: '{}'", request.getUsername(), ip);
 
             return ResponseEntity.ok(new LoginResponse(
                     userId,
@@ -78,12 +81,30 @@ public class AuthController {
                     user.isMustChangePassword()
             ));
         } catch (org.springframework.security.core.AuthenticationException e) {
-            logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", maskUsername(request.getUsername()), ip);
+            logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", request.getUsername(), ip);
             rateLimiter.loginFailed(ip);
             rateLimiter.accountLoginFailed(username);
-            throw e;
+
+            int attempts = rateLimiter.getAccountAttempts(username);
+            int remaining = Math.max(0, com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS - attempts);
+            long lockoutMs = rateLimiter.getAccountLockoutRemainingMs(username);
+
+            return ResponseEntity.status(401).body(new LoginErrorResponse(
+                    "Invalid username or password.",
+                    attempts,
+                    remaining,
+                    lockoutMs
+            ));
         }
     }
+
+    /** Structured error response with rate-limit feedback for the login UI. */
+    public record LoginErrorResponse(
+            String message,
+            int attemptsMade,
+            int attemptsRemaining,
+            long lockoutRemainingMs
+    ) {}
 
     /**
      * Register - POST /api/auth/register (Admin only initially)
@@ -151,15 +172,7 @@ public class AuthController {
         return request.getRemoteAddr();
     }
 
-    private String maskUsername(String username) {
-        if (username == null) {
-            return "null";
-        }
-        if (username.length() <= 2) {
-            return "*".repeat(username.length());
-        }
-        return username.charAt(0) + "*".repeat(username.length() - 2) + username.charAt(username.length() - 1);
-    }
+
 
     /**
      * Inner class for change password request

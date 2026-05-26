@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class LoginRateLimiterService {
 
-    private static final int MAX_ATTEMPTS = 5;
-    private static final long BLOCK_DURATION_MS = TimeUnit.MINUTES.toMillis(15); // Block for 15 minutes
+    public static final int MAX_ATTEMPTS = 5;
+    public static final long BLOCK_DURATION_MS = TimeUnit.MINUTES.toMillis(1); // Block for 1 minute
 
     private final ConcurrentHashMap<String, AttemptTracker> trackers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, AttemptTracker> accountTrackers = new ConcurrentHashMap<>();
@@ -114,6 +114,30 @@ public class LoginRateLimiterService {
         if (username != null) {
             accountTrackers.remove(username);
         }
+    }
+
+    /**
+     * Returns the current failed attempt count for a username.
+     */
+    public int getAccountAttempts(String username) {
+        if (username == null) return 0;
+        AttemptTracker tracker = accountTrackers.get(username);
+        if (tracker == null) return 0;
+        // If the lockout window has expired, treat as 0
+        if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) return 0;
+        return tracker.attempts;
+    }
+
+    /**
+     * Returns how many milliseconds remain in the lockout, or 0 if not locked.
+     */
+    public long getAccountLockoutRemainingMs(String username) {
+        if (username == null) return 0;
+        AttemptTracker tracker = accountTrackers.get(username);
+        if (tracker == null || tracker.attempts < MAX_ATTEMPTS) return 0;
+        long elapsed = System.currentTimeMillis() - tracker.lastAttemptTime;
+        long remaining = BLOCK_DURATION_MS - elapsed;
+        return Math.max(0, remaining);
     }
 
     /**

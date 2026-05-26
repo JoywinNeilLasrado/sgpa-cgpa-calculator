@@ -100,6 +100,7 @@ class EnrollmentServiceTest {
     void throwsWhenStudentNotFound() {
         EnrollmentRequest request = new EnrollmentRequest();
         request.setStudentId(99L);
+        request.setCourseId(2L);
 
         when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 

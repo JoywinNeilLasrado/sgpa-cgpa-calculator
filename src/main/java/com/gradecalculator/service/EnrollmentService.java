@@ -1,4 +1,5 @@
 package com.gradecalculator.service;
+import com.gradecalculator.util.ValidationUtil;
 
 import com.gradecalculator.dto.EnrollmentRequest;
 import com.gradecalculator.dto.EnrollmentResponse;
@@ -15,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Service class for managing course enrollments, grading scales, and detailed student mark registers.
+ */
 @Service
 public class EnrollmentService {
 
@@ -31,6 +35,11 @@ public class EnrollmentService {
         this.courseRepository = courseRepository;
     }
 
+    /**
+     * Retrieves all course enrollments registered in the system.
+     *
+     * @return a list of enrollment response DTOs containing complete student, course, and grade details
+     */
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> findAll() {
         return enrollmentRepository.findAll().stream()
@@ -38,36 +47,76 @@ public class EnrollmentService {
                 .toList();
     }
 
+    /**
+     * Retrieves all course enrollments registered for a specific student.
+     *
+     * @param studentId the database identifier of the student
+     * @return a list of enrollment response DTOs for the matching student
+     */
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> findByStudentId(Long studentId) {
+        ValidationUtil.requireNonNull(studentId, "Student ID cannot be null");
         return enrollmentRepository.findByStudentId(studentId).stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
+    /**
+     * Retrieves course enrollments registered for a specific student in a specific semester.
+     *
+     * @param studentId  the database identifier of the student
+     * @param semesterId the database identifier of the semester
+     * @return a list of enrollment response DTOs for the matching student and semester
+     */
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> findByStudentIdAndSemesterId(Long studentId, Long semesterId) {
+        ValidationUtil.requireNonNull(studentId, "Student ID cannot be null");
+        ValidationUtil.requireNonNull(semesterId, "Semester ID cannot be null");
         return enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId).stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
+    /**
+     * Retrieves all enrollments registered in a specific course.
+     *
+     * @param courseId the database identifier of the course
+     * @return a list of enrollment response DTOs for the course
+     */
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> findByCourseId(Long courseId) {
+        ValidationUtil.requireNonNull(courseId, "Course ID cannot be null");
         return enrollmentRepository.findByCourseId(courseId).stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
+    /**
+     * Retrieves all enrollments registered in a specific semester.
+     *
+     * @param semesterId the database identifier of the semester
+     * @return a list of enrollment response DTOs for the semester
+     */
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> findBySemesterId(Long semesterId) {
+        ValidationUtil.requireNonNull(semesterId, "Semester ID cannot be null");
         return enrollmentRepository.findBySemesterId(semesterId).stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
+    /**
+     * Enrolls a student in a specific course and initializes their internal grade record.
+     *
+     * @param request the enrollment request containing student ID, course ID, and any initial marks
+     * @return the saved enrollment response details
+     */
     @Transactional
     public EnrollmentResponse create(EnrollmentRequest request) {
+        ValidationUtil.requireNonNull(request, "Enrollment request cannot be null");
+        ValidationUtil.requireNonNull(request.getStudentId(), "Student ID cannot be null");
+        ValidationUtil.requireNonNull(request.getCourseId(), "Course ID cannot be null");
+
         Student student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
         Course course = courseRepository.findById(request.getCourseId())
@@ -97,8 +146,20 @@ public class EnrollmentService {
         return toEnrollmentResponse(saved);
     }
 
+    /**
+     * Updates an existing enrollment record, modifying course/student linkages and recalculating grades.
+     *
+     * @param id      the database identifier of the enrollment to update
+     * @param request the updated enrollment details
+     * @return the updated enrollment response DTO
+     */
     @Transactional
     public EnrollmentResponse update(Long id, EnrollmentRequest request) {
+        ValidationUtil.requireNonNull(id, "Enrollment ID cannot be null");
+        ValidationUtil.requireNonNull(request, "Enrollment request cannot be null");
+        ValidationUtil.requireNonNull(request.getStudentId(), "Student ID cannot be null");
+        ValidationUtil.requireNonNull(request.getCourseId(), "Course ID cannot be null");
+
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         
@@ -141,8 +202,14 @@ public class EnrollmentService {
         return toEnrollmentResponse(saved);
     }
 
+    /**
+     * Deletes an enrollment record from the system and generates an audit log entry.
+     *
+     * @param id the database identifier of the enrollment to delete
+     */
     @Transactional
     public void delete(Long id) {
+        ValidationUtil.requireNonNull(id, "Enrollment ID cannot be null");
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         
@@ -160,7 +227,16 @@ public class EnrollmentService {
         );
     }
 
+    /**
+     * Converts a raw Enrollment database entity into a flat, read-only EnrollmentResponse DTO.
+     *
+     * @param enrollment the raw database entity
+     * @return the mapped enrollment response DTO
+     */
     public EnrollmentResponse toEnrollmentResponse(Enrollment enrollment) {
+        if (enrollment == null) {
+            return null;
+        }
         Course course = enrollment.getCourse();
         Student student = enrollment.getStudent();
         return new EnrollmentResponse(
@@ -194,13 +270,32 @@ public class EnrollmentService {
         );
     }
 
+    /**
+     * Looks up an enrollment entity directly by its primary key.
+     *
+     * @param id the enrollment database identifier
+     * @return an Optional containing the Enrollment if found
+     */
     @Transactional(readOnly = true)
     public java.util.Optional<Enrollment> findEnrollmentById(Long id) {
+        ValidationUtil.requireNonNull(id, "Enrollment ID cannot be null");
         return enrollmentRepository.findById(id);
     }
 
+    /**
+     * Manually overrides/sets the letter grade of a student enrollment.
+     *
+     * @param enrollmentId the identifier of the enrollment
+     * @param grade        the target letter grade
+     * @param username     the modifier username for audit tracing
+     * @return the saved enrollment entity
+     */
     @Transactional
     public Enrollment updateGrade(Long enrollmentId, LetterGrade grade, String username) {
+        ValidationUtil.requireNonNull(enrollmentId, "Enrollment ID cannot be null");
+        ValidationUtil.requireNonNull(grade, "Grade cannot be null");
+        ValidationUtil.requireNonBlank(username, "Modifier username is required");
+
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         
@@ -223,8 +318,19 @@ public class EnrollmentService {
         return saved;
     }
 
+    /**
+     * Detailed grade/marks registration updating and grade recalculation.
+     *
+     * @param request  the detailed mark request details
+     * @param username the modifier username for audit tracking
+     * @return the updated enrollment entity
+     */
     @Transactional
     public Enrollment updateMarks(GradeUpdateRequest request, String username) {
+        ValidationUtil.requireNonNull(request, "Grade update request cannot be null");
+        ValidationUtil.requireNonNull(request.enrollmentId(), "Enrollment ID cannot be null");
+        ValidationUtil.requireNonBlank(username, "Modifier username is required");
+
         Enrollment enrollment = enrollmentRepository.findById(request.enrollmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         
