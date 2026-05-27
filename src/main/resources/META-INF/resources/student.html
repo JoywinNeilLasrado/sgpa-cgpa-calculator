@@ -469,7 +469,7 @@
             try {
                 // Call student dashboard API
                 const data = await API.getStudent(currentStudentId);
-                const dashboard = await request(`/students/${currentStudentId}/dashboard`);
+                const dashboard = await API.getStudentDashboard(currentStudentId);
                 
                 if (data) {
                     document.getElementById('hero-welcome').textContent = `Welcome back, ${data.name || 'Student'}`;
@@ -640,22 +640,7 @@
             }
         }
 
-        // Generic HTTP requester helper
-        async function request(endpoint) {
-            const url = `/api${endpoint}`;
-            const token = localStorage.getItem('token');
-            const res = await fetch(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-            if (res.status === 401) {
-                logout();
-            }
-            if (!res.ok) throw new Error('API request failed');
-            return res.json();
-        }
+
 
         // Simulator Logic
         const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0 };

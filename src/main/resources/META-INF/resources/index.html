@@ -472,56 +472,56 @@
             loader.style.display = 'flex';
 
             try {
-                const resp = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await resp.json();
+                if (!window.API) {
+                    throw new Error("Centralized API service not loaded.");
+                }
+                const data = await window.API.login(username, password);
                 loader.style.display = 'none';
 
-                if (resp.ok) {
-                    // ✅ Success
-                    clearRateLimitUI();
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data));
-                    if (window.showToast) window.showToast(`Welcome back, ${data.username}!`, 'success');
-                    setTimeout(() => {
-                        if (data.role === 'ADMIN') window.location.href = '/admin.html';
-                        else if (data.role === 'FACULTY') window.location.href = '/faculty-grades.html';
-                        else window.location.href = '/student.html';
-                    }, 800);
+                // ✅ Success
+                clearRateLimitUI();
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data));
+                if (window.showToast) window.showToast(`Welcome back, ${data.username}!`, 'success');
+                setTimeout(() => {
+                    if (data.role === 'ADMIN') window.location.href = '/admin.html';
+                    else if (data.role === 'FACULTY') window.location.href = '/faculty-grades.html';
+                    else window.location.href = '/student.html';
+                }, 800);
 
-                } else if (resp.status === 429) {
-                    // 🔒 Locked out
-                    errorAlert.textContent = data.message || 'Account locked.';
-                    errorAlert.classList.add('show');
-                    startLockoutTimer(data.lockoutRemainingMs || 60000);
-                    if (window.showToast) window.showToast('Account locked. Wait for timer.', 'error');
-
-                } else {
-                    // ❌ Wrong credentials
-                    const made      = data.attemptsMade      ?? 1;
-                    const remaining = data.attemptsRemaining ?? (MAX_ATTEMPTS - made);
-                    const lockMs    = data.lockoutRemainingMs ?? 0;
-
-                    errorAlert.textContent = data.message || 'Invalid credentials.';
-                    errorAlert.classList.add('show');
-
-                    if (lockMs > 0) {
-                        startLockoutTimer(lockMs);
-                    } else {
-                        showAttemptTracker(made, remaining);
-                    }
-                    if (window.showToast) window.showToast('Authentication failed.', 'error');
-                }
             } catch (err) {
                 console.error(err);
                 loader.style.display = 'none';
-                errorAlert.textContent = 'Connection error. Please try again.';
-                errorAlert.classList.add('show');
-                if (window.showToast) window.showToast('Connection error.', 'error');
+                
+                if (err.name === 'APIError') {
+                    const data = err.data || {};
+                    if (err.status === 429) {
+                        // 🔒 Locked out
+                        errorAlert.textContent = data.message || 'Account locked.';
+                        errorAlert.classList.add('show');
+                        startLockoutTimer(data.lockoutRemainingMs || 60000);
+                        if (window.showToast) window.showToast('Account locked. Wait for timer.', 'error');
+                    } else {
+                        // ❌ Wrong credentials / CAPTCHA trigger
+                        const made      = data.attemptsMade      ?? 1;
+                        const remaining = data.attemptsRemaining ?? (MAX_ATTEMPTS - made);
+                        const lockMs    = data.lockoutRemainingMs ?? 0;
+
+                        errorAlert.textContent = data.message || 'Invalid credentials.';
+                        errorAlert.classList.add('show');
+
+                        if (lockMs > 0) {
+                            startLockoutTimer(lockMs);
+                        } else {
+                            showAttemptTracker(made, remaining);
+                        }
+                        if (window.showToast) window.showToast(data.message || 'Authentication failed.', 'error');
+                    }
+                } else {
+                    errorAlert.textContent = 'Connection error. Please try again.';
+                    errorAlert.classList.add('show');
+                    if (window.showToast) window.showToast('Connection error.', 'error');
+                }
             }
         });
     </script>

@@ -1,0 +1,47 @@
+// Brand Theme Design tokens
+:root {
+  // Harmony Design HSL Tailored Palettes
+  --navy: #0d1117;
+  --navy-light: #161b22;
+  --paper: #faf9f7;
+  --paper-dark: #f0ede8;
+  --crimson: #8b1538;
+  --crimson-light: #a61c47;
+  --crimson-dark: #660f29;
+  --crimson-glow: rgba(139, 21, 56, 0.15);
+  --gold: #c9a227;
+  --gold-light: #dfb738;
+  --gold-dark: #9e7d17;
+  --gold-glow: rgba(201, 162, 39, 0.12);
+  
+  --slate: #334155;
+  --slate-light: #64748b;
+  --slate-dark: #1e293b;
+  --mist: #f1f5f9;
+  --mist-dark: #cbd5e1;
+  --white: #ffffff;
+  
+  --success: #059669;
+  --success-bg: rgba(5, 150, 105, 0.08);
+  --error: #dc2626;
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --info: #2563eb;
+  --info-bg: rgba(37, 99, 235, 0.08);
+  --warning: #d97706;
+  --warning-bg: rgba(217, 119, 6, 0.08);
+
+  // Layout Design Tokens
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --shadow-soft: 0 4px 20px rgba(13, 17, 23, 0.02);
+  --shadow-medium: 0 12px 30px rgba(13, 17, 23, 0.05);
+  --shadow-premium: 0 20px 50px rgba(139, 21, 56, 0.04);
+}
+
+// Media Query Viewport Breakpoints
+$breakpoint-mobile: 480px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;

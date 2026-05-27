@@ -1,0 +1,34 @@
+// Flexbox centering layout helper
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Responsive viewport helper
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == mobile {
+    @media (max-width: 480px) { @content; }
+  } @else if $breakpoint == tablet {
+    @media (max-width: 768px) { @content; }
+  } @else if $breakpoint == desktop {
+    @media (max-width: 1024px) { @content; }
+  }
+}
+
+// Glassmorphism backdrop filter luxury mixin
+@mixin glass-panel($bg: rgba(255, 255, 255, 0.85), $blur: 16px, $border: rgba(255, 255, 255, 0.8)) {
+  background: $bg;
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid $border;
+}
+
+// Hover elevation dynamic micro-animation
+@mixin hover-lift($translation: -4px, $shadow: var(--shadow-medium)) {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  &:hover {
+    transform: translateY($translation);
+    box-shadow: $shadow;
+  }
+}
