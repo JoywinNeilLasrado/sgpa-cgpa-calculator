@@ -1,14 +1,8 @@
 package com.gradecalculator.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
+import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,18 +13,25 @@ import java.util.List;
 @Table(name = "students", uniqueConstraints = {
         @UniqueConstraint(name = "uk_student_roll_number", columnNames = "student_id")
 })
+@Data
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NonNull
     private String name;
 
     @Column(name = "student_id", nullable = false)
+    @NonNull
     private String studentId; // University roll number
 
     @Column(name = "branch")
+    @Builder.Default
     private String branch = "Computer Science";
 
     @Column(name = "username", unique = true)
@@ -41,77 +42,35 @@ public class Student {
 
     @OneToMany(mappedBy = "student")
     @JsonIgnore
+    @Builder.Default
     private List<Enrollment> enrollments = new ArrayList<>();
 
-    // Constructors
-    public Student() {}
-
-    public Student(@lombok.NonNull String name, @lombok.NonNull String studentId) {
+    // Custom constructors for specific use cases
+    public Student(@NonNull String name, @NonNull String studentId) {
         this.name = name;
         this.studentId = studentId;
         this.branch = "Computer Science";
     }
 
-    public Student(@lombok.NonNull String name, @lombok.NonNull String studentId, String branch) {
+    public Student(@NonNull String name, @NonNull String studentId, String branch) {
         this.name = name;
         this.studentId = studentId;
         this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    /**
+     * Helper method to add an enrollment (bidirectional relationship).
+     */
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
+        enrollment.setStudent(this);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
-    }
-
-    public String getBranch() {
-        return branch;
-    }
-
-    public void setBranch(String branch) {
-        this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public List<Enrollment> getEnrollments() {
-        return enrollments;
-    }
-
-    public void setEnrollments(List<Enrollment> enrollments) {
-        this.enrollments = enrollments;
+    /**
+     * Helper method to remove an enrollment (bidirectional relationship).
+     */
+    public void removeEnrollment(Enrollment enrollment) {
+        this.enrollments.remove(enrollment);
+        enrollment.setStudent(null);
     }
 }

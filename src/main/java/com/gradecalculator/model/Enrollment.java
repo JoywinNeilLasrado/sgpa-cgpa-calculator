@@ -1,18 +1,10 @@
 package com.gradecalculator.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 /**
  * Entity representing a student's enrollment in a course for a semester,
@@ -22,9 +14,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "enrollments", uniqueConstraints = {
         @UniqueConstraint(name = "uk_student_course_enrollment", columnNames = {"student_id", "course_id"})
 }, indexes = {
-        @jakarta.persistence.Index(name = "idx_enrollment_student_id", columnList = "student_id"),
-        @jakarta.persistence.Index(name = "idx_enrollment_course_id", columnList = "course_id")
+        @Index(name = "idx_enrollment_student_id", columnList = "student_id"),
+        @Index(name = "idx_enrollment_course_id", columnList = "course_id")
 })
+@Data
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Enrollment {
 
     @Id
@@ -44,28 +40,18 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     private LetterGrade grade;
 
-    @jakarta.persistence.Embedded
+    @Embedded
+    @Builder.Default
     private EnrollmentMarks marks = new EnrollmentMarks();
 
-    @jakarta.persistence.Version
+    @Version
     private Long version;
 
     private String lastModifiedBy;
 
-    private java.time.LocalDateTime lastModifiedAt;
+    private LocalDateTime lastModifiedAt;
 
-    public Long getVersion() { return version; }
-    public void setVersion(Long version) { this.version = version; }
-
-    public String getLastModifiedBy() { return lastModifiedBy; }
-    public void setLastModifiedBy(String lastModifiedBy) { this.lastModifiedBy = lastModifiedBy; }
-
-    public java.time.LocalDateTime getLastModifiedAt() { return lastModifiedAt; }
-    public void setLastModifiedAt(java.time.LocalDateTime lastModifiedAt) { this.lastModifiedAt = lastModifiedAt; }
-
-    // Constructors
-    public Enrollment() {}
-
+    // Custom constructors
     public Enrollment(Student student, Course course) {
         this.student = student;
         this.course = course;
@@ -74,42 +60,10 @@ public class Enrollment {
     public Enrollment(Student student, Course course, LetterGrade grade) {
         this.student = student;
         this.course = course;
-        this.grade = grade; // Kept for backwards compatibility
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public LetterGrade getGrade() {
-        return grade;
-    }
-
-    public void setGrade(LetterGrade grade) {
         this.grade = grade;
     }
 
+    // Delegate methods for backward compatibility
     public Integer getCieMarks() { return marks.getCieMarks(); }
     public void setCieMarks(Integer cieMarks) { marks.setCieMarks(cieMarks); }
 
@@ -149,6 +103,7 @@ public class Enrollment {
     public Integer getTotalMarks() { return marks.getTotalMarks(); }
     public void setTotalMarks(Integer totalMarks) { marks.setTotalMarks(totalMarks); }
 
+    // Business logic methods
     public void calculateGrade() {
         if (course == null || course.getCourseType() == null) {
             return;

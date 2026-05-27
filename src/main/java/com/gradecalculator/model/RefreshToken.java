@@ -1,6 +1,7 @@
 package com.gradecalculator.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 
 /**
@@ -12,6 +13,10 @@ import java.time.LocalDateTime;
     @Index(name = "idx_refresh_token_hash", columnList = "token_hash", unique = true),
     @Index(name = "idx_refresh_token_user", columnList = "user_id")
 })
+@Data
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class RefreshToken {
 
     @Id
@@ -20,6 +25,7 @@ public class RefreshToken {
 
     /** SHA-256 hash of the raw refresh token */
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    @NonNull
     private String tokenHash;
 
     @Column(name = "user_id", nullable = false)
@@ -29,6 +35,7 @@ public class RefreshToken {
     private LocalDateTime expiresAt;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean revoked = false;
 
     @Column(name = "created_at", nullable = false)
@@ -40,8 +47,7 @@ public class RefreshToken {
     @Column(name = "ip_address", length = 64)
     private String ipAddress;
 
-    public RefreshToken() {}
-
+    // Custom constructor
     public RefreshToken(String tokenHash, Long userId, LocalDateTime expiresAt,
                         String userAgent, String ipAddress) {
         this.tokenHash = tokenHash;
@@ -53,6 +59,7 @@ public class RefreshToken {
         this.ipAddress = ipAddress;
     }
 
+    // Business logic
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(expiresAt);
     }
@@ -60,21 +67,4 @@ public class RefreshToken {
     public boolean isValid() {
         return !revoked && !isExpired();
     }
-
-    // Getters and setters
-    public Long getId() { return id; }
-    public String getTokenHash() { return tokenHash; }
-    public void setTokenHash(String tokenHash) { this.tokenHash = tokenHash; }
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-    public LocalDateTime getExpiresAt() { return expiresAt; }
-    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
-    public boolean isRevoked() { return revoked; }
-    public void setRevoked(boolean revoked) { this.revoked = revoked; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public String getUserAgent() { return userAgent; }
-    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
-    public String getIpAddress() { return ipAddress; }
-    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
 }

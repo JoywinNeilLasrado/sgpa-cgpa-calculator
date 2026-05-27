@@ -1,12 +1,8 @@
 package com.gradecalculator.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,47 +11,35 @@ import java.util.List;
  */
 @Entity
 @Table(name = "semesters")
+@Data
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Semester {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NonNull
     private Integer semesterNumber;
 
     @OneToMany(mappedBy = "semester")
     @JsonIgnore
+    @Builder.Default
     private List<Course> courses = new ArrayList<>();
 
-    // Constructors
-    public Semester() {}
-
+    // Custom constructors
     public Semester(Integer semesterNumber) {
         this.semesterNumber = semesterNumber;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    // Convenience methods
+    public String getDisplayName() {
+        return "Semester " + semesterNumber;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getSemesterNumber() {
-        return semesterNumber;
-    }
-
-    public void setSemesterNumber(Integer semesterNumber) {
-        this.semesterNumber = semesterNumber;
-    }
-
-    public List<Course> getCourses() {
-        return courses;
-    }
-
-    public void setCourses(List<Course> courses) {
-        this.courses = courses;
+    public int getCourseCount() {
+        return courses != null ? courses.size() : 0;
     }
 }

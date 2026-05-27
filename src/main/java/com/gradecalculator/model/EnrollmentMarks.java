@@ -1,12 +1,17 @@
 package com.gradecalculator.model;
 
 import jakarta.persistence.Embeddable;
+import lombok.*;
 
 /**
  * Embeddable entity encapsulating all grades and marks details for an Enrollment.
  * Helps break down the large Enrollment class to comply with the SOLID Single Responsibility Principle.
  */
 @Embeddable
+@Data
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class EnrollmentMarks {
 
     private Integer cieMarks;
@@ -27,46 +32,6 @@ public class EnrollmentMarks {
     private Integer seeMarks;
     private Integer graceMarks;
     private Integer totalMarks;
-
-    // Getters and Setters
-    public Integer getCieMarks() { return cieMarks; }
-    public void setCieMarks(Integer cieMarks) { this.cieMarks = cieMarks; }
-
-    public Integer getCieTheoryMarks() { return cieTheoryMarks; }
-    public void setCieTheoryMarks(Integer cieTheoryMarks) { this.cieTheoryMarks = cieTheoryMarks; }
-
-    public Integer getCieLabMarks() { return cieLabMarks; }
-    public void setCieLabMarks(Integer cieLabMarks) { this.cieLabMarks = cieLabMarks; }
-
-    public Integer getTest1Marks() { return test1Marks; }
-    public void setTest1Marks(Integer test1Marks) { this.test1Marks = test1Marks; }
-
-    public Integer getTest2Marks() { return test2Marks; }
-    public void setTest2Marks(Integer test2Marks) { this.test2Marks = test2Marks; }
-
-    public Integer getAssignmentMarks() { return assignmentMarks; }
-    public void setAssignmentMarks(Integer assignmentMarks) { this.assignmentMarks = assignmentMarks; }
-
-    public Integer getOaaMarks() { return oaaMarks; }
-    public void setOaaMarks(Integer oaaMarks) { this.oaaMarks = oaaMarks; }
-
-    public Integer getRegularLabMarks() { return regularLabMarks; }
-    public void setRegularLabMarks(Integer regularLabMarks) { this.regularLabMarks = regularLabMarks; }
-
-    public Integer getLabTestMarks() { return labTestMarks; }
-    public void setLabTestMarks(Integer labTestMarks) { this.labTestMarks = labTestMarks; }
-
-    public Integer getLabRecordMarks() { return labRecordMarks; }
-    public void setLabRecordMarks(Integer labRecordMarks) { this.labRecordMarks = labRecordMarks; }
-
-    public Integer getSeeMarks() { return seeMarks; }
-    public void setSeeMarks(Integer seeMarks) { this.seeMarks = seeMarks; }
-
-    public Integer getGraceMarks() { return graceMarks; }
-    public void setGraceMarks(Integer graceMarks) { this.graceMarks = graceMarks; }
-
-    public Integer getTotalMarks() { return totalMarks; }
-    public void setTotalMarks(Integer totalMarks) { this.totalMarks = totalMarks; }
 
     /**
      * Compute and determine the LetterGrade based on the detailed marks and the CourseType.
