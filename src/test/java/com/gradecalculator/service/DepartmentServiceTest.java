@@ -67,7 +67,7 @@ class DepartmentServiceTest {
 
     @Test
     void createDepartmentSuccessfully() {
-        when(departmentRepository.findByName("Computer Science")).thenReturn(Optional.empty());
+        when(departmentRepository.findByName("COMPUTER SCIENCE")).thenReturn(Optional.empty());
         when(departmentRepository.findByCode("CS")).thenReturn(Optional.empty());
         when(departmentRepository.save(any(Department.class))).thenAnswer(invocation -> {
             Department d = invocation.getArgument(0);
@@ -123,7 +123,7 @@ class DepartmentServiceTest {
     @Test
     void createThrowsWhenCodeAlreadyExists() {
         Department existing = new Department("Other", "CS");
-        when(departmentRepository.findByName("Computer Science")).thenReturn(Optional.empty());
+        when(departmentRepository.findByName("COMPUTER SCIENCE")).thenReturn(Optional.empty());
         when(departmentRepository.findByCode("CS")).thenReturn(Optional.of(existing));
 
         assertThatThrownBy(() -> service.create("Computer Science", "cs"))
@@ -137,7 +137,7 @@ class DepartmentServiceTest {
         existing.setId(1L);
         
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(departmentRepository.findByName("Software Engineering")).thenReturn(Optional.empty());
+        when(departmentRepository.findByName("SOFTWARE ENGINEERING")).thenReturn(Optional.empty());
         when(departmentRepository.findByCode("SE")).thenReturn(Optional.empty());
         when(departmentRepository.save(any(Department.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -180,7 +180,7 @@ class DepartmentServiceTest {
         other.setId(2L);
 
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(departmentRepository.findByName("Computer Science")).thenReturn(Optional.empty());
+        when(departmentRepository.findByName("COMPUTER SCIENCE")).thenReturn(Optional.empty());
         when(departmentRepository.findByCode("CS")).thenReturn(Optional.of(other));
 
         assertThatThrownBy(() -> service.update(1L, "Computer Science", "cs"))

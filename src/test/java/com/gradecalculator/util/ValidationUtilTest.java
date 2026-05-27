@@ -61,6 +61,6 @@ class ValidationUtilTest {
     @Test
     void utilityClassHasPrivateConstructor() throws Exception {
         var constructor = ValidationUtil.class.getDeclaredConstructor();
-        assertThat(constructor.isPrivate()).isTrue();
+        assertThat(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers())).isTrue();
     }
 }

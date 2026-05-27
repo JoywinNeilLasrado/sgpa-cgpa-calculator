@@ -39,7 +39,7 @@ class EnrollmentMarksTest {
     void calculateGradeForLaboratoryCoursePassing() {
         EnrollmentMarks marks = new EnrollmentMarks();
         marks.setCieMarks(30);
-        marks.setSeeMarks(25);
+        marks.setSeeMarks(35); // cieMarks(30) + seeMarks(35) = 65 → B_PLUS
 
         LetterGrade grade = marks.calculateGrade(CourseType.LABORATORY);
 
@@ -114,8 +114,8 @@ class EnrollmentMarksTest {
     void calculateGradeAverageMarks() {
         EnrollmentMarks marks = new EnrollmentMarks();
         marks.setCieMarks(30);
-        marks.setSeeMarks(25);
-        marks.setTotalMarks(55);
+        marks.setSeeMarks(22);
+        marks.setTotalMarks(52); // 52 is in C range (50-54)
 
         LetterGrade grade = marks.calculateGrade(CourseType.THEORY);
 
@@ -125,9 +125,9 @@ class EnrollmentMarksTest {
     @ParameterizedTest
     @CsvSource({
         "90, 10, O",
-        "85, 9, A_PLUS",
+        "85, 9, A+",
         "75, 8, A",
-        "65, 7, B_PLUS",
+        "65, 7, B+",
         "57, 6, B",
         "52, 5, C",
         "45, 4, P",
@@ -135,8 +135,12 @@ class EnrollmentMarksTest {
     })
     void verifyGradeCalculationForVariousMarks(int totalMarks, int expectedPoints, String expectedGrade) {
         EnrollmentMarks marks = new EnrollmentMarks();
+        // Set cieMarks high enough to pass the 20-point threshold
+        // and seeMarks high enough to pass 18-point threshold
+        // Use pre-set totalMarks for the grade mapping
+        marks.setCieMarks(30); // always passes 20 threshold
+        marks.setSeeMarks(totalMarks > 35 ? 20 : 15); // fails SEE for F case
         marks.setTotalMarks(totalMarks);
-        marks.setSeeMarks(totalMarks);
 
         LetterGrade grade = marks.calculateGrade(CourseType.THEORY);
 

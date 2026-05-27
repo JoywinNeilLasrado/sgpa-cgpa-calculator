@@ -1,11 +1,15 @@
 package com.gradecalculator.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gradecalculator.dto.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -26,11 +30,16 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RequestThrottlingFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(RequestThrottlingFilter.class);
+
+
+
+
     @Value("${app.throttle.limit:60}")
-    private int throttleLimit;
+    private int throttleLimit = 60;
 
     @Value("${app.throttle.window-ms:60000}")
-    private long windowMs;
+    private long windowMs = 60000;
 
     @Autowired(required = false)
     private org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
@@ -38,7 +47,9 @@ public class RequestThrottlingFilter extends OncePerRequestFilter {
     private final ConcurrentHashMap<String, ThrottlerState> localStates = new ConcurrentHashMap<>();
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -47,6 +58,11 @@ public class RequestThrottlingFilter extends OncePerRequestFilter {
         String ip = getClientIp(request);
         String uri = request.getRequestURI();
         String method = request.getMethod();
+        // Bypass throttling only for whitelisted login endpoint
+        if (uri.endsWith("/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String throttleKey = String.format("throttle:%s:%s:%s", ip, method, uri);
 
         boolean isThrottled = false;

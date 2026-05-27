@@ -36,7 +36,7 @@ public class DepartmentService {
             throw new ValidationException("Department code cannot be empty");
         }
         
-        String trimmedName = name.trim();
+        String trimmedName = name.trim().toUpperCase();
         String trimmedCode = code.trim().toUpperCase();
 
         if (departmentRepository.findByName(trimmedName).isPresent()) {
@@ -61,7 +61,7 @@ public class DepartmentService {
             throw new ValidationException("Department code cannot be empty");
         }
 
-        String trimmedName = name.trim();
+        String trimmedName = name.trim().toUpperCase();
         String trimmedCode = code.trim().toUpperCase();
 
         departmentRepository.findByName(trimmedName).ifPresent(d -> {

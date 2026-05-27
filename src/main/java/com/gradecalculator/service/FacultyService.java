@@ -45,7 +45,7 @@ public class FacultyService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         AppUser faculty = userRepository.findById(facultyId)
-                .orElseThrow(() -> new IllegalArgumentException("Faculty not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Faculty member not found"));
 
         course.setFaculty(faculty);
         courseRepository.save(course);
@@ -56,19 +56,25 @@ public class FacultyService {
         AppUser faculty = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Faculty member not found"));
 
-        if (!faculty.getUsername().equalsIgnoreCase(username) && userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-
+        // Validate name and username
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Faculty name cannot be empty");
         }
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
+        String trimmedUsername = username.trim();
+
+        // Check for username conflict only if the new username differs from the current one
+        String currentUsername = faculty.getUsername();
+        if (currentUsername == null || !currentUsername.equalsIgnoreCase(trimmedUsername)) {
+            if (userRepository.existsByUsername(trimmedUsername)) {
+                throw new IllegalArgumentException("Username already exists");
+            }
+        }
 
         faculty.setName(name.trim());
-        faculty.setUsername(username.trim());
+        faculty.setUsername(trimmedUsername);
         faculty.setEmail(email != null ? email.trim() : null);
         faculty.setDepartment(department != null ? department.trim() : null);
 
