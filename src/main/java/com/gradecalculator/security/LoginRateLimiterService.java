@@ -5,13 +5,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Thread-safe in-memory login rate limiter to protect against brute-force attacks.
+ * Thread-safe hybrid rate limiter to protect against brute-force attacks.
+ * Uses a Redis backing store if available to persist attempts across restarts,
+ * and falls back to an in-memory ConcurrentHashMap for local testing and standalone runs.
  */
 @Service
 public class LoginRateLimiterService {
 
     public static final int MAX_ATTEMPTS = 5;
     public static final long BLOCK_DURATION_MS = TimeUnit.MINUTES.toMillis(1); // Block for 1 minute
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
 
     private final ConcurrentHashMap<String, AttemptTracker> trackers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, AttemptTracker> accountTrackers = new ConcurrentHashMap<>();
@@ -23,6 +28,17 @@ public class LoginRateLimiterService {
         if (ip == null) {
             return false;
         }
+        if (redisTemplate != null) {
+            try {
+                String val = redisTemplate.opsForValue().get("rate:ip:" + ip);
+                if (val != null) {
+                    return Integer.parseInt(val) >= MAX_ATTEMPTS;
+                }
+                return false;
+            } catch (Exception e) {
+                // Connection failures fall through to in-memory map
+            }
+        }
         AttemptTracker tracker = trackers.get(ip);
         if (tracker == null) {
             return false;
@@ -30,7 +46,6 @@ public class LoginRateLimiterService {
         if (tracker.isBlocked(BLOCK_DURATION_MS)) {
             return true;
         }
-        // If blocking period has expired, automatically clean up tracker
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) {
             trackers.remove(ip);
             return false;
@@ -45,6 +60,17 @@ public class LoginRateLimiterService {
         if (username == null) {
             return false;
         }
+        if (redisTemplate != null) {
+            try {
+                String val = redisTemplate.opsForValue().get("rate:user:" + username);
+                if (val != null) {
+                    return Integer.parseInt(val) >= MAX_ATTEMPTS;
+                }
+                return false;
+            } catch (Exception e) {
+                // Connection failures fall through to in-memory map
+            }
+        }
         AttemptTracker tracker = accountTrackers.get(username);
         if (tracker == null) {
             return false;
@@ -52,7 +78,6 @@ public class LoginRateLimiterService {
         if (tracker.isBlocked(BLOCK_DURATION_MS)) {
             return true;
         }
-        // If blocking period has expired, automatically clean up tracker
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) {
             accountTrackers.remove(username);
             return false;
@@ -66,6 +91,18 @@ public class LoginRateLimiterService {
     public void loginFailed(String ip) {
         if (ip == null) {
             return;
+        }
+        if (redisTemplate != null) {
+            try {
+                String key = "rate:ip:" + ip;
+                Long attempts = redisTemplate.opsForValue().increment(key);
+                if (attempts != null && attempts == 1) {
+                    redisTemplate.expire(key, BLOCK_DURATION_MS, TimeUnit.MILLISECONDS);
+                }
+                return;
+            } catch (Exception e) {
+                // Connection failures fall through to in-memory map
+            }
         }
         trackers.compute(ip, (key, value) -> {
             long now = System.currentTimeMillis();
@@ -86,6 +123,18 @@ public class LoginRateLimiterService {
         if (username == null) {
             return;
         }
+        if (redisTemplate != null) {
+            try {
+                String key = "rate:user:" + username;
+                Long attempts = redisTemplate.opsForValue().increment(key);
+                if (attempts != null && attempts == 1) {
+                    redisTemplate.expire(key, BLOCK_DURATION_MS, TimeUnit.MILLISECONDS);
+                }
+                return;
+            } catch (Exception e) {
+                // Connection failures fall through to in-memory map
+            }
+        }
         accountTrackers.compute(username, (key, value) -> {
             long now = System.currentTimeMillis();
             if (value == null) {
@@ -103,6 +152,14 @@ public class LoginRateLimiterService {
      */
     public void loginSucceeded(String ip) {
         if (ip != null) {
+            if (redisTemplate != null) {
+                try {
+                    redisTemplate.delete("rate:ip:" + ip);
+                    return;
+                } catch (Exception e) {
+                    // fall through
+                }
+            }
             trackers.remove(ip);
         }
     }
@@ -112,6 +169,14 @@ public class LoginRateLimiterService {
      */
     public void accountLoginSucceeded(String username) {
         if (username != null) {
+            if (redisTemplate != null) {
+                try {
+                    redisTemplate.delete("rate:user:" + username);
+                    return;
+                } catch (Exception e) {
+                    // fall through
+                }
+            }
             accountTrackers.remove(username);
         }
     }
@@ -121,6 +186,14 @@ public class LoginRateLimiterService {
      */
     public int getAccountAttempts(String username) {
         if (username == null) return 0;
+        if (redisTemplate != null) {
+            try {
+                String val = redisTemplate.opsForValue().get("rate:user:" + username);
+                return val == null ? 0 : Integer.parseInt(val);
+            } catch (Exception e) {
+                // fall through
+            }
+        }
         AttemptTracker tracker = accountTrackers.get(username);
         if (tracker == null) return 0;
         // If the lockout window has expired, treat as 0
@@ -133,6 +206,18 @@ public class LoginRateLimiterService {
      */
     public long getAccountLockoutRemainingMs(String username) {
         if (username == null) return 0;
+        if (redisTemplate != null) {
+            try {
+                String val = redisTemplate.opsForValue().get("rate:user:" + username);
+                if (val != null && Integer.parseInt(val) >= MAX_ATTEMPTS) {
+                    Long ttl = redisTemplate.getExpire("rate:user:" + username, TimeUnit.MILLISECONDS);
+                    return ttl != null ? Math.max(0, ttl) : 0;
+                }
+                return 0;
+            } catch (Exception e) {
+                // fall through
+            }
+        }
         AttemptTracker tracker = accountTrackers.get(username);
         if (tracker == null || tracker.attempts < MAX_ATTEMPTS) return 0;
         long elapsed = System.currentTimeMillis() - tracker.lastAttemptTime;

@@ -1,11 +1,13 @@
 package com.gradecalculator.util;
 
+import com.gradecalculator.exception.ValidationException;
+
 /**
  * Centralised validation helpers used throughout the application.
  *
- * <p>All methods throw {@link IllegalArgumentException} when the supplied value
- * does not satisfy the required condition. Keeping the exception type unchanged
- * ensures existing error‑handling and tests continue to work.</p>
+ * <p>All methods throw {@link ValidationException} when the supplied value
+ * does not satisfy the required condition. Since ValidationException inherits
+ * from IllegalArgumentException, existing error-handling and tests continue to work.</p>
  */
 public final class ValidationUtil {
 
@@ -16,11 +18,11 @@ public final class ValidationUtil {
      *
      * @param obj   the object to validate
      * @param message the exception message if {@code obj} is {@code null}
-     * @throws IllegalArgumentException if {@code obj} is {@code null}
+     * @throws ValidationException if {@code obj} is {@code null}
      */
     public static void requireNonNull(Object obj, String message) {
         if (obj == null) {
-            throw new IllegalArgumentException(message);
+            throw new ValidationException(message);
         }
     }
 
@@ -29,11 +31,11 @@ public final class ValidationUtil {
      *
      * @param cs      the character sequence to validate
      * @param message the exception message if validation fails
-     * @throws IllegalArgumentException if {@code cs} is {@code null} or blank
+     * @throws ValidationException if {@code cs} is {@code null} or blank
      */
     public static void requireNonBlank(CharSequence cs, String message) {
         if (cs == null || cs.toString().trim().isEmpty()) {
-            throw new IllegalArgumentException(message);
+            throw new ValidationException(message);
         }
     }
 }

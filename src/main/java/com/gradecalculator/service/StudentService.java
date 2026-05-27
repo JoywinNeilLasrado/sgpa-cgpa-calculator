@@ -6,7 +6,6 @@ import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.NonNull;
 import com.gradecalculator.exception.NotFoundException;
 import com.gradecalculator.exception.ValidationException;
 
@@ -45,6 +44,16 @@ public class StudentService {
      */
     public List<Student> findAll() {
         return studentRepository.findAll();
+    }
+
+    /**
+     * Retrieves a page of student records registered in the system.
+     *
+     * @param pageable pagination parameters
+     * @return Page of student records
+     */
+    public org.springframework.data.domain.Page<Student> findAll(org.springframework.data.domain.Pageable pageable) {
+        return studentRepository.findAll(pageable);
     }
 
     /**

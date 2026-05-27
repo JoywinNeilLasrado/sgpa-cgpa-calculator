@@ -7,6 +7,8 @@ import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
+import com.gradecalculator.exception.NotFoundException;
+import com.gradecalculator.exception.ValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,12 +61,12 @@ public class GradeCalculationService {
     @Transactional(readOnly = true)
     public SgpaResponse calculateSGPA(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
 
         List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId);
 
         if (enrollments.isEmpty()) {
-            throw new IllegalArgumentException("No enrollments found for this student in the specified semester");
+            throw new ValidationException("No enrollments found for this student in the specified semester");
         }
 
         GradeSummary summary = summarizeGrades(enrollments, e -> true);
@@ -73,7 +75,7 @@ public class GradeCalculationService {
             return new SgpaResponse(studentId, semesterId, 0.0, 0, 0);
         }
 
-        double sgpa = roundToTwoDecimals((double) summary.totalCreditPoints / summary.totalCredits);
+        double sgpa = divideUsingBigDecimal(summary.totalCreditPoints, summary.totalCredits);
 
         return new SgpaResponse(studentId, semesterId, sgpa, summary.totalCredits, summary.totalCreditPoints);
     }
@@ -87,7 +89,7 @@ public class GradeCalculationService {
     @Transactional(readOnly = true)
     public CgpaResponse calculateCGPA(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
 
         // Get all enrollments, excluding F grades
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
@@ -124,7 +126,7 @@ public class GradeCalculationService {
             return new CgpaResponse(studentId, 0.0, 0, 0, semestersCompleted);
         }
 
-        double cgpa = roundToTwoDecimals((double) summary.totalCreditPoints / summary.totalCredits);
+        double cgpa = divideUsingBigDecimal(summary.totalCreditPoints, summary.totalCredits);
 
         return new CgpaResponse(studentId, cgpa, summary.totalCredits, summary.totalCreditPoints, semestersCompleted);
     }
@@ -135,7 +137,7 @@ public class GradeCalculationService {
     @Transactional(readOnly = true)
     public CgpaResponse calculateOverallCGPA(Long studentId) {
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
 
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
 
@@ -164,17 +166,20 @@ public class GradeCalculationService {
             return new CgpaResponse(studentId, 0.0, 0, 0, semestersCompleted.size());
         }
 
-        double cgpa = roundToTwoDecimals((double) summary.totalCreditPoints / summary.totalCredits);
+        double cgpa = divideUsingBigDecimal(summary.totalCreditPoints, summary.totalCredits);
 
         return new CgpaResponse(studentId, cgpa, summary.totalCredits, summary.totalCreditPoints, semestersCompleted.size());
     }
 
     /**
-     * Round a double value to two decimal places.
+     * Divide numerator by denominator using BigDecimal to avoid floating point precision loss.
      */
-    private double roundToTwoDecimals(double value) {
-        return BigDecimal.valueOf(value)
-                .setScale(2, RoundingMode.HALF_UP)
+    private double divideUsingBigDecimal(int numerator, int denominator) {
+        if (denominator == 0) {
+            return 0.0;
+        }
+        return BigDecimal.valueOf(numerator)
+                .divide(BigDecimal.valueOf(denominator), 2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 }

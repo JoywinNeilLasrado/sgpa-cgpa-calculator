@@ -16,6 +16,9 @@ import jakarta.persistence.UniqueConstraint;
 @Entity
 @Table(name = "courses", uniqueConstraints = {
         @UniqueConstraint(name = "uk_course_code_semester", columnNames = {"course_code", "semester_id"})
+}, indexes = {
+        @jakarta.persistence.Index(name = "idx_course_semester_id", columnList = "semester_id"),
+        @jakarta.persistence.Index(name = "idx_course_faculty_id", columnList = "faculty_id")
 })
 public class Course {
 

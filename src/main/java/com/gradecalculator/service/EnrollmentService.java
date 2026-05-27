@@ -1,6 +1,6 @@
 package com.gradecalculator.service;
+
 import com.gradecalculator.util.ValidationUtil;
-import lombok.NonNull;
 import com.gradecalculator.exception.NotFoundException;
 import com.gradecalculator.exception.ValidationException;
 
@@ -166,23 +166,20 @@ public class EnrollmentService {
         ValidationUtil.requireNonNull(request.getCourseId(), "Course ID cannot be null");
 
         Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+                .orElseThrow(() -> new NotFoundException("Enrollment not found"));
         
         // Capture previous state
         String previousState = getEnrollmentStateString(enrollment);
 
         Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new NotFoundException("Student not found"));
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+                .orElseThrow(() -> new NotFoundException("Course not found"));
 
-        enrollmentRepository.findAll().stream()
+        enrollmentRepository.findByStudentIdAndCourseId(student.getId(), course.getId())
                 .filter(existing -> !existing.getId().equals(id))
-                .filter(existing -> existing.getStudent().getId().equals(student.getId()))
-                .filter(existing -> existing.getCourse().getId().equals(course.getId()))
-                .findFirst()
                 .ifPresent(existing -> {
-                    throw new IllegalArgumentException("This student is already enrolled in this course");
+                    throw new ValidationException("This student is already enrolled in this course");
                 });
 
         enrollment.setStudent(student);
@@ -216,7 +213,7 @@ public class EnrollmentService {
     public void delete(Long id) {
         ValidationUtil.requireNonNull(id, "Enrollment ID cannot be null");
         Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+                .orElseThrow(() -> new NotFoundException("Enrollment not found"));
         
         String previousState = getEnrollmentStateString(enrollment);
 
@@ -302,7 +299,7 @@ public class EnrollmentService {
         ValidationUtil.requireNonBlank(username, "Modifier username is required");
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+                .orElseThrow(() -> new NotFoundException("Enrollment not found"));
         
         String previousState = getEnrollmentStateString(enrollment);
 
@@ -337,7 +334,7 @@ public class EnrollmentService {
         ValidationUtil.requireNonBlank(username, "Modifier username is required");
 
         Enrollment enrollment = enrollmentRepository.findById(request.enrollmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+                .orElseThrow(() -> new NotFoundException("Enrollment not found"));
         
         String previousState = getEnrollmentStateString(enrollment);
 

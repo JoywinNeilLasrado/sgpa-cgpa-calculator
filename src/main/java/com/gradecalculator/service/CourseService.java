@@ -10,7 +10,6 @@ import com.gradecalculator.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gradecalculator.util.ValidationUtil;
-import lombok.NonNull;
 import com.gradecalculator.exception.NotFoundException;
 import com.gradecalculator.exception.ValidationException;
 import java.util.List;

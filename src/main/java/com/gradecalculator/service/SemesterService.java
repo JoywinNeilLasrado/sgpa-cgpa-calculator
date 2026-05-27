@@ -5,6 +5,8 @@ import com.gradecalculator.model.Semester;
 import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.SemesterRepository;
+import com.gradecalculator.exception.NotFoundException;
+import com.gradecalculator.exception.ValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +44,7 @@ public class SemesterService {
 
     public Semester update(Long id, Integer semesterNumber) {
         Semester semester = semesterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
+                .orElseThrow(() -> new NotFoundException("Semester not found"));
         validateSemesterNumber(semesterNumber);
         semester.setSemesterNumber(semesterNumber);
         return semesterRepository.save(semester);
@@ -51,7 +53,7 @@ public class SemesterService {
     @Transactional
     public void delete(Long id) {
         Semester semester = semesterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Semester not found"));
+                .orElseThrow(() -> new NotFoundException("Semester not found"));
         List<Course> courses = courseRepository.findBySemesterId(id);
         for (Course course : courses) {
             enrollmentRepository.deleteAll(enrollmentRepository.findByCourseId(course.getId()));
@@ -62,7 +64,7 @@ public class SemesterService {
 
     private void validateSemesterNumber(Integer semesterNumber) {
         if (semesterNumber == null || semesterNumber < 1) {
-            throw new IllegalArgumentException("Semester number must be greater than zero");
+            throw new ValidationException("Semester number must be greater than zero");
         }
     }
 }

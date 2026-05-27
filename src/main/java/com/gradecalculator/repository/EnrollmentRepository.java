@@ -11,18 +11,23 @@ import java.util.List;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
-    List<Enrollment> findByStudentId(Long studentId);
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course c JOIN FETCH c.semester LEFT JOIN FETCH c.faculty WHERE e.student.id = :studentId")
+    List<Enrollment> findByStudentId(@Param("studentId") Long studentId);
 
-    List<Enrollment> findByCourseId(Long courseId);
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course c JOIN FETCH c.semester LEFT JOIN FETCH c.faculty WHERE e.course.id = :courseId")
+    List<Enrollment> findByCourseId(@Param("courseId") Long courseId);
 
-    @Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId AND e.course.semester.id = :semesterId")
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course c JOIN FETCH c.semester LEFT JOIN FETCH c.faculty WHERE e.student.id = :studentId AND c.semester.id = :semesterId")
     List<Enrollment> findByStudentIdAndSemesterId(@Param("studentId") Long studentId, @Param("semesterId") Long semesterId);
 
-    @Query("SELECT e FROM Enrollment e WHERE e.course.semester.id = :semesterId")
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course c JOIN FETCH c.semester LEFT JOIN FETCH c.faculty WHERE c.semester.id = :semesterId")
     List<Enrollment> findBySemesterId(@Param("semesterId") Long semesterId);
 
-    @Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId AND e.grade != 'F'")
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course c JOIN FETCH c.semester LEFT JOIN FETCH c.faculty WHERE e.student.id = :studentId AND e.grade != 'F'")
     List<Enrollment> findByStudentIdExcludingF(@Param("studentId") Long studentId);
 
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
+
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course c JOIN FETCH c.semester LEFT JOIN FETCH c.faculty WHERE e.student.id = :studentId AND c.id = :courseId")
+    java.util.Optional<Enrollment> findByStudentIdAndCourseId(@Param("studentId") Long studentId, @Param("courseId") Long courseId);
 }

@@ -36,7 +36,12 @@ public class StudentController {
      */
     @GetMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('FACULTY')")
-    public ResponseEntity<List<Student>> getAllStudents() {
+    public ResponseEntity<?> getAllStudents(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Integer page,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Integer size) {
+        if (page != null && size != null) {
+            return ResponseEntity.ok(studentService.findAll(org.springframework.data.domain.PageRequest.of(page, size)));
+        }
         return ResponseEntity.ok(studentService.findAll());
     }
 
