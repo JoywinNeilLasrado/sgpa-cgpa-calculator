@@ -6,14 +6,28 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.gradecalculator.model.AuditLog;
+import com.gradecalculator.repository.AuditLogRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
 /**
  * Global Security Audit Logger for tracking critical domain data changes.
+ * Integrates direct database storage of audit trails as a first-class citizen
+ * in addition to SLF4J log prints.
  */
+@Component
 public class AuditLogger {
     private static final Logger logger = LoggerFactory.getLogger("AuditLogger");
+
+    private static AuditLogRepository auditLogRepository;
+
+    @Autowired
+    public void setAuditLogRepository(AuditLogRepository repo) {
+        AuditLogger.auditLogRepository = repo;
+    }
 
     /**
      * Logs an audit record for an entity state modification.
@@ -47,7 +61,20 @@ public class AuditLogger {
             // Keep safe fallback if accessed out of request-handling scope
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. SLF4J Log printing for real-time SIEM pipelines
         logger.info("AUDIT TRAIL | Timestamp: '{}' | User: '{}' | IP: '{}' | Action: '{}' on {} [{}] | Previous: '{}' | New: '{}'",
-                LocalDateTime.now(), username, ip, action, entityName, entityId, previousValue, newValue);
+                now, username, ip, action, entityName, entityId, previousValue, newValue);
+
+        // 2. Relational Database persistence for structured audit storage
+        if (auditLogRepository != null) {
+            try {
+                AuditLog auditLog = new AuditLog(now, username, ip, action, entityName, entityId, previousValue, newValue);
+                auditLogRepository.save(auditLog);
+            } catch (Exception e) {
+                logger.error("Failed to persist security audit log entry in database", e);
+            }
+        }
     }
 }

@@ -1,25 +1,93 @@
 package com.gradecalculator.security;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import com.gradecalculator.model.LoginAttempt;
+import com.gradecalculator.repository.LoginAttemptRepository;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 /**
  * Thread-safe hybrid rate limiter to protect against brute-force attacks.
  * Uses a Redis backing store if available to persist attempts across restarts,
- * and falls back to an in-memory ConcurrentHashMap for local testing and standalone runs.
+ * falls back to a relational JPA database table for persistent storage without Redis,
+ * and uses an in-memory ConcurrentHashMap as a last-resort fallback.
  */
 @Service
+@Transactional
 public class LoginRateLimiterService {
 
     public static final int MAX_ATTEMPTS = 5;
     public static final long BLOCK_DURATION_MS = TimeUnit.MINUTES.toMillis(1); // Block for 1 minute
 
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    @Autowired(required = false)
     private org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+
+    @Autowired(required = false)
+    private LoginAttemptRepository loginAttemptRepository;
 
     private final ConcurrentHashMap<String, AttemptTracker> trackers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, AttemptTracker> accountTrackers = new ConcurrentHashMap<>();
+
+    private AttemptTracker getFallbackTracker(String key, boolean isAccount) {
+        ConcurrentHashMap<String, AttemptTracker> map = isAccount ? accountTrackers : trackers;
+        return map.get(key);
+    }
+
+    private void saveFallbackTracker(String key, int attempts, long time, boolean isAccount) {
+        ConcurrentHashMap<String, AttemptTracker> map = isAccount ? accountTrackers : trackers;
+        map.put(key, new AttemptTracker(attempts, time));
+    }
+
+    private void removeFallbackTracker(String key, boolean isAccount) {
+        ConcurrentHashMap<String, AttemptTracker> map = isAccount ? accountTrackers : trackers;
+        map.remove(key);
+    }
+
+    private AttemptTracker getTracker(String key, boolean isAccount) {
+        if (loginAttemptRepository != null) {
+            try {
+                Optional<LoginAttempt> attemptOpt = loginAttemptRepository.findByAttemptKey(key);
+                if (attemptOpt.isPresent()) {
+                    LoginAttempt attempt = attemptOpt.get();
+                    return new AttemptTracker(attempt.getAttempts(), attempt.getLastAttemptTime());
+                }
+            } catch (Exception e) {
+                // fall through to in-memory
+            }
+        }
+        return getFallbackTracker(key, isAccount);
+    }
+
+    private void saveTracker(String key, int attempts, long time, boolean isAccount) {
+        if (loginAttemptRepository != null) {
+            try {
+                LoginAttempt attempt = loginAttemptRepository.findByAttemptKey(key)
+                        .orElse(new LoginAttempt(key, 0, 0));
+                attempt.setAttempts(attempts);
+                attempt.setLastAttemptTime(time);
+                loginAttemptRepository.save(attempt);
+                return;
+            } catch (Exception e) {
+                // fall through to in-memory
+            }
+        }
+        saveFallbackTracker(key, attempts, time, isAccount);
+    }
+
+    private void removeTracker(String key, boolean isAccount) {
+        if (loginAttemptRepository != null) {
+            try {
+                loginAttemptRepository.deleteByAttemptKey(key);
+                return;
+            } catch (Exception e) {
+                // fall through to in-memory
+            }
+        }
+        removeFallbackTracker(key, isAccount);
+    }
 
     /**
      * Check if the specified client IP is currently blocked.
@@ -36,10 +104,10 @@ public class LoginRateLimiterService {
                 }
                 return false;
             } catch (Exception e) {
-                // Connection failures fall through to in-memory map
+                // Connection failures fall through to JPA/in-memory
             }
         }
-        AttemptTracker tracker = trackers.get(ip);
+        AttemptTracker tracker = getTracker("rate:ip:" + ip, false);
         if (tracker == null) {
             return false;
         }
@@ -47,7 +115,7 @@ public class LoginRateLimiterService {
             return true;
         }
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) {
-            trackers.remove(ip);
+            removeTracker("rate:ip:" + ip, false);
             return false;
         }
         return false;
@@ -68,10 +136,10 @@ public class LoginRateLimiterService {
                 }
                 return false;
             } catch (Exception e) {
-                // Connection failures fall through to in-memory map
+                // Connection failures fall through to JPA/in-memory
             }
         }
-        AttemptTracker tracker = accountTrackers.get(username);
+        AttemptTracker tracker = getTracker("rate:user:" + username, true);
         if (tracker == null) {
             return false;
         }
@@ -79,7 +147,7 @@ public class LoginRateLimiterService {
             return true;
         }
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) {
-            accountTrackers.remove(username);
+            removeTracker("rate:user:" + username, true);
             return false;
         }
         return false;
@@ -101,19 +169,17 @@ public class LoginRateLimiterService {
                 }
                 return;
             } catch (Exception e) {
-                // Connection failures fall through to in-memory map
+                // Connection failures fall through to JPA/in-memory
             }
         }
-        trackers.compute(ip, (key, value) -> {
-            long now = System.currentTimeMillis();
-            if (value == null) {
-                return new AttemptTracker(1, now);
-            }
-            if (now - value.lastAttemptTime > BLOCK_DURATION_MS) {
-                return new AttemptTracker(1, now); // Reset if block duration has elapsed
-            }
-            return new AttemptTracker(value.attempts + 1, now);
-        });
+        String key = "rate:ip:" + ip;
+        AttemptTracker tracker = getTracker(key, false);
+        long now = System.currentTimeMillis();
+        if (tracker == null || (now - tracker.lastAttemptTime > BLOCK_DURATION_MS)) {
+            saveTracker(key, 1, now, false);
+        } else {
+            saveTracker(key, tracker.attempts + 1, now, false);
+        }
     }
 
     /**
@@ -132,19 +198,17 @@ public class LoginRateLimiterService {
                 }
                 return;
             } catch (Exception e) {
-                // Connection failures fall through to in-memory map
+                // Connection failures fall through to JPA/in-memory
             }
         }
-        accountTrackers.compute(username, (key, value) -> {
-            long now = System.currentTimeMillis();
-            if (value == null) {
-                return new AttemptTracker(1, now);
-            }
-            if (now - value.lastAttemptTime > BLOCK_DURATION_MS) {
-                return new AttemptTracker(1, now); // Reset if block duration has elapsed
-            }
-            return new AttemptTracker(value.attempts + 1, now);
-        });
+        String key = "rate:user:" + username;
+        AttemptTracker tracker = getTracker(key, true);
+        long now = System.currentTimeMillis();
+        if (tracker == null || (now - tracker.lastAttemptTime > BLOCK_DURATION_MS)) {
+            saveTracker(key, 1, now, true);
+        } else {
+            saveTracker(key, tracker.attempts + 1, now, true);
+        }
     }
 
     /**
@@ -160,7 +224,7 @@ public class LoginRateLimiterService {
                     // fall through
                 }
             }
-            trackers.remove(ip);
+            removeTracker("rate:ip:" + ip, false);
         }
     }
 
@@ -177,7 +241,7 @@ public class LoginRateLimiterService {
                     // fall through
                 }
             }
-            accountTrackers.remove(username);
+            removeTracker("rate:user:" + username, true);
         }
     }
 
@@ -194,7 +258,7 @@ public class LoginRateLimiterService {
                 // fall through
             }
         }
-        AttemptTracker tracker = accountTrackers.get(username);
+        AttemptTracker tracker = getTracker("rate:user:" + username, true);
         if (tracker == null) return 0;
         // If the lockout window has expired, treat as 0
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) return 0;
@@ -218,7 +282,7 @@ public class LoginRateLimiterService {
                 // fall through
             }
         }
-        AttemptTracker tracker = accountTrackers.get(username);
+        AttemptTracker tracker = getTracker("rate:user:" + username, true);
         if (tracker == null || tracker.attempts < MAX_ATTEMPTS) return 0;
         long elapsed = System.currentTimeMillis() - tracker.lastAttemptTime;
         long remaining = BLOCK_DURATION_MS - elapsed;

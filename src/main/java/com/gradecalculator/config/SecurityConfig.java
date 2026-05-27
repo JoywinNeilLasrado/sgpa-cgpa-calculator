@@ -36,13 +36,20 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final com.gradecalculator.security.ApiKeyAuthFilter apiKeyAuthFilter;
+    private final com.gradecalculator.security.RequestThrottlingFilter requestThrottlingFilter;
 
     @Value("${spring.h2.console.enabled:false}")
     private boolean h2ConsoleEnabled;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(UserDetailsService userDetailsService, 
+                          JwtAuthenticationFilter jwtAuthenticationFilter,
+                          com.gradecalculator.security.ApiKeyAuthFilter apiKeyAuthFilter,
+                          com.gradecalculator.security.RequestThrottlingFilter requestThrottlingFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
+        this.requestThrottlingFilter = requestThrottlingFilter;
     }
 
     @Bean
@@ -99,6 +106,7 @@ public class SecurityConfig {
                     .requestMatchers("/", "/index.html", "/admin.html", "/student.html", "/home.html", "/login.html", "/analytics.html", "/transcript.html", "/faculty-grades.html", "/profile.html", "/student-dashboard.html", "/favicon.ico").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                     .requestMatchers("/api/auth/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                    .requestMatchers("/api/internal/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/grade-scale", "/api/grades/from-marks").permitAll();
                 
                 if (h2ConsoleEnabled) {
@@ -110,6 +118,8 @@ public class SecurityConfig {
                 auth.anyRequest().authenticated();
             })
             .authenticationProvider(authenticationProvider())
+            .addFilterBefore(requestThrottlingFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class)
             .headers(headers -> headers

@@ -52,8 +52,32 @@ public class AuthController {
                     "Account locked due to too many failed attempts.",
                     com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
                     com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
-                    remainingMs
+                    remainingMs,
+                    true
             ));
+        }
+
+        int currentAttempts = rateLimiter.getAccountAttempts(username);
+        boolean requiresCaptcha = currentAttempts >= 3;
+
+        if (requiresCaptcha) {
+            if (request.getCaptcha() == null || !request.getCaptcha().equals("VALID_CAPTCHA")) {
+                logger.warn("Security Event: Blocked login due to missing/invalid CAPTCHA for '{}' from IP: '{}'", username, ip);
+                rateLimiter.loginFailed(ip);
+                rateLimiter.accountLoginFailed(username);
+
+                int attempts = rateLimiter.getAccountAttempts(username);
+                int remaining = Math.max(0, com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS - attempts);
+                long lockoutMs = rateLimiter.getAccountLockoutRemainingMs(username);
+
+                return ResponseEntity.status(401).body(new LoginErrorResponse(
+                        "CAPTCHA verification required or invalid CAPTCHA.",
+                        attempts,
+                        remaining,
+                        lockoutMs,
+                        true
+                ));
+            }
         }
 
         try {
@@ -88,12 +112,14 @@ public class AuthController {
             int attempts = rateLimiter.getAccountAttempts(username);
             int remaining = Math.max(0, com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS - attempts);
             long lockoutMs = rateLimiter.getAccountLockoutRemainingMs(username);
+            boolean nextRequiresCaptcha = attempts >= 3;
 
             return ResponseEntity.status(401).body(new LoginErrorResponse(
                     "Invalid username or password.",
                     attempts,
                     remaining,
-                    lockoutMs
+                    lockoutMs,
+                    nextRequiresCaptcha
             ));
         }
     }
@@ -103,7 +129,8 @@ public class AuthController {
             String message,
             int attemptsMade,
             int attemptsRemaining,
-            long lockoutRemainingMs
+            long lockoutRemainingMs,
+            boolean requiresCaptcha
     ) {}
 
     /**
@@ -111,9 +138,32 @@ public class AuthController {
      */
     @PostMapping("/register")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AppUser> register(@Valid @RequestBody RegisterRequest request) {
-        AppUser user = userService.register(request);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> register(
+            @Valid @RequestBody RegisterRequest request,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        String ip = getClientIp(httpRequest);
+        
+        // Brute-force check on registration endpoint
+        if (rateLimiter.isBlocked(ip)) {
+            logger.warn("Security Event: Blocked registration attempt from IP: '{}' due to excessive attempts", ip);
+            return ResponseEntity.status(429).body(new com.gradecalculator.dto.ErrorResponse(
+                    "TOO_MANY_REQUESTS",
+                    429,
+                    "Registration blocked due to too many failed security requests.",
+                    httpRequest.getRequestURI(),
+                    java.time.LocalDateTime.now(),
+                    java.util.List.of("Brute-force protection activated on registration.")
+            ));
+        }
+
+        try {
+            AppUser user = userService.register(request);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            // Track failed registration attempt
+            rateLimiter.loginFailed(ip);
+            throw e; // rethrow so GlobalExceptionHandler handles it
+        }
     }
 
     /**

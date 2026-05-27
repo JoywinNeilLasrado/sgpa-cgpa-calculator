@@ -26,6 +26,9 @@ public class JwtTokenProvider {
         if (jwtSecret == null || jwtSecret.trim().isEmpty()) {
             throw new IllegalStateException("FATAL CONFIGURATION ERROR: The JWT signing secret key is not configured! Please configure 'jwt.secret' or set the 'JWT_SECRET' environment variable.");
         }
+        if (jwtSecret.trim().length() < 32) {
+            throw new IllegalStateException("FATAL CONFIGURATION ERROR: The JWT signing secret key must be at least 32 characters long to ensure a minimum of 256 bits security!");
+        }
         this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
