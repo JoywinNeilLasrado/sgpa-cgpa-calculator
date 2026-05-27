@@ -22,7 +22,9 @@ import static org.hamcrest.Matchers.*;
 /**
  * Integration tests for SGPA and CGPA calculation endpoints.
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "jwt.secret=MySuperSecretKey1234567890123456MySuperSecretKey1234567890123456"
+})
 @AutoConfigureMockMvc
 class GradeCalculationIntegrationTest {
 
@@ -47,6 +49,15 @@ class GradeCalculationIntegrationTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.gradecalculator.repository.LoginAttemptRepository loginAttemptRepository;
+
+    @Autowired
+    private com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+
     private String adminToken;
     private Long studentId;
     private Long semester1Id;
@@ -61,6 +72,19 @@ class GradeCalculationIntegrationTest {
         semesterRepository.deleteAll();
         studentRepository.deleteAll();
         userRepository.deleteAll();
+
+        // Seed the admin user with password 'admin123'
+        AppUser admin = new AppUser();
+        admin.setUsername("admin");
+        admin.setName("admin");
+        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setRole(AppUser.Role.ADMIN);
+        userRepository.save(admin);
+
+        // Clear rate limiting block on 127.0.0.1 and admin user
+        loginAttemptRepository.deleteAll();
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("admin");
 
         adminToken = getAdminToken();
 
@@ -84,11 +108,11 @@ class GradeCalculationIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(studentRequest))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
 
         studentId = objectMapper.readTree(studentResult.getResponse().getContentAsString())
-                .get("data").get("id").asLong();
+                .get("id").asLong();
 
         // Create a course
         String courseRequest = String.format("""
@@ -105,11 +129,11 @@ class GradeCalculationIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(courseRequest))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
 
         course1Id = objectMapper.readTree(courseResult.getResponse().getContentAsString())
-                .get("data").get("id").asLong();
+                .get("id").asLong();
     }
 
     private String getAdminToken() throws Exception {
@@ -127,7 +151,7 @@ class GradeCalculationIntegrationTest {
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("data").get("accessToken").asText();
+                .get("token").asText();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -143,10 +167,9 @@ class GradeCalculationIntegrationTest {
         mockMvc.perform(get("/api/sgpa/student/" + studentId + "/semester/" + semester1Id)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.studentId").value(studentId))
-                .andExpect(jsonPath("$.data.semesterId").value(semester1Id))
-                .andExpect(jsonPath("$.data.sgpa").isNumber());
+                .andExpect(jsonPath("$.studentId").value(studentId))
+                .andExpect(jsonPath("$.semesterId").value(semester1Id))
+                .andExpect(jsonPath("$.sgpa").isNumber());
     }
 
     @Test
@@ -155,7 +178,7 @@ class GradeCalculationIntegrationTest {
         mockMvc.perform(get("/api/sgpa/student/" + studentId + "/semester/" + semester2Id)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value(containsString("No enrollments")));
     }
 
@@ -165,7 +188,7 @@ class GradeCalculationIntegrationTest {
         mockMvc.perform(get("/api/sgpa/student/99999/semester/" + semester1Id)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorCode").value("STUDENT_NOT_FOUND"));
+                .andExpect(jsonPath("$.status").value("STUDENT_NOT_FOUND"));
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -181,9 +204,8 @@ class GradeCalculationIntegrationTest {
         mockMvc.perform(get("/api/cgpa/student/" + studentId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.studentId").value(studentId))
-                .andExpect(jsonPath("$.data.cgpa").isNumber());
+                .andExpect(jsonPath("$.studentId").value(studentId))
+                .andExpect(jsonPath("$.cgpa").isNumber());
     }
 
     @Test
@@ -192,8 +214,8 @@ class GradeCalculationIntegrationTest {
         mockMvc.perform(get("/api/cgpa/student/" + studentId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.cgpa").value(0.0))
-                .andExpect(jsonPath("$.data.totalCredits").value(0));
+                .andExpect(jsonPath("$.cgpa").value(0.0))
+                .andExpect(jsonPath("$.totalEarnedCredits").value(0));
     }
 
     @Test
@@ -205,8 +227,7 @@ class GradeCalculationIntegrationTest {
         mockMvc.perform(get("/api/cgpa/student/" + studentId + "/semester/" + semester1Id)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.cgpa").isNumber());
+                .andExpect(jsonPath("$.cgpa").isNumber());
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -214,45 +235,53 @@ class GradeCalculationIntegrationTest {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     @Test
-    @DisplayName("GET /api/grades/scale - should return grading scale")
+    @DisplayName("GET /api/grade-scale - should return grading scale")
     void getGradingScale() throws Exception {
-        mockMvc.perform(get("/api/grades/scale")
+        mockMvc.perform(get("/api/grade-scale")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(8)); // O, A+, A, B+, B, C, P, F
+                .andExpect(jsonPath("$.grades").isMap())
+                .andExpect(jsonPath("$.grades.O.performance").value("Outstanding"))
+                .andExpect(jsonPath("$.grades.O.points").value(10));
     }
 
     @Test
-    @DisplayName("GET /api/grades/from-marks/{marks} - should return grade for marks")
+    @DisplayName("GET /api/grades/from-marks - should return grade for marks")
     void getGradeFromMarks() throws Exception {
-        mockMvc.perform(get("/api/grades/from-marks/85")
+        mockMvc.perform(get("/api/grades/from-marks")
+                        .param("marks", "85")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.letterGrade").value("A+"))
-                .andExpect(jsonPath("$.data.gradePoints").value(9));
+                .andExpect(jsonPath("$.marks").value(85))
+                .andExpect(jsonPath("$.grade").value("A+"))
+                .andExpect(jsonPath("$.performance").value("Excellent"))
+                .andExpect(jsonPath("$.points").value(9));
     }
 
     @Test
-    @DisplayName("GET /api/grades/from-marks/{marks} - should return F for low marks")
+    @DisplayName("GET /api/grades/from-marks - should return F for low marks")
     void getGradeFromLowMarks() throws Exception {
-        mockMvc.perform(get("/api/grades/from-marks/30")
+        mockMvc.perform(get("/api/grades/from-marks")
+                        .param("marks", "30")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.letterGrade").value("F"))
-                .andExpect(jsonPath("$.data.gradePoints").value(0));
+                .andExpect(jsonPath("$.marks").value(30))
+                .andExpect(jsonPath("$.grade").value("F"))
+                .andExpect(jsonPath("$.performance").value("Fail"))
+                .andExpect(jsonPath("$.points").value(0));
     }
 
     @Test
-    @DisplayName("GET /api/grades/from-marks/{marks} - should return O for high marks")
+    @DisplayName("GET /api/grades/from-marks - should return O for high marks")
     void getGradeFromHighMarks() throws Exception {
-        mockMvc.perform(get("/api/grades/from-marks/95")
+        mockMvc.perform(get("/api/grades/from-marks")
+                        .param("marks", "95")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.letterGrade").value("O"))
-                .andExpect(jsonPath("$.data.gradePoints").value(10));
+                .andExpect(jsonPath("$.marks").value(95))
+                .andExpect(jsonPath("$.grade").value("O"))
+                .andExpect(jsonPath("$.performance").value("Outstanding"))
+                .andExpect(jsonPath("$.points").value(10));
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -272,10 +301,10 @@ class GradeCalculationIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("data").get("id").asLong();
+                .get("id").asLong();
     }
 }

@@ -49,10 +49,11 @@ class AuthControllerTest {
     @MockitoBean private LoginRateLimiterService rateLimiter;
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserDetailsServiceImpl userDetailsService;
+    @MockitoBean private com.gradecalculator.security.RefreshTokenService refreshTokenService;
 
     @BeforeEach
     void setUp() {
-        reset(rateLimiter, userService, studentService);
+        reset(rateLimiter, userService, studentService, refreshTokenService);
     }
 
     @Test
@@ -67,6 +68,7 @@ class AuthControllerTest {
         when(rateLimiter.isAccountLocked("admin")).thenReturn(false);
         when(userService.authenticate("admin", "Password123!")).thenReturn("mock-jwt-token");
         when(userService.findByUsername("admin")).thenReturn(Optional.of(user));
+        when(refreshTokenService.generateRefreshToken(any(), any(), any())).thenReturn("mock-refresh-token");
 
         mockMvc.perform(post("/api/auth/login")
                         .with(csrf())

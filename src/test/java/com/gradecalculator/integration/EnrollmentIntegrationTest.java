@@ -4,6 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gradecalculator.dto.EnrollmentRequest;
 import com.gradecalculator.dto.request.LoginRequest;
 import com.gradecalculator.dto.StudentRequest;
+import com.gradecalculator.model.Semester;
+import com.gradecalculator.model.AppUser;
+import com.gradecalculator.repository.SemesterRepository;
+import com.gradecalculator.repository.AppUserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +39,46 @@ public class EnrollmentIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private SemesterRepository semesterRepository;
+
+    @Autowired
+    private AppUserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.gradecalculator.repository.LoginAttemptRepository loginAttemptRepository;
+
+    @Autowired
+    private com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+
     private String adminToken;
+    private Long semesterId;
 
     @BeforeEach
     public void setup() throws Exception {
+        userRepository.findByUsername("admin").ifPresentOrElse(
+            user -> {
+                user.setPassword(passwordEncoder.encode("adminPassword123"));
+                userRepository.save(user);
+            },
+            () -> {
+                AppUser admin = new AppUser();
+                admin.setUsername("admin");
+                admin.setName("admin");
+                admin.setPassword(passwordEncoder.encode("adminPassword123"));
+                admin.setRole(AppUser.Role.ADMIN);
+                userRepository.save(admin);
+            }
+        );
+
+        // Clear rate limits
+        loginAttemptRepository.deleteAll();
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("admin");
+
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername("admin");
         loginRequest.setPassword("adminPassword123");
@@ -48,6 +89,11 @@ public class EnrollmentIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
 
         adminToken = objectMapper.readTree(loginResponse).get("token").asText();
+
+        // Dynamically get or create a semester
+        Semester semester = semesterRepository.findBySemesterNumber(1)
+                .orElseGet(() -> semesterRepository.save(new Semester(1)));
+        semesterId = semester.getId();
     }
 
     @Test
@@ -69,14 +115,14 @@ public class EnrollmentIntegrationTest {
         Long studentId = objectMapper.readTree(studentJson).get("id").asLong();
 
         // 2. Create a course
-        String courseRequest = """
+        String courseRequest = String.format("""
             {
                 "courseCode": "TEST101",
                 "courseName": "Test Course",
                 "credits": 4,
-                "semesterId": 1
+                "semesterId": %d
             }
-            """;
+            """, semesterId);
 
         String courseJson = mockMvc.perform(post("/api/courses")
                         .header("Authorization", "Bearer " + adminToken)
@@ -133,14 +179,14 @@ public class EnrollmentIntegrationTest {
         Long studentId = objectMapper.readTree(studentJson).get("id").asLong();
 
         // Create course
-        String courseRequest = """
+        String courseRequest = String.format("""
             {
                 "courseCode": "DUP101",
                 "courseName": "Duplicate Test Course",
                 "credits": 3,
-                "semesterId": 1
+                "semesterId": %d
             }
-            """;
+            """, semesterId);
 
         String courseJson = mockMvc.perform(post("/api/courses")
                         .header("Authorization", "Bearer " + adminToken)

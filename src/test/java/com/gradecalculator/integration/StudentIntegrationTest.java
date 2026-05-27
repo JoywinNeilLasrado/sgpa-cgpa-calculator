@@ -3,6 +3,9 @@ package com.gradecalculator.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gradecalculator.dto.request.LoginRequest;
 import com.gradecalculator.dto.StudentRequest;
+import com.gradecalculator.model.AppUser;
+import com.gradecalculator.repository.AppUserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +35,40 @@ public class StudentIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AppUserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.gradecalculator.repository.LoginAttemptRepository loginAttemptRepository;
+
+    @Autowired
+    private com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        userRepository.findByUsername("admin").ifPresentOrElse(
+            user -> {
+                user.setPassword(passwordEncoder.encode("adminPassword123"));
+                userRepository.save(user);
+            },
+            () -> {
+                AppUser admin = new AppUser();
+                admin.setUsername("admin");
+                admin.setName("admin");
+                admin.setPassword(passwordEncoder.encode("adminPassword123"));
+                admin.setRole(AppUser.Role.ADMIN);
+                userRepository.save(admin);
+            }
+        );
+
+        loginAttemptRepository.deleteAll();
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("admin");
+    }
 
     @Test
     public void testStudentLifecycleIntegration() throws Exception {

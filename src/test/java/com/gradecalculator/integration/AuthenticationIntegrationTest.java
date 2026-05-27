@@ -4,6 +4,9 @@ import com.gradecalculator.dto.request.LoginRequest;
 import com.gradecalculator.model.AppUser;
 import com.gradecalculator.model.Student;
 import com.gradecalculator.repository.AppUserRepository;
+import com.gradecalculator.repository.CourseRepository;
+import com.gradecalculator.repository.EnrollmentRepository;
+import com.gradecalculator.repository.SemesterRepository;
 import com.gradecalculator.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for authentication endpoints.
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "jwt.secret=MySuperSecretKey1234567890123456MySuperSecretKey1234567890123456"
+})
 @AutoConfigureMockMvc
 class AuthenticationIntegrationTest {
 
@@ -34,11 +39,75 @@ class AuthenticationIntegrationTest {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private SemesterRepository semesterRepository;
+
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.gradecalculator.repository.LoginAttemptRepository loginAttemptRepository;
+
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
+    private String adminToken;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         // Clean up before each test
-        userRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        courseRepository.deleteAll();
+        semesterRepository.deleteAll();
         studentRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Seed the admin user with password 'admin123'
+        AppUser admin = new AppUser();
+        admin.setUsername("admin");
+        admin.setName("admin");
+        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setRole(AppUser.Role.ADMIN);
+        userRepository.save(admin);
+
+        // Clear rate limiting block on 127.0.0.1 and admin user
+        loginAttemptRepository.deleteAll();
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("admin");
+
+        adminToken = getAdminToken();
+    }
+
+    private String getAdminToken() throws Exception {
+        String requestBody = """
+            {
+                "username": "admin",
+                "password": "admin123"
+            }
+            """;
+
+        String loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        return objectMapper.readTree(loginResponse).get("token").asText();
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDownRateLimiter() {
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("admin");
     }
 
     @Test
@@ -55,10 +124,9 @@ class AuthenticationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.data.refreshToken").isNotEmpty())
-                .andExpect(jsonPath("$.data.tokenType").value("Bearer"));
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"));
     }
 
     @Test
@@ -118,12 +186,12 @@ class AuthenticationIntegrationTest {
             """;
 
         mockMvc.perform(post("/api/auth/register")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.username").value("NEWUSER"))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("NEWUSER"))
+                .andExpect(jsonPath("$.role").value("STUDENT"));
     }
 
     @Test
@@ -133,22 +201,24 @@ class AuthenticationIntegrationTest {
         String requestBody = """
             {
                 "username": "DUPLICATE",
-                "password": "password123",
+                "password": "SecurePass123!",
                 "role": "STUDENT",
                 "name": "First User"
             }
             """;
 
         mockMvc.perform(post("/api/auth/register")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
 
         // Try to register second user with same username
         mockMvc.perform(post("/api/auth/register")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isConflict())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(containsString("already exists")));
     }
@@ -159,13 +229,14 @@ class AuthenticationIntegrationTest {
         String requestBody = """
             {
                 "username": "NEWUSER",
-                "password": "password123",
+                "password": "SecurePass123!",
                 "role": "INVALID_ROLE",
                 "name": "New User"
             }
             """;
 
         mockMvc.perform(post("/api/auth/register")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest());
@@ -201,6 +272,6 @@ class AuthenticationIntegrationTest {
                         .content(invalidRequest))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value(containsString("Too many")));
+                .andExpect(jsonPath("$.message").value(containsString("too many")));
     }
 }

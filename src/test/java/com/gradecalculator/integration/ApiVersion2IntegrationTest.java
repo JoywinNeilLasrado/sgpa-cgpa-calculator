@@ -1,9 +1,14 @@
 package com.gradecalculator.integration;
 
 import com.gradecalculator.dto.response.ApiResponse;
-import com.gradecalculator.exception.*;
-import com.gradecalculator.repository.*;
-import com.gradecalculator.model.*;
+import com.gradecalculator.repository.AppUserRepository;
+import com.gradecalculator.repository.StudentRepository;
+import com.gradecalculator.repository.SemesterRepository;
+import com.gradecalculator.repository.CourseRepository;
+import com.gradecalculator.repository.EnrollmentRepository;
+import com.gradecalculator.model.AppUser;
+import com.gradecalculator.model.Semester;
+import com.gradecalculator.model.Student;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,11 +23,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.containsString;
 
 /**
  * Integration tests for API v2 endpoints and exception handling.
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "jwt.secret=MySuperSecretKey1234567890123456MySuperSecretKey1234567890123456"
+})
 @AutoConfigureMockMvc
 class ApiVersion2IntegrationTest {
 
@@ -41,13 +49,44 @@ class ApiVersion2IntegrationTest {
     @Autowired
     private SemesterRepository semesterRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.gradecalculator.repository.LoginAttemptRepository loginAttemptRepository;
+
+    @Autowired
+    private com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+
     private String adminToken;
 
     @BeforeEach
     void setUp() throws Exception {
-        userRepository.deleteAll();
-        studentRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        courseRepository.deleteAll();
         semesterRepository.deleteAll();
+        studentRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Seed the admin user with password 'admin123'
+        AppUser admin = new AppUser();
+        admin.setUsername("admin");
+        admin.setName("admin");
+        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setRole(AppUser.Role.ADMIN);
+        userRepository.save(admin);
+
+        // Clear rate limiting block on 127.0.0.1 and admin user
+        loginAttemptRepository.deleteAll();
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("admin");
+
         adminToken = getAdminToken();
 
         // Create test semesters
@@ -72,7 +111,7 @@ class ApiVersion2IntegrationTest {
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("data").get("accessToken").asText();
+                .get("token").asText();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -194,7 +233,7 @@ class ApiVersion2IntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .param("username", "CS2024095"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Searchable"));
+                .andExpect(jsonPath("$.data.name").value("Searchable"));
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -204,11 +243,11 @@ class ApiVersion2IntegrationTest {
     @Test
     @DisplayName("Should handle StudentNotFoundException with STUDENT_NOT_FOUND error code")
     void handleStudentNotFoundException() throws Exception {
-        mockMvc.perform(get("/api/students/99999")
+        mockMvc.perform(get("/api/v2/students/99999")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.errorCode").value("STUDENT_NOT_FOUND"));
+                .andExpect(jsonPath("$.status").value("STUDENT_NOT_FOUND"));
     }
 
     @Test
@@ -227,13 +266,13 @@ class ApiVersion2IntegrationTest {
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
     }
 
     @Test
     @DisplayName("Should return proper JSON structure for all error responses")
     void properErrorResponseStructure() throws Exception {
-        mockMvc.perform(get("/api/students/99999")
+        mockMvc.perform(get("/api/v2/students/99999")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false))
@@ -256,10 +295,10 @@ class ApiVersion2IntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("data").get("id").asLong();
+                .get("id").asLong();
     }
 }

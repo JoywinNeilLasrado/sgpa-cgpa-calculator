@@ -13,5 +13,10 @@ public record ErrorResponse(
     String message,
     String path,
     LocalDateTime timestamp,
-    List<String> details
-) {}
+    List<String> details,
+    boolean success
+) {
+    public ErrorResponse(String status, int code, String message, String path, LocalDateTime timestamp, List<String> details) {
+        this(status, code, message, path, timestamp, details, false);
+    }
+}

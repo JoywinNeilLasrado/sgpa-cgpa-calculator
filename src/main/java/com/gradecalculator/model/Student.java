@@ -15,8 +15,9 @@ import java.util.List;
 })
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "enrollments"})
 public class Student {
 
     @Id
@@ -42,20 +43,29 @@ public class Student {
 
     @OneToMany(mappedBy = "student")
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Enrollment> enrollments = new ArrayList<>();
+
+    @JsonIgnore
+    public List<Enrollment> getEnrollments() {
+        return this.enrollments;
+    }
 
     // Custom constructors for specific use cases
     public Student(@NonNull String name, @NonNull String studentId) {
         this.name = name;
         this.studentId = studentId;
         this.branch = "Computer Science";
+        this.enrollments = new ArrayList<>();
     }
 
     public Student(@NonNull String name, @NonNull String studentId, String branch) {
         this.name = name;
         this.studentId = studentId;
         this.branch = branch != null && !branch.trim().isEmpty() ? branch : "Computer Science";
+        this.enrollments = new ArrayList<>();
     }
 
     /**

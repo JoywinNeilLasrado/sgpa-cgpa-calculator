@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.gradecalculator.mapper.EntityMapper;
 import com.gradecalculator.util.CoveredBy;
 
 import java.util.Collections;
@@ -31,12 +32,13 @@ class StudentServiceTest {
     @Mock private UserService userService;
     @Mock private AppUserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private EntityMapper entityMapper;
 
     private StudentService service;
 
     @BeforeEach
     void setUp() {
-        service = new StudentService(studentRepository, enrollmentRepository, userService, userRepository, passwordEncoder);
+        service = new StudentService(studentRepository, enrollmentRepository, userService, userRepository, passwordEncoder, entityMapper);
     }
 
     @Test

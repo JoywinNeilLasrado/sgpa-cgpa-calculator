@@ -10,8 +10,8 @@ import lombok.*;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class EnrollmentMarks {
 
     private Integer cieMarks;

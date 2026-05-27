@@ -66,11 +66,12 @@ class ErrorResponseTest {
 
     @Test
     void errorResponseIsRecord() {
+        LocalDateTime now = LocalDateTime.now();
         ErrorResponse response1 = new ErrorResponse(
-                "A", 100, "msg", "path", LocalDateTime.now(), List.of()
+                "A", 100, "msg", "path", now, List.of()
         );
         ErrorResponse response2 = new ErrorResponse(
-                "A", 100, "msg", "path", LocalDateTime.now(), List.of()
+                "A", 100, "msg", "path", now, List.of()
         );
 
         // Records with same values should be equal

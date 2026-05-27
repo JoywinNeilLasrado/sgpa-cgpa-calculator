@@ -13,8 +13,9 @@ import java.util.List;
 @Table(name = "semesters")
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "courses"})
 public class Semester {
 
     @Id
@@ -26,12 +27,20 @@ public class Semester {
 
     @OneToMany(mappedBy = "semester")
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Course> courses = new ArrayList<>();
+
+    @JsonIgnore
+    public List<Course> getCourses() {
+        return this.courses;
+    }
 
     // Custom constructors
     public Semester(Integer semesterNumber) {
         this.semesterNumber = semesterNumber;
+        this.courses = new ArrayList<>();
     }
 
     // Convenience methods
@@ -39,6 +48,7 @@ public class Semester {
         return "Semester " + semesterNumber;
     }
 
+    @JsonIgnore
     public int getCourseCount() {
         return courses != null ? courses.size() : 0;
     }

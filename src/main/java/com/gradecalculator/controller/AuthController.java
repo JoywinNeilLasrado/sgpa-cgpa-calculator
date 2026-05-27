@@ -52,6 +52,7 @@ public class AuthController {
             long remainingMs = rateLimiter.getAccountLockoutRemainingMs(username);
             logger.warn("Security Event: Blocked login attempt for '{}' from IP: '{}'", username, ip);
             return ResponseEntity.status(429).body(new LoginErrorResponse(
+                    false,
                     "Account locked due to too many failed attempts.",
                     com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
                     com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
@@ -74,6 +75,7 @@ public class AuthController {
                 long lockoutMs = rateLimiter.getAccountLockoutRemainingMs(username);
 
                 return ResponseEntity.status(401).body(new LoginErrorResponse(
+                        false,
                         "CAPTCHA verification required or invalid CAPTCHA.",
                         attempts,
                         remaining,
@@ -123,6 +125,7 @@ public class AuthController {
             boolean nextRequiresCaptcha = attempts >= 3;
 
             return ResponseEntity.status(401).body(new LoginErrorResponse(
+                    false,
                     "Invalid username or password.",
                     attempts,
                     remaining,
@@ -134,6 +137,7 @@ public class AuthController {
 
     /** Structured error response with rate-limit feedback for the login UI. */
     public record LoginErrorResponse(
+            boolean success,
             String message,
             int attemptsMade,
             int attemptsRemaining,
@@ -151,13 +155,13 @@ public class AuthController {
             jakarta.servlet.http.HttpServletRequest httpRequest) {
         String ip = getClientIp(httpRequest);
         try {
-            Long userId = refreshTokenService.getUserIdFromToken(request.getRefreshToken());
+            Long userId = refreshTokenService.getUserIdFromToken(request.refreshToken());
             AppUser user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
             String newAccessToken = userService.generateTokenForUser(user);
             String newRefreshToken = refreshTokenService.rotateRefreshToken(
-                    request.getRefreshToken(), ip, httpRequest.getHeader("User-Agent"));
+                    request.refreshToken(), ip, httpRequest.getHeader("User-Agent"));
 
             logger.info("Security Event: Token refreshed for userId={} from IP={}", userId, ip);
             return ResponseEntity.ok(new LoginResponse(

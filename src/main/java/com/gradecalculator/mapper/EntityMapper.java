@@ -4,7 +4,7 @@ import com.gradecalculator.model.Student;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Semester;
 import com.gradecalculator.model.Enrollment;
-import com.gradecalculator.dto.request.StudentRequest;
+import com.gradecalculator.dto.StudentRequest;
 import com.gradecalculator.dto.response.StudentResponse;
 import com.gradecalculator.dto.response.CourseResponse;
 import com.gradecalculator.dto.response.SemesterResponse;
@@ -43,12 +43,7 @@ public interface EntityMapper {
      */
     StudentResponse toStudentResponse(Student student);
 
-    /**
-     * Converts Student entity to StudentResponse with optional semester info.
-     */
-    @Mapping(target = "semesterId", source = "semester.id")
-    @Mapping(target = "semesterName", source = "semester.name")
-    StudentResponse toStudentWithSemesterResponse(Student student);
+
 
     /**
      * Converts StudentRequest DTO to Student entity (for creation).
@@ -59,8 +54,8 @@ public interface EntityMapper {
      * Updates an existing Student entity from StudentRequest.
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "enrollments", ignore = true)
     void updateStudentFromRequest(StudentRequest request, @MappingTarget Student student);
 
     /**
@@ -75,13 +70,8 @@ public interface EntityMapper {
     /**
      * Converts Course entity to CourseResponse DTO.
      */
-    CourseResponse toCourseResponse(Course course);
-
-    /**
-     * Converts Course entity with faculty name.
-     */
     @Mapping(target = "facultyName", source = "faculty.name")
-    CourseResponse toCourseWithFacultyResponse(Course course);
+    CourseResponse toCourseResponse(Course course);
 
     /**
      * Converts a list of Course entities to CourseResponse DTOs.
@@ -109,14 +99,31 @@ public interface EntityMapper {
     /**
      * Converts Enrollment entity to a basic response (without nested marks).
      */
+    @Mapping(target = "studentId", source = "student.id")
     @Mapping(target = "studentName", source = "student.name")
-    @Mapping(target = "studentRollNumber", source = "student.rollNumber")
-    @Mapping(target = "courseName", source = "course.name")
+    @Mapping(target = "studentRollNumber", source = "student.studentId")
+    @Mapping(target = "courseId", source = "course.id")
+    @Mapping(target = "courseName", source = "course.courseName")
     @Mapping(target = "courseCode", source = "course.courseCode")
     @Mapping(target = "credits", source = "course.credits")
-    Enrollment toEnrollmentEntity(
-            Long studentId,
-            Long courseId,
-            java.time.LocalDateTime enrolledAt
-    );
+    @Mapping(target = "courseType", source = "course.courseType")
+    @Mapping(target = "semesterId", source = "course.semester.id")
+    @Mapping(target = "semesterNumber", source = "course.semester.semesterNumber")
+    @Mapping(target = "grade", expression = "java(enrollment.getGrade() != null ? enrollment.getGrade().getGrade() : null)")
+    @Mapping(target = "gradePoints", expression = "java(enrollment.getGrade() != null ? enrollment.getGrade().getGradePoints() : 0)")
+    @Mapping(target = "creditPoints", expression = "java(enrollment.getCreditPoints())")
+    @Mapping(target = "cieMarks", source = "marks.cieMarks")
+    @Mapping(target = "cieTheoryMarks", source = "marks.cieTheoryMarks")
+    @Mapping(target = "cieLabMarks", source = "marks.cieLabMarks")
+    @Mapping(target = "test1Marks", source = "marks.test1Marks")
+    @Mapping(target = "test2Marks", source = "marks.test2Marks")
+    @Mapping(target = "assignmentMarks", source = "marks.assignmentMarks")
+    @Mapping(target = "oaaMarks", source = "marks.oaaMarks")
+    @Mapping(target = "regularLabMarks", source = "marks.regularLabMarks")
+    @Mapping(target = "labTestMarks", source = "marks.labTestMarks")
+    @Mapping(target = "labRecordMarks", source = "marks.labRecordMarks")
+    @Mapping(target = "seeMarks", source = "marks.seeMarks")
+    @Mapping(target = "graceMarks", source = "marks.graceMarks")
+    @Mapping(target = "totalMarks", source = "marks.totalMarks")
+    com.gradecalculator.dto.EnrollmentResponse toEnrollmentResponse(Enrollment enrollment);
 }

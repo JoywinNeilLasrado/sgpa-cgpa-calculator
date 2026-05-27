@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 })
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuditLog {
 
     @Id

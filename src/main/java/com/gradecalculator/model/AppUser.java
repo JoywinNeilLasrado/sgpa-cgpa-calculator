@@ -11,8 +11,8 @@ import lombok.*;
 @Table(name = "users")
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppUser {
 
     @Id

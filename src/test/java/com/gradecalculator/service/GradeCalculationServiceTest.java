@@ -18,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
+import com.gradecalculator.exception.StudentNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -120,8 +121,8 @@ class GradeCalculationServiceTest {
         when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.calculateSGPA(99L, 1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Student not found");
+                .isInstanceOf(StudentNotFoundException.class)
+                .hasMessage("Student not found with ID: 99");
     }
 
     @Test
@@ -129,8 +130,8 @@ class GradeCalculationServiceTest {
         when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.calculateCGPA(99L, 1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Student not found");
+                .isInstanceOf(StudentNotFoundException.class)
+                .hasMessage("Student not found with ID: 99");
     }
 
     @Test

@@ -133,8 +133,13 @@ class SemesterServiceTest {
         when(semesterRepository.findById(1L)).thenReturn(Optional.of(semester));
         when(courseRepository.findBySemesterId(1L)).thenReturn(courses);
 
-        List<Enrollment> e1 = Collections.singletonList(new Enrollment());
-        List<Enrollment> e2 = Collections.singletonList(new Enrollment());
+        Enrollment enrollment1 = new Enrollment();
+        enrollment1.setId(100L);
+        List<Enrollment> e1 = Collections.singletonList(enrollment1);
+
+        Enrollment enrollment2 = new Enrollment();
+        enrollment2.setId(200L);
+        List<Enrollment> e2 = Collections.singletonList(enrollment2);
 
         when(enrollmentRepository.findByCourseId(10L)).thenReturn(e1);
         when(enrollmentRepository.findByCourseId(11L)).thenReturn(e2);

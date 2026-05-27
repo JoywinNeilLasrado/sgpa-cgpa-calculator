@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 })
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Enrollment {
 
     @Id
@@ -55,12 +55,14 @@ public class Enrollment {
     public Enrollment(Student student, Course course) {
         this.student = student;
         this.course = course;
+        this.marks = new EnrollmentMarks();
     }
 
     public Enrollment(Student student, Course course, LetterGrade grade) {
         this.student = student;
         this.course = course;
         this.grade = grade;
+        this.marks = new EnrollmentMarks();
     }
 
     // Delegate methods for backward compatibility

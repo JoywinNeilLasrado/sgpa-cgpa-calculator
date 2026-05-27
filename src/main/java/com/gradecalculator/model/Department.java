@@ -10,8 +10,8 @@ import lombok.*;
 @Table(name = "departments")
 @Data
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Department {
 
     @Id

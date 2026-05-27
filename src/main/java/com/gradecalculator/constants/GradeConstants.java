@@ -7,7 +7,9 @@ package com.gradecalculator.constants;
  */
 public final class GradeConstants {
 
-    private GradeConstants() {}
+    private GradeConstants() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // MARK RANGES (%)

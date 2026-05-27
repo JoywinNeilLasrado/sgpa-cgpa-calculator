@@ -41,6 +41,20 @@ public class SecurityQualityElevationTest {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
+    @Autowired
+    private com.gradecalculator.repository.LoginAttemptRepository loginAttemptRepository;
+
+    @Autowired
+    private com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        loginAttemptRepository.deleteAll();
+        rateLimiter.loginSucceeded("127.0.0.1");
+        rateLimiter.accountLoginSucceeded("captcha-user");
+        rateLimiter.accountLoginSucceeded("admin");
+    }
+
     @Test
     public void testJwtSecretKeyLengthCheck() {
         // Enforce that empty key throws exception

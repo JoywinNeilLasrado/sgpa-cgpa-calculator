@@ -1,6 +1,6 @@
 package com.gradecalculator.controller.v2;
 
-import com.gradecalculator.dto.request.StudentRequest;
+import com.gradecalculator.dto.StudentRequest;
 import com.gradecalculator.dto.response.ApiResponse;
 import com.gradecalculator.model.Student;
 import com.gradecalculator.service.StudentService;
@@ -39,7 +39,7 @@ public class StudentControllerV2 {
 
     @GetMapping
     @Operation(summary = "Get all students", description = "Returns paginated list of students")
-    public ResponseEntity<ApiResponse<List<Student>>> getAllStudents(
+    public ResponseEntity<ApiResponse<Page<Student>>> getAllStudents(
             @Parameter(description = "Pagination parameters") Pageable pageable) {
         Page<Student> students = studentService.findAll(pageable);
         return ResponseEntity.ok(ApiResponse.success(students));
@@ -49,9 +49,9 @@ public class StudentControllerV2 {
     @Operation(summary = "Get student by ID")
     public ResponseEntity<ApiResponse<Student>> getStudentById(
             @Parameter(description = "Student ID") @PathVariable Long id) {
-        return studentService.findById(id)
-                .map(student -> ResponseEntity.ok(ApiResponse.success(student)))
-                .orElse(ResponseEntity.notFound().build());
+        Student student = studentService.findById(id)
+                .orElseThrow(() -> new com.gradecalculator.exception.StudentNotFoundException(id));
+        return ResponseEntity.ok(ApiResponse.success(student));
     }
 
     @PostMapping
