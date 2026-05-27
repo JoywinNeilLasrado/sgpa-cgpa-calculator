@@ -7,7 +7,7 @@ import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
-import com.gradecalculator.exception.NotFoundException;
+import com.gradecalculator.exception.StudentNotFoundException;
 import com.gradecalculator.exception.ValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +61,7 @@ public class GradeCalculationService {
     @Transactional(readOnly = true)
     public SgpaResponse calculateSGPA(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
 
         List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndSemesterId(studentId, semesterId);
 
@@ -89,7 +89,7 @@ public class GradeCalculationService {
     @Transactional(readOnly = true)
     public CgpaResponse calculateCGPA(Long studentId, Long semesterId) {
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
 
         // Get all enrollments, excluding F grades
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
@@ -137,7 +137,7 @@ public class GradeCalculationService {
     @Transactional(readOnly = true)
     public CgpaResponse calculateOverallCGPA(Long studentId) {
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
 
         List<Enrollment> allEnrollments = enrollmentRepository.findByStudentId(studentId);
 

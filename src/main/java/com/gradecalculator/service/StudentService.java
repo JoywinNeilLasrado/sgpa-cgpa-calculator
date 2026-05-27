@@ -4,10 +4,11 @@ import com.gradecalculator.model.Student;
 import com.gradecalculator.util.ValidationUtil;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
+import com.gradecalculator.exception.StudentNotFoundException;
+import com.gradecalculator.exception.ValidationException;
+import com.gradecalculator.mapper.EntityMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.gradecalculator.exception.NotFoundException;
-import com.gradecalculator.exception.ValidationException;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,18 +24,21 @@ public class StudentService {
     private final UserService userService;
     private final com.gradecalculator.repository.AppUserRepository userRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final EntityMapper entityMapper;
 
     @org.springframework.beans.factory.annotation.Value("${app.demo.password:password123}")
     private String demoPassword;
 
     public StudentService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository,
                           UserService userService, com.gradecalculator.repository.AppUserRepository userRepository,
-                          org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
+                          org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+                          EntityMapper entityMapper) {
         this.studentRepository = studentRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.userService = userService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.entityMapper = entityMapper;
     }
 
     /**
@@ -166,7 +170,7 @@ public class StudentService {
     public Student update(Long id, String name, String rollNumber, String branch, String dateOfBirth) {
         ValidationUtil.requireNonNull(id, "Student ID cannot be null");
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException(id));
         validateStudent(name, rollNumber);
         ValidationUtil.requireNonBlank(dateOfBirth, "Date of birth is required");
         studentRepository.findByStudentId(rollNumber)
@@ -214,7 +218,7 @@ public class StudentService {
             throw new ValidationException("Student ID cannot be null");
         }
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException(id));
         if (student.getUsername() != null) {
             userRepository.findByUsername(student.getUsername())
                     .ifPresent(userRepository::delete);

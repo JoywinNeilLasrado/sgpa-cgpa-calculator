@@ -110,4 +110,120 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.badRequest().body(errorResponse);
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // DOMAIN-SPECIFIC EXCEPTIONS (Custom Business Exceptions)
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(StudentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStudentNotFound(StudentNotFoundException e, jakarta.servlet.http.HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                404,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(404).body(errorResponse);
+    }
+
+    @ExceptionHandler(CourseNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCourseNotFound(CourseNotFoundException e, jakarta.servlet.http.HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                404,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(404).body(errorResponse);
+    }
+
+    @ExceptionHandler(SemesterNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSemesterNotFound(SemesterNotFoundException e, jakarta.servlet.http.HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                404,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(404).body(errorResponse);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException e, jakarta.servlet.http.HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                404,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(404).body(errorResponse);
+    }
+
+    @ExceptionHandler(EnrollmentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEnrollmentNotFound(EnrollmentNotFoundException e, jakarta.servlet.http.HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                404,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(404).body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateEnrollmentException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEnrollment(DuplicateEnrollmentException e, jakarta.servlet.http.HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                409,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(409).body(errorResponse);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // BASE EXCEPTION HANDLER (Fallback for all BaseException subclasses)
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ErrorResponse> handleBaseException(BaseException e, jakarta.servlet.http.HttpServletRequest request) {
+        int status = determineHttpStatus(e);
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode(),
+                status,
+                e.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    private int determineHttpStatus(BaseException e) {
+        String code = e.getErrorCode();
+        if (code.contains("NOT_FOUND")) {
+            return 404;
+        } else if (code.contains("DUPLICATE") || code.contains("CONFLICT")) {
+            return 409;
+        } else if (code.contains("VALIDATION") || code.contains("BAD_REQUEST")) {
+            return 400;
+        } else if (code.contains("UNAUTHORIZED")) {
+            return 401;
+        } else if (code.contains("FORBIDDEN")) {
+            return 403;
+        }
+        return 400;
+    }
 }
