@@ -2,7 +2,7 @@
 
 A professional Spring Boot application to calculate **SGPA** (Semester Grade Point Average) and **CGPA** (Cumulative Grade Point Average) following autonomous college grading regulations with role-based access control.
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.5-green)
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![License](https://img.shields.io/badge/License-MIT-orange)
@@ -63,7 +63,7 @@ cd sgpa-cgpa-calculator
 mvn clean package
 
 # Run
-java -jar target/sgpa-cgpa-calculator-2.1.0.jar
+java -jar target/sgpa-cgpa-calculator-1.0.0.jar
 ```
 
 Access at: **http://localhost:8080**
@@ -199,49 +199,104 @@ CGPA = Σ(Credit Points excluding F) / Σ(Credits excluding F)
 src/main/java/com/gradecalculator/
 ├── SgpaCgpaCalculatorApplication.java
 ├── config/
+│   ├── RequestResponseLoggingInterceptor.java
 │   ├── SecurityConfig.java
 │   ├── SecurityHeadersConfig.java
 │   └── WebConfig.java
 ├── constants/
 │   └── GradeConstants.java          # Centralized magic numbers
 ├── controller/
-│   ├── v2/                          # API versioning
-│   │   └── StudentControllerV2.java
-│   └── *(12 Controllers)
+│   ├── AdminUserController.java     # User management
+│   ├── AnalyticsController.java    # Analytics dashboard
+│   ├── AuditController.java        # Audit log access
+│   ├── AuthController.java         # Authentication
+│   ├── CourseController.java       # Course CRUD
+│   ├── DashboardController.java    # Student dashboard
+│   ├── DepartmentController.java   # Department CRUD
+│   ├── EnrollmentController.java  # Enrollment management
+│   ├── FacultyGradeController.java # Faculty grade entry
+│   ├── GradeController.java       # Grade calculations
+│   ├── HomeController.java        # Static pages
+│   ├── InternalServiceController.java # Internal APIs
+│   ├── SemesterController.java    # Semester CRUD
+│   ├── StudentController.java     # Student CRUD
+│   ├── TranscriptController.java  # PDF transcript generation
+│   └── v2/
+│       └── StudentControllerV2.java # API v2 with pagination
 ├── dto/
 │   ├── request/
+│   │   ├── AssignCourseRequest.java
+│   │   ├── LoginRequest.java
+│   │   └── RegisterRequest.java
 │   ├── response/
-│   │   └── ApiResponse.java          # Standardized response wrapper
+│   │   ├── ApiResponse.java         # Standardized response wrapper
+│   │   └── LoginResponse.java
+│   └── *Response.java              # Response DTOs
 ├── exception/
-│   ├── BaseException.java            # Abstract base with error codes
+│   ├── BaseException.java           # Abstract base with error codes
+│   ├── ValidationException.java
 │   ├── StudentNotFoundException.java
 │   ├── CourseNotFoundException.java
 │   ├── SemesterNotFoundException.java
 │   ├── EnrollmentNotFoundException.java
 │   ├── DuplicateEnrollmentException.java
 │   ├── UserNotFoundException.java
-│   └── GlobalExceptionHandler.java
+│   ├── NotFoundException.java      # Generic not found
+│   ├── RateLimitException.java     # Rate limiting
+│   └── GlobalExceptionHandler.java  # Centralized exception handling
 ├── mapper/
-│   └── EntityMapper.java            # MapStruct auto-generated
-├── model/                           # Lombok @Data @Builder entities
-│   ├── AppUser.java
-│   ├── AuditLog.java
-│   ├── Course.java
-│   ├── Department.java
-│   ├── Enrollment.java
-│   ├── EnrollmentMarks.java
-│   ├── LetterGrade.java
-│   ├── LoginAttempt.java
-│   ├── RefreshToken.java
-│   ├── Semester.java
-│   └── Student.java
-├── repository/                       # Spring Data JPA
+│   └── EntityMapper.java           # MapStruct auto-generated
+├── model/                          # Lombok @Data @Builder entities
+│   ├── AppUser.java               # User/authentication
+│   ├── AuditLog.java              # Security audit trail
+│   ├── Course.java                 # Course entity
+│   ├── CourseType.java             # THEORY, LABORATORY, INTEGRATED
+│   ├── Department.java            # Academic departments
+│   ├── Enrollment.java            # Student-course enrollment
+│   ├── EnrollmentMarks.java       # Detailed marks (Embedded)
+│   ├── LetterGrade.java           # Grade enum (O to F)
+│   ├── LoginAttempt.java          # Rate limiting tracking
+│   ├── RefreshToken.java          # JWT refresh tokens
+│   ├── Semester.java              # Academic semester
+│   └── Student.java               # Student profile
+├── repository/                    # Spring Data JPA
+│   ├── AppUserRepository.java
+│   ├── AuditLogRepository.java
+│   ├── CourseRepository.java
+│   ├── DepartmentRepository.java
+│   ├── EnrollmentRepository.java
+│   ├── LoginAttemptRepository.java
+│   ├── RefreshTokenRepository.java
+│   ├── SemesterRepository.java
+│   └── StudentRepository.java
 ├── security/
-│   ├── AuditLogExporter.java        # SIEM-compatible export
-│   ├── RefreshTokenService.java     # JWT refresh token rotation
+│   ├── ApiKeyAuthFilter.java      # API key authentication
+│   ├── AuditLogExporter.java     # SIEM-compatible JSON export
+│   ├── AuditLogger.java           # Audit event logging
+│   ├── JwtAuthenticationFilter.java
+│   ├── JwtTokenProvider.java      # JWT token generation
+│   ├── LoginRateLimiterService.java # Hybrid Redis + in-memory
+│   ├── RefreshTokenService.java   # Token rotation
 │   ├── RequestThrottlingFilter.java
-│   └── *(6 Security Classes)
-└── service/                          # Business logic
+│   ├── SecurityExpressionEvaluator.java
+│   ├── UserDetailsServiceImpl.java
+│   └── UserPrincipal.java         # Security principal
+├── service/                        # Business logic
+│   ├── AnalyticsService.java
+│   ├── CourseService.java
+│   ├── DashboardService.java
+│   ├── DataInitializer.java       # Sample data loader
+│   ├── DepartmentService.java
+│   ├── EnrollmentService.java
+│   ├── FacultyService.java
+│   ├── GradeCalculationService.java # SGPA/CGPA calculations
+│   ├── SemesterService.java
+│   ├── StudentService.java
+│   ├── TranscriptPdfService.java # PDF generation
+│   └── UserService.java
+└── util/
+    ├── CoveredBy.java             # Authorization annotation
+    └── ValidationUtil.java       # Validation utilities
 ```
 
 ### Frontend (Modular Structure)
