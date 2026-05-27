@@ -1,7 +1,7 @@
 package com.gradecalculator.dto.response;
 
 /**
- * Login response DTO with JWT token
+ * Login response DTO with JWT access token and optional refresh token.
  */
 public class LoginResponse {
 
@@ -11,6 +11,8 @@ public class LoginResponse {
     private String token;
     private String tokenType = "Bearer";
     private boolean mustChangePassword;
+    /** Refresh token — only present on login, not on /me */
+    private String refreshToken;
 
     public LoginResponse() {}
 
@@ -30,6 +32,16 @@ public class LoginResponse {
         this.mustChangePassword = mustChangePassword;
     }
 
+    public LoginResponse(Long userId, String username, String role, String token,
+                         boolean mustChangePassword, String refreshToken) {
+        this.userId = userId;
+        this.username = username;
+        this.role = role;
+        this.token = token;
+        this.mustChangePassword = mustChangePassword;
+        this.refreshToken = refreshToken;
+    }
+
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
     public Long getId() { return userId; }
@@ -43,4 +55,6 @@ public class LoginResponse {
     public void setTokenType(String tokenType) { this.tokenType = tokenType; }
     public boolean isMustChangePassword() { return mustChangePassword; }
     public void setMustChangePassword(boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }
-}
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+}

@@ -81,6 +81,15 @@ public class UserService {
     }
 
     /**
+     * Generate a new JWT access token for an already-authenticated user.
+     * Used by the refresh token endpoint to issue a new access token without re-authentication.
+     */
+    public String generateTokenForUser(AppUser user) {
+        ValidationUtil.requireNonNull(user, "User cannot be null");
+        return jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole().name());
+    }
+
+    /**
      * Resolves a user from the repository by their unique username string.
      *
      * @param username the username to lookup

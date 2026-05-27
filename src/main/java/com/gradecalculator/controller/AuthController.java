@@ -24,13 +24,16 @@ public class AuthController {
     private final UserService userService;
     private final StudentService studentService;
     private final com.gradecalculator.security.LoginRateLimiterService rateLimiter;
+    private final com.gradecalculator.security.RefreshTokenService refreshTokenService;
 
-    public AuthController(UserService userService, 
+    public AuthController(UserService userService,
                           StudentService studentService,
-                          com.gradecalculator.security.LoginRateLimiterService rateLimiter) {
+                          com.gradecalculator.security.LoginRateLimiterService rateLimiter,
+                          com.gradecalculator.security.RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.studentService = studentService;
         this.rateLimiter = rateLimiter;
+        this.refreshTokenService = refreshTokenService;
     }
 
     /**
@@ -97,12 +100,17 @@ public class AuthController {
 
             logger.info("Security Event: Successful login for username: '{}' from IP: '{}'", request.getUsername(), ip);
 
+            String refreshToken = refreshTokenService.generateRefreshToken(
+                    user.getId(), ip,
+                    httpRequest.getHeader("User-Agent"));
+
             return ResponseEntity.ok(new LoginResponse(
                     userId,
                     user.getUsername(),
                     user.getRole().name(),
                     token,
-                    user.isMustChangePassword()
+                    user.isMustChangePassword(),
+                    refreshToken
             ));
         } catch (org.springframework.security.core.AuthenticationException e) {
             logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", request.getUsername(), ip);
@@ -134,8 +142,53 @@ public class AuthController {
     ) {}
 
     /**
-     * Register - POST /api/auth/register (Admin only initially)
+     * Refresh — POST /api/auth/refresh
+     * Validates the refresh token, rotates it, and returns a new access + refresh token pair.
      */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(
+            @RequestBody RefreshRequest request,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        String ip = getClientIp(httpRequest);
+        try {
+            Long userId = refreshTokenService.getUserIdFromToken(request.getRefreshToken());
+            AppUser user = userService.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            String newAccessToken = userService.generateTokenForUser(user);
+            String newRefreshToken = refreshTokenService.rotateRefreshToken(
+                    request.getRefreshToken(), ip, httpRequest.getHeader("User-Agent"));
+
+            logger.info("Security Event: Token refreshed for userId={} from IP={}", userId, ip);
+            return ResponseEntity.ok(new LoginResponse(
+                    user.getId(), user.getUsername(), user.getRole().name(),
+                    newAccessToken, user.isMustChangePassword(), newRefreshToken));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Security Event: Failed token refresh from IP={}: {}", ip, e.getMessage());
+            return ResponseEntity.status(401).body(
+                    new com.gradecalculator.dto.ErrorResponse(
+                            "UNAUTHORIZED", 401, "Invalid or expired refresh token",
+                            httpRequest.getRequestURI(), java.time.LocalDateTime.now(),
+                            java.util.List.of(e.getMessage())));
+        }
+    }
+
+    /** Request body for /refresh */
+    public record RefreshRequest(String refreshToken) {}
+
+    /**
+     * Logout — POST /api/auth/logout
+     * Revokes all refresh tokens for the authenticated user.
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserPrincipal principal) {
+        if (principal != null) {
+            int revoked = refreshTokenService.revokeAll(principal.getId());
+            logger.info("Security Event: Logout for userId={}, {} token(s) revoked", principal.getId(), revoked);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/register")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> register(
