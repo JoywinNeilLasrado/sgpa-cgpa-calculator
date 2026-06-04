@@ -1,6 +1,5 @@
 package com.gradecalculator.integration;
 
-import com.gradecalculator.dto.SgpaResponse;
 import com.gradecalculator.model.*;
 import com.gradecalculator.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;

@@ -1,6 +1,6 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.*;
+import com.gradecalculator.dto.response.*;
 import com.gradecalculator.model.*;
 import com.gradecalculator.repository.*;
 import org.junit.jupiter.api.BeforeEach;

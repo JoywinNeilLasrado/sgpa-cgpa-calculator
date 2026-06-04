@@ -57,4 +57,4 @@ public class LoginResponse {
     public void setMustChangePassword(boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }
     public String getRefreshToken() { return refreshToken; }
     public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
-}
+}

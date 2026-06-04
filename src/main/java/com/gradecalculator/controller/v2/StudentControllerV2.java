@@ -1,6 +1,6 @@
 package com.gradecalculator.controller.v2;
 
-import com.gradecalculator.dto.StudentRequest;
+import com.gradecalculator.dto.request.StudentRequest;
 import com.gradecalculator.dto.response.ApiResponse;
 import com.gradecalculator.model.Student;
 import com.gradecalculator.service.StudentService;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * API v2 for Student management.

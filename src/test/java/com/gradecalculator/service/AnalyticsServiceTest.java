@@ -1,6 +1,6 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.CgpaResponse;
+import com.gradecalculator.dto.response.CgpaResponse;
 import com.gradecalculator.model.*;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;

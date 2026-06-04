@@ -1,4 +1,4 @@
-package com.gradecalculator.dto;
+package com.gradecalculator.dto.response;
 
 /**
  * Semester result for transcript display.

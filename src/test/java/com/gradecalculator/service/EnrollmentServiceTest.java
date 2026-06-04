@@ -1,7 +1,7 @@
 package com.gradecalculator.service;
 
-import com.gradecalculator.dto.EnrollmentRequest;
-import com.gradecalculator.dto.EnrollmentResponse;
+import com.gradecalculator.dto.request.EnrollmentRequest;
+import com.gradecalculator.dto.response.EnrollmentResponse;
 import com.gradecalculator.model.*;
 import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;

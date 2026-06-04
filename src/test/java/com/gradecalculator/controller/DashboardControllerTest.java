@@ -1,7 +1,7 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.DashboardResponse;
-import com.gradecalculator.dto.SemesterResultRowResponse;
+import com.gradecalculator.dto.response.DashboardResponse;
+import com.gradecalculator.dto.response.SemesterResultRowResponse;
 import com.gradecalculator.security.JwtTokenProvider;
 import com.gradecalculator.security.SecurityExpressionEvaluator;
 import com.gradecalculator.security.UserPrincipal;

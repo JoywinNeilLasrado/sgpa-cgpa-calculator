@@ -1,6 +1,6 @@
 package com.gradecalculator.exception;
 
-import com.gradecalculator.dto.ErrorResponse;
+import com.gradecalculator.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

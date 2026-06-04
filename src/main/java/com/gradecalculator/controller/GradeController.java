@@ -1,10 +1,10 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.CgpaResponse;
-import com.gradecalculator.dto.GradeFromMarksResponse;
-import com.gradecalculator.dto.GradeScaleEntryResponse;
-import com.gradecalculator.dto.GradeScaleResponse;
-import com.gradecalculator.dto.SgpaResponse;
+import com.gradecalculator.dto.response.CgpaResponse;
+import com.gradecalculator.dto.response.GradeFromMarksResponse;
+import com.gradecalculator.dto.response.GradeScaleEntryResponse;
+import com.gradecalculator.dto.response.GradeScaleResponse;
+import com.gradecalculator.dto.response.SgpaResponse;
 import com.gradecalculator.model.LetterGrade;
 import com.gradecalculator.service.GradeCalculationService;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,7 @@ package com.gradecalculator.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gradecalculator.dto.request.LoginRequest;
-import com.gradecalculator.dto.StudentRequest;
+import com.gradecalculator.dto.request.StudentRequest;
 import com.gradecalculator.model.AppUser;
 import com.gradecalculator.repository.AppUserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

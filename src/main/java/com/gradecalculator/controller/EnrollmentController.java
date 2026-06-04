@@ -1,7 +1,7 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.EnrollmentRequest;
-import com.gradecalculator.dto.EnrollmentResponse;
+import com.gradecalculator.dto.request.EnrollmentRequest;
+import com.gradecalculator.dto.response.EnrollmentResponse;
 import com.gradecalculator.service.EnrollmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

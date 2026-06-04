@@ -2,7 +2,6 @@ package com.gradecalculator.security;
 
 import com.gradecalculator.model.AppUser;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

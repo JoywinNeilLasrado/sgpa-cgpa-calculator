@@ -1,4 +1,4 @@
-package com.gradecalculator.dto;
+package com.gradecalculator.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -26,12 +26,6 @@ class EnrollmentRepositoryTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
-
     private Student student;
     private Course course;
     private Semester semester;

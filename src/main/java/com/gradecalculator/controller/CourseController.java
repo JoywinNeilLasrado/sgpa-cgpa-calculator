@@ -1,6 +1,6 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.CourseRequest;
+import com.gradecalculator.dto.request.CourseRequest;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.service.CourseService;
 import jakarta.validation.Valid;

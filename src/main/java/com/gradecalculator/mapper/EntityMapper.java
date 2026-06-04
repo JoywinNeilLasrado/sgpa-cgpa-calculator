@@ -4,15 +4,16 @@ import com.gradecalculator.model.Student;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Semester;
 import com.gradecalculator.model.Enrollment;
-import com.gradecalculator.dto.StudentRequest;
+import com.gradecalculator.dto.request.StudentRequest;
 import com.gradecalculator.dto.response.StudentResponse;
 import com.gradecalculator.dto.response.CourseResponse;
 import com.gradecalculator.dto.response.SemesterResponse;
+import com.gradecalculator.dto.response.EnrollmentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.ReportingPolicy; 
 
 import java.util.List;
 
@@ -125,5 +126,5 @@ public interface EntityMapper {
     @Mapping(target = "seeMarks", source = "marks.seeMarks")
     @Mapping(target = "graceMarks", source = "marks.graceMarks")
     @Mapping(target = "totalMarks", source = "marks.totalMarks")
-    com.gradecalculator.dto.EnrollmentResponse toEnrollmentResponse(Enrollment enrollment);
+    EnrollmentResponse toEnrollmentResponse(Enrollment enrollment);
 }

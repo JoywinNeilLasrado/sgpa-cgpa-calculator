@@ -1,6 +1,5 @@
 package com.gradecalculator.integration;
 
-import com.gradecalculator.dto.response.ApiResponse;
 import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.repository.StudentRepository;
 import com.gradecalculator.repository.SemesterRepository;
@@ -8,7 +7,6 @@ import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.model.AppUser;
 import com.gradecalculator.model.Semester;
-import com.gradecalculator.model.Student;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.containsString;

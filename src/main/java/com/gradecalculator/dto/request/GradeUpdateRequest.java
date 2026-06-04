@@ -1,4 +1,4 @@
-package com.gradecalculator.dto;
+package com.gradecalculator.dto.request;
 
 import com.gradecalculator.model.LetterGrade;
 

@@ -4,9 +4,9 @@ import com.gradecalculator.util.ValidationUtil;
 import com.gradecalculator.exception.NotFoundException;
 import com.gradecalculator.exception.ValidationException;
 
-import com.gradecalculator.dto.EnrollmentRequest;
-import com.gradecalculator.dto.EnrollmentResponse;
-import com.gradecalculator.dto.GradeUpdateRequest;
+import com.gradecalculator.dto.request.EnrollmentRequest;
+import com.gradecalculator.dto.response.EnrollmentResponse;
+import com.gradecalculator.dto.request.GradeUpdateRequest;
 import com.gradecalculator.model.Course;
 import com.gradecalculator.model.Enrollment;
 import com.gradecalculator.model.LetterGrade;

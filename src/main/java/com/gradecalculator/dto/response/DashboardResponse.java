@@ -1,4 +1,4 @@
-package com.gradecalculator.dto;
+package com.gradecalculator.dto.response;
 
 import java.util.List;
 import java.util.Map;

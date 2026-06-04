@@ -1,8 +1,6 @@
 package com.gradecalculator.integration;
 
-import com.gradecalculator.dto.request.LoginRequest;
 import com.gradecalculator.model.AppUser;
-import com.gradecalculator.model.Student;
 import com.gradecalculator.repository.AppUserRepository;
 import com.gradecalculator.repository.CourseRepository;
 import com.gradecalculator.repository.EnrollmentRepository;
@@ -245,13 +243,6 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("POST /api/auth/login - should handle rate limiting after multiple failures")
     void loginWithRateLimiting() throws Exception {
-        String validRequest = """
-            {
-                "username": "admin",
-                "password": "admin123"
-            }
-            """;
-
         String invalidRequest = """
             {
                 "username": "nonexistent",

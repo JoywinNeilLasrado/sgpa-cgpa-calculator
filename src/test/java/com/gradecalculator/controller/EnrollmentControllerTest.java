@@ -1,8 +1,8 @@
 package com.gradecalculator.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gradecalculator.dto.EnrollmentRequest;
-import com.gradecalculator.dto.EnrollmentResponse;
+import com.gradecalculator.dto.request.EnrollmentRequest;
+import com.gradecalculator.dto.response.EnrollmentResponse;
 import com.gradecalculator.security.JwtTokenProvider;
 import com.gradecalculator.security.SecurityExpressionEvaluator;
 import com.gradecalculator.security.UserPrincipal;

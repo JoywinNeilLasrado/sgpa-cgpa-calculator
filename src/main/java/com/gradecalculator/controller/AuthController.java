@@ -170,7 +170,7 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             logger.warn("Security Event: Failed token refresh from IP={}: {}", ip, e.getMessage());
             return ResponseEntity.status(401).body(
-                    new com.gradecalculator.dto.ErrorResponse(
+                    new com.gradecalculator.dto.response.ErrorResponse(
                             "UNAUTHORIZED", 401, "Invalid or expired refresh token",
                             httpRequest.getRequestURI(), java.time.LocalDateTime.now(),
                             java.util.List.of(e.getMessage())));
@@ -203,7 +203,7 @@ public class AuthController {
         // Brute-force check on registration endpoint
         if (rateLimiter.isBlocked(ip)) {
             logger.warn("Security Event: Blocked registration attempt from IP: '{}' due to excessive attempts", ip);
-            return ResponseEntity.status(429).body(new com.gradecalculator.dto.ErrorResponse(
+            return ResponseEntity.status(429).body(new com.gradecalculator.dto.response.ErrorResponse(
                     "TOO_MANY_REQUESTS",
                     429,
                     "Registration blocked due to too many failed security requests.",

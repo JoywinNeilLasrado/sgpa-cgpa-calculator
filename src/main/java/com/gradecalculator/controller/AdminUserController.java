@@ -1,6 +1,6 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.PasswordChangeRequest;
+import com.gradecalculator.dto.request.PasswordChangeRequest;
 import com.gradecalculator.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

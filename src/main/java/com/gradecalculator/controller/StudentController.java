@@ -2,7 +2,7 @@ package com.gradecalculator.controller;
 
 import com.gradecalculator.model.Student;
 import com.gradecalculator.service.StudentService;
-import com.gradecalculator.dto.StudentRequest;
+import com.gradecalculator.dto.request.StudentRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 /**
  * REST controller for managing Student profiles and credentials.

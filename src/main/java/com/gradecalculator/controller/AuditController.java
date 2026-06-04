@@ -74,9 +74,6 @@ public class AuditController {
      */
     @GetMapping("/summary")
     public ResponseEntity<?> summary() {
-        long total = exporter instanceof AuditLogExporter a
-                ? -1L  // placeholder; could be injected repository count
-                : -1L;
         return ResponseEntity.ok(java.util.Map.of("status", "ok", "endpoint", "/api/audit/export"));
     }
 }

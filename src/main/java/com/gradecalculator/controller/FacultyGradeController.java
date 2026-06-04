@@ -1,6 +1,6 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.GradeUpdateRequest;
+import com.gradecalculator.dto.request.GradeUpdateRequest;
 import com.gradecalculator.dto.request.RegisterRequest;
 import com.gradecalculator.dto.request.AssignCourseRequest;
 import com.gradecalculator.service.UserService;
@@ -132,7 +132,7 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/semester/{semesterId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getEnrollmentsBySemester(@PathVariable Long semesterId, @AuthenticationPrincipal UserPrincipal principal) {
-        List<com.gradecalculator.dto.EnrollmentResponse> enrollments = enrollmentService.findBySemesterId(semesterId);
+        List<com.gradecalculator.dto.response.EnrollmentResponse> enrollments = enrollmentService.findBySemesterId(semesterId);
         if (principal.getRole().equals("FACULTY")) {
             enrollments = enrollments.stream()
                 .filter(e -> {
@@ -149,7 +149,7 @@ public class FacultyGradeController {
     @GetMapping("/enrollments/student/{studentId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<?> getStudentEnrollments(@PathVariable Long studentId, @AuthenticationPrincipal UserPrincipal principal) {
-        List<com.gradecalculator.dto.EnrollmentResponse> enrollments = enrollmentService.findByStudentId(studentId);
+        List<com.gradecalculator.dto.response.EnrollmentResponse> enrollments = enrollmentService.findByStudentId(studentId);
         if (principal.getRole().equals("FACULTY")) {
             enrollments = enrollments.stream()
                 .filter(e -> {

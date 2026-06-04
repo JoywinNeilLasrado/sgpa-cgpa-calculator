@@ -1,7 +1,7 @@
 package com.gradecalculator.controller;
 
-import com.gradecalculator.dto.DashboardResponse;
-import com.gradecalculator.dto.SemesterResultRowResponse;
+import com.gradecalculator.dto.response.DashboardResponse;
+import com.gradecalculator.dto.response.SemesterResultRowResponse;
 import com.gradecalculator.service.DashboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

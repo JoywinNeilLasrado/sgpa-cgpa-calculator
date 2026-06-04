@@ -1,7 +1,7 @@
 package com.gradecalculator.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gradecalculator.dto.PasswordChangeRequest;
+import com.gradecalculator.dto.request.PasswordChangeRequest;
 import com.gradecalculator.security.JwtTokenProvider;
 import com.gradecalculator.security.SecurityExpressionEvaluator;
 import com.gradecalculator.security.UserPrincipal;

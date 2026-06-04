@@ -1,6 +1,6 @@
 package com.gradecalculator.exception;
 
-import com.gradecalculator.dto.ErrorResponse;
+import com.gradecalculator.dto.response.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

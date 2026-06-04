@@ -6,7 +6,6 @@ import com.gradecalculator.repository.EnrollmentRepository;
 import com.gradecalculator.repository.StudentRepository;
 import com.gradecalculator.exception.StudentNotFoundException;
 import com.gradecalculator.exception.ValidationException;
-import com.gradecalculator.mapper.EntityMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,21 +23,18 @@ public class StudentService {
     private final UserService userService;
     private final com.gradecalculator.repository.AppUserRepository userRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
-    private final EntityMapper entityMapper;
 
     @org.springframework.beans.factory.annotation.Value("${app.demo.password:password123}")
     private String demoPassword;
 
     public StudentService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository,
                           UserService userService, com.gradecalculator.repository.AppUserRepository userRepository,
-                          org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
-                          EntityMapper entityMapper) {
+                          org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.studentRepository = studentRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.userService = userService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.entityMapper = entityMapper;
     }
 
     /**
