@@ -24,6 +24,7 @@ const interceptors = {
 let activeRequests = 0;
 
 function showGlobalSpinner() {
+    return;
     activeRequests++;
     let overlay = document.getElementById('global-ajax-loader');
     if (!overlay) {
@@ -79,6 +80,7 @@ function showGlobalSpinner() {
 }
 
 function hideGlobalSpinner() {
+    return;
     activeRequests = Math.max(0, activeRequests - 1);
     if (activeRequests === 0) {
         const overlay = document.getElementById('global-ajax-loader');

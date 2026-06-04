@@ -209,7 +209,7 @@
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                 <div style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--crimson); font-weight: 700; margin-bottom: 0;">
-                    ✨ Institutional Excellence Leaderboard
+                     Institutional Excellence Leaderboard
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <label for="branch-filter" style="font-size: 0.85rem; font-weight: 600; color: var(--slate-light); text-transform: uppercase; letter-spacing: 0.05em;">Filter by Branch:</label>
@@ -255,7 +255,7 @@
                         <p class="card-subtitle">Active system students ranked by overall CGPA score.</p>
                     </div>
                     <div class="search-input-wrap">
-                        <span class="search-icon-decor">🔍</span>
+                        <span class="search-icon-decor"></span>
                         <input type="text" class="search-input" id="search-rankings" placeholder="Search standings..." oninput="filterRankingsTable()">
                     </div>
                 </div>
@@ -281,7 +281,7 @@
 
             <!-- Student File Picker for Detail Lookup -->
             <div style="margin-top: 3.5rem; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--crimson); font-weight: 700;">
-                🔍 Student File Visual Trend Lookup
+                 Student File Visual Trend Lookup
             </div>
             <div class="card" style="background: var(--parchment); border: 1px solid var(--mist-dark); margin-bottom: 2rem; padding: 1.5rem;">
                 <div class="form-group" style="margin-bottom: 0;">
@@ -298,7 +298,7 @@
         <div id="personal-analytics-panel" style="display: none;">
             
             <div id="inspector-heading" style="display: none; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold-dark); font-weight: 700;">
-                📊 Inspecting File: <span id="inspected-student-name">-</span>
+                 Inspecting File: <span id="inspected-student-name">-</span>
             </div>
 
             <!-- Stats Overview Cards -->
@@ -334,7 +334,7 @@
                     </div>
 
                     <div id="chart-progression-empty" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--slate-light);">
-                        <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">📊</span>
+                        <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;"></span>
                         <p>No semester grades recorded to plot progression curve.</p>
                     </div>
 
@@ -530,7 +530,7 @@
                         <td><strong>#${index + 1}</strong></td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span>${index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤'}</span>
+                                <span>${index === 0 ? '' : index === 1 ? '' : index === 2 ? '' : ''}</span>
                                 <strong>${r.name}</strong>
                             </div>
                         </td>
@@ -704,6 +704,11 @@
             localStorage.clear();
             window.location.href = '/';
         }
+
+        // Export functions to global scope for HTML inline handlers
+        window.handleBranchFilterChange = handleBranchFilterChange;
+        window.loadStudentAnalytics = loadStudentAnalytics;
+        window.logout = logout;
 
         init();
     </script>

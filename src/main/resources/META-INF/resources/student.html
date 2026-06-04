@@ -325,7 +325,7 @@
                             </table>
                         </div>
                         <p style="font-size: 0.8rem; color: var(--slate-light); margin-top: 1rem;">
-                            💡 <strong>Formula Check:</strong> CGPA ignores 'F' grades in credit summation but tracks passed points. 
+                             <strong>Formula Check:</strong> CGPA ignores 'F' grades in credit summation but tracks passed points. 
                             SGPA weights all grades weighted directly.
                         </p>
                     </div>
@@ -368,7 +368,7 @@
                 <!-- Registration Course Catalog -->
                 <div id="reg-courses-container">
                     <div style="text-align: center; padding: 3rem; color: var(--slate-light);">
-                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📚</span>
+                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;"></span>
                         <p>Select a semester stage from the dropdown to load available courses.</p>
                     </div>
                 </div>
@@ -384,19 +384,19 @@
                 <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
                     
                     <div class="stat-card-luxury" style="padding: 2rem; cursor: pointer;" onclick="window.location.href='/transcript.html'">
-                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">📜</span>
+                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;"></span>
                         <h4 style="font-size: 1.2rem; color: var(--crimson); font-weight: 600; margin-bottom: 0.5rem;">Official Academic Transcript</h4>
                         <p style="font-size: 0.85rem; color: var(--slate);">Generate and print a double-ruled, watermark-certified academic record.</p>
                     </div>
 
                     <div class="stat-card-luxury" style="padding: 2rem; cursor: pointer;" onclick="window.location.href='/analytics.html'">
-                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">📊</span>
+                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;"></span>
                         <h4 style="font-size: 1.2rem; color: var(--crimson); font-weight: 600; margin-bottom: 0.5rem;">Performance Analytics</h4>
                         <p style="font-size: 0.85rem; color: var(--slate);">View statistical course grade distributions, topper tables, and overall trends.</p>
                     </div>
 
                     <div class="stat-card-luxury" style="padding: 2rem; cursor: pointer;" onclick="window.location.href='/profile.html'">
-                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚙️</span>
+                        <span style="font-size: 2.2rem; margin-bottom: 0.5rem;"></span>
                         <h4 style="font-size: 1.2rem; color: var(--crimson); font-weight: 600; margin-bottom: 0.5rem;">Account Settings</h4>
                         <p style="font-size: 0.85rem; color: var(--slate);">Modify your credentials, manage security questions, or extract API tokens.</p>
                     </div>
@@ -753,7 +753,7 @@
             if (!semesterId) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 3rem; color: var(--slate-light);">
-                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📚</span>
+                        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;"></span>
                         <p>Select a semester stage from the dropdown to load available courses.</p>
                     </div>
                 `;
@@ -851,6 +851,16 @@
             localStorage.clear();
             window.location.href = '/';
         }
+
+        // Export functions to global scope for HTML inline handlers
+        window.switchTab = switchTab;
+        window.addMockRow = addMockRow;
+        window.deleteMockRow = deleteMockRow;
+        window.resetSimulator = resetSimulator;
+        window.calculateSimulator = calculateSimulator;
+        window.loadRegistrationCourses = loadRegistrationCourses;
+        window.registerCourse = registerCourse;
+        window.logout = logout;
 
         init();
     </script>

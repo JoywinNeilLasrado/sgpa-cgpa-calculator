@@ -91,12 +91,8 @@
 
         const navHtml = `
             <div class="container nav-inner">
-                <a href="${brandHref}" class="nav-logo">
-                    <div class="nav-logo-icon">🎓</div>
-                    <div class="nav-logo-text">
-                        <h1>GradePoint</h1>
-                        <span>Academic Excellence</span>
-                    </div>
+                <a href="${brandHref}" class="nav-logo" style="display: flex; align-items: center;">
+                    <img src="/img/logo.png" alt="GradePoint Logo" style="height: 48px; width: auto;">
                 </a>
                 <div class="nav-links">
                     ${navLinksHtml}

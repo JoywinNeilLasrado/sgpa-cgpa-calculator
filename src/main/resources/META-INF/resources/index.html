@@ -317,10 +317,8 @@
                 <div class="card-loader-text">Verifying Credentials...</div>
             </div>
 
-            <div class="login-logo">
-                <div class="login-logo-icon">🎓</div>
-                <h1>GradePoint</h1>
-                <p>Academic Excellence Tracker</p>
+            <div class="login-logo" style="margin-bottom: 2rem; text-align: center;">
+                <img src="/img/logo.png" alt="GradePoint Logo" style="max-width: 100%; height: auto; max-height: 80px;">
             </div>
 
             <!-- Error Alerts -->
@@ -334,7 +332,7 @@
 
             <!-- Lockout countdown banner -->
             <div id="lockout-banner" class="lockout-banner">
-                <div class="lockout-icon">🔒</div>
+                <div class="lockout-icon"></div>
                 <div class="lockout-title">Account Temporarily Locked</div>
                 <div class="lockout-timer" id="lockout-timer">0:60</div>
                 <div class="lockout-subtitle">Please wait before trying again</div>
@@ -496,7 +494,7 @@
                 if (err.name === 'APIError') {
                     const data = err.data || {};
                     if (err.status === 429) {
-                        // 🔒 Locked out
+                        //  Locked out
                         errorAlert.textContent = data.message || 'Account locked.';
                         errorAlert.classList.add('show');
                         startLockoutTimer(data.lockoutRemainingMs || 60000);

@@ -30,8 +30,8 @@ import java.util.List;
  */
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
-    unmappedTargetPolicy = ReportingPolicy.WARN,
-    unmappedSourcePolicy = ReportingPolicy.WARN
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    unmappedSourcePolicy = ReportingPolicy.IGNORE
 )
 public interface EntityMapper {
 

@@ -151,7 +151,7 @@
         const toast = document.createElement('div');
         toast.className = `toast toast-${type} show`;
         toast.innerHTML = `
-            <span>${type === 'success' ? '✨' : '⚠️'}</span>
+            <span>${type === 'success' ? '' : ''}</span>
             <span>${message}</span>
         `;
         container.appendChild(toast);

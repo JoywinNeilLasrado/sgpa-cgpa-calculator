@@ -451,32 +451,32 @@ function filterTable(type) {
     const query = document.getElementById(`search-${type}`).value.toLowerCase().trim();
     if (type === 'students') {
         document.querySelectorAll('.student-row-item').forEach(tr => {
-            const name = tr.getAttribute('data-name');
-            const roll = tr.getAttribute('data-roll');
+            const name = tr.getAttribute('data-name') || '';
+            const roll = tr.getAttribute('data-roll') || '';
             tr.style.display = (name.includes(query) || roll.includes(query)) ? '' : 'none';
         });
     } else if (type === 'courses') {
         document.querySelectorAll('.course-row-item').forEach(tr => {
-            const name = tr.getAttribute('data-name');
-            const code = tr.getAttribute('data-code');
+            const name = tr.getAttribute('data-name') || '';
+            const code = tr.getAttribute('data-code') || '';
             tr.style.display = (name.includes(query) || code.includes(query)) ? '' : 'none';
         });
     } else if (type === 'enrollments') {
         document.querySelectorAll('.enroll-row-item').forEach(tr => {
-            const student = tr.getAttribute('data-student');
-            const code = tr.getAttribute('data-code');
+            const student = tr.getAttribute('data-student') || '';
+            const code = tr.getAttribute('data-code') || '';
             tr.style.display = (student.includes(query) || code.includes(query)) ? '' : 'none';
         });
     } else if (type === 'faculty') {
         document.querySelectorAll('.faculty-row-item').forEach(tr => {
-            const name = tr.getAttribute('data-name');
-            const username = tr.getAttribute('data-username');
+            const name = tr.getAttribute('data-name') || '';
+            const username = tr.getAttribute('data-username') || '';
             tr.style.display = (name.includes(query) || username.includes(query)) ? '' : 'none';
         });
     } else if (type === 'departments') {
         document.querySelectorAll('.department-row-item').forEach(tr => {
-            const name = tr.getAttribute('data-name');
-            const code = tr.getAttribute('data-code');
+            const name = tr.getAttribute('data-name') || '';
+            const code = tr.getAttribute('data-code') || '';
             tr.style.display = (name.includes(query) || code.includes(query)) ? '' : 'none';
         });
     }

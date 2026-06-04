@@ -287,6 +287,11 @@
             window.location.href = '/';
         }
 
+        // Export to global scope
+        window.resetForm = resetForm;
+        window.copyToken = copyToken;
+        window.logout = logout;
+
         init();
     </script>
 </body>

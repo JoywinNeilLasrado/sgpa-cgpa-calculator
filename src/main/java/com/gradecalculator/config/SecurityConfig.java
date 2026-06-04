@@ -104,7 +104,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> {
                 auth
                     .requestMatchers("/", "/index.html", "/admin.html", "/student.html", "/home.html", "/login.html", "/analytics.html", "/transcript.html", "/faculty-grades.html", "/profile.html", "/student-dashboard.html", "/favicon.ico").permitAll()
-                    .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                    .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/webjars/**").permitAll()
                     .requestMatchers("/api/auth/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     .requestMatchers("/api/internal/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/grade-scale", "/api/grades/from-marks").permitAll();

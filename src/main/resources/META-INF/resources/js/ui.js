@@ -6,7 +6,7 @@
 const UI = (function() {
     'use strict';
 
-    // 🛡️ DOMPurify auto-loader for advanced XSS input sanitization
+    //  DOMPurify auto-loader for advanced XSS input sanitization
     (function initDOMPurify() {
         if (typeof window !== 'undefined' && typeof window.DOMPurify === 'undefined') {
             const script = document.createElement('script');
@@ -17,7 +17,7 @@ const UI = (function() {
         }
     })();
 
-    // ⌨️ Keyboard accessibility & focus outline helpers
+    //  Keyboard accessibility & focus outline helpers
     (function initAccessibility() {
         if (typeof window === 'undefined') return;
 
@@ -198,4 +198,4 @@ const UI = (function() {
     };
 })();
 
-export { UI };
+export { UI };
