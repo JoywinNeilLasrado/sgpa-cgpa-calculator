@@ -24,7 +24,6 @@ const interceptors = {
 let activeRequests = 0;
 
 function showGlobalSpinner() {
-    return;
     activeRequests++;
     let overlay = document.getElementById('global-ajax-loader');
     if (!overlay) {
@@ -80,7 +79,6 @@ function showGlobalSpinner() {
 }
 
 function hideGlobalSpinner() {
-    return;
     activeRequests = Math.max(0, activeRequests - 1);
     if (activeRequests === 0) {
         const overlay = document.getElementById('global-ajax-loader');
@@ -141,7 +139,7 @@ async function request(endpoint, options = {}) {
             await interceptor(res);
         }
 
-        if (res.status === 401) {
+        if (res.status === 401 && !url.includes('/auth/login')) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/';

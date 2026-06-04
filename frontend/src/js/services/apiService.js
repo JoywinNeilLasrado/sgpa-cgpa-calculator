@@ -139,7 +139,7 @@ async function request(endpoint, options = {}) {
             await interceptor(res);
         }
 
-        if (res.status === 401) {
+        if (res.status === 401 && !url.includes('/auth/login')) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/';

@@ -47,13 +47,13 @@ public class AuthController {
         String ip = getClientIp(httpRequest);
         String username = request.getUsername();
 
-        // Check if IP or account is locked — return remaining lockout time
-        if (rateLimiter.isBlocked(ip) || rateLimiter.isAccountLocked(username)) {
-            long remainingMs = rateLimiter.getAccountLockoutRemainingMs(username);
+        // Check if IP is locked — return remaining lockout time
+        if (rateLimiter.isBlocked(ip)) {
+            long remainingMs = rateLimiter.getIpLockoutRemainingMs(ip);
             logger.warn("Security Event: Blocked login attempt for '{}' from IP: '{}'", username, ip);
             return ResponseEntity.status(429).body(new LoginErrorResponse(
                     false,
-                    "Account locked due to too many failed attempts.",
+                    "IP Address locked due to too many failed attempts.",
                     com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
                     com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS,
                     remainingMs,
@@ -61,34 +61,11 @@ public class AuthController {
             ));
         }
 
-        int currentAttempts = rateLimiter.getAccountAttempts(username);
-        boolean requiresCaptcha = currentAttempts >= 3;
-
-        if (requiresCaptcha) {
-            if (request.getCaptcha() == null || !request.getCaptcha().equals("VALID_CAPTCHA")) {
-                logger.warn("Security Event: Blocked login due to missing/invalid CAPTCHA for '{}' from IP: '{}'", username, ip);
-                rateLimiter.loginFailed(ip);
-                rateLimiter.accountLoginFailed(username);
-
-                int attempts = rateLimiter.getAccountAttempts(username);
-                int remaining = Math.max(0, com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS - attempts);
-                long lockoutMs = rateLimiter.getAccountLockoutRemainingMs(username);
-
-                return ResponseEntity.status(401).body(new LoginErrorResponse(
-                        false,
-                        "CAPTCHA verification required or invalid CAPTCHA.",
-                        attempts,
-                        remaining,
-                        lockoutMs,
-                        true
-                ));
-            }
-        }
-
+        int currentAttempts = rateLimiter.getIpAttempts(ip);
+        
         try {
             String token = userService.authenticate(request.getUsername(), request.getPassword());
             rateLimiter.loginSucceeded(ip);
-            rateLimiter.accountLoginSucceeded(username);
 
             AppUser user = userService.findByUsername(request.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("AppUser not found"));
@@ -117,12 +94,10 @@ public class AuthController {
         } catch (org.springframework.security.core.AuthenticationException e) {
             logger.warn("Security Event: Failed login attempt for username: '{}' from IP: '{}'", request.getUsername(), ip);
             rateLimiter.loginFailed(ip);
-            rateLimiter.accountLoginFailed(username);
 
-            int attempts = rateLimiter.getAccountAttempts(username);
+            int attempts = rateLimiter.getIpAttempts(ip);
             int remaining = Math.max(0, com.gradecalculator.security.LoginRateLimiterService.MAX_ATTEMPTS - attempts);
-            long lockoutMs = rateLimiter.getAccountLockoutRemainingMs(username);
-            boolean nextRequiresCaptcha = attempts >= 3;
+            long lockoutMs = rateLimiter.getIpLockoutRemainingMs(ip);
 
             return ResponseEntity.status(401).body(new LoginErrorResponse(
                     false,
@@ -130,7 +105,7 @@ public class AuthController {
                     attempts,
                     remaining,
                     lockoutMs,
-                    nextRequiresCaptcha
+                    false
             ));
         }
     }

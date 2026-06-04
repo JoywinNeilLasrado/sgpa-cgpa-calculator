@@ -246,35 +246,34 @@ public class LoginRateLimiterService {
     }
 
     /**
-     * Returns the current failed attempt count for a username.
+     * Returns the current failed attempt count for an IP.
      */
-    public int getAccountAttempts(String username) {
-        if (username == null) return 0;
+    public int getIpAttempts(String ip) {
+        if (ip == null) return 0;
         if (redisTemplate != null) {
             try {
-                String val = redisTemplate.opsForValue().get("rate:user:" + username);
+                String val = redisTemplate.opsForValue().get("rate:ip:" + ip);
                 return val == null ? 0 : Integer.parseInt(val);
             } catch (Exception e) {
                 // fall through
             }
         }
-        AttemptTracker tracker = getTracker("rate:user:" + username, true);
+        AttemptTracker tracker = getTracker("rate:ip:" + ip, false);
         if (tracker == null) return 0;
-        // If the lockout window has expired, treat as 0
         if (System.currentTimeMillis() - tracker.lastAttemptTime > BLOCK_DURATION_MS) return 0;
         return tracker.attempts;
     }
 
     /**
-     * Returns how many milliseconds remain in the lockout, or 0 if not locked.
+     * Returns how many milliseconds remain in the lockout for an IP.
      */
-    public long getAccountLockoutRemainingMs(String username) {
-        if (username == null) return 0;
+    public long getIpLockoutRemainingMs(String ip) {
+        if (ip == null) return 0;
         if (redisTemplate != null) {
             try {
-                String val = redisTemplate.opsForValue().get("rate:user:" + username);
+                String val = redisTemplate.opsForValue().get("rate:ip:" + ip);
                 if (val != null && Integer.parseInt(val) >= MAX_ATTEMPTS) {
-                    Long ttl = redisTemplate.getExpire("rate:user:" + username, TimeUnit.MILLISECONDS);
+                    Long ttl = redisTemplate.getExpire("rate:ip:" + ip, TimeUnit.MILLISECONDS);
                     return ttl != null ? Math.max(0, ttl) : 0;
                 }
                 return 0;
@@ -282,7 +281,7 @@ public class LoginRateLimiterService {
                 // fall through
             }
         }
-        AttemptTracker tracker = getTracker("rate:user:" + username, true);
+        AttemptTracker tracker = getTracker("rate:ip:" + ip, false);
         if (tracker == null || tracker.attempts < MAX_ATTEMPTS) return 0;
         long elapsed = System.currentTimeMillis() - tracker.lastAttemptTime;
         long remaining = BLOCK_DURATION_MS - elapsed;

@@ -134,7 +134,7 @@
         .grade-distribution-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         @media (max-width: 768px) {
@@ -144,31 +144,60 @@
         }
 
         .grade-count-card {
-            background: var(--parchment);
-            border: 1px solid var(--mist-dark);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            text-align: center;
-            transition: all 0.3s ease;
+            background: linear-gradient(145deg, var(--white) 0%, var(--parchment) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 1.5rem;
+            padding: 1.75rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grade-count-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--crimson), var(--gold));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .grade-count-card:hover {
-            border-color: var(--crimson);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 32px rgba(139, 0, 0, 0.08), 0 4px 12px rgba(0,0,0,0.02);
+            border-color: transparent;
             background: var(--white);
-            transform: translateY(-2px);
+        }
+
+        .grade-count-card:hover::before {
+            opacity: 1;
         }
 
         .grade-count-letter {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem;
+            font-size: 2.25rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.75rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--mist);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
 
         .grade-count-val {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--slate);
+            letter-spacing: 0.02em;
         }
 
         .analytics-layout {
@@ -685,8 +714,8 @@
 
                     const countCardHtml = `
                         <div class="grade-count-card">
-                            <div class="grade-count-letter grade-badge ${cleanGClass}" style="border: none; padding: 0.15rem 0.5rem; font-size: 1.4rem;">${g}</div>
-                            <div class="grade-count-val" style="margin-top: 0.5rem;">${count} Count</div>
+                            <div class="grade-count-letter grade-badge ${cleanGClass}">${g}</div>
+                            <div class="grade-count-val">${count} Count</div>
                         </div>
                     `;
                     distList.insertAdjacentHTML('beforeend', countCardHtml);
